@@ -62,9 +62,9 @@ footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
 
   <h1>Deine Spiele</h1>
   <nav class="list">
-    <a class="game" href="hashtag/">
-      <div class="ic grid" aria-hidden="true"><i class="e"></i><i></i><i class="e"></i><i class="y"></i><i class="g"></i><i></i><i class="e"></i><i class="y"></i><i class="e"></i></div>
-      <div class="t"><strong>Hashtag</strong><span>Vier Wörter im #-Gitter. Jeden Tag ein neues Rätsel.</span><span class="st" id="hashtagStatus"></span></div>
+    <a class="game" href="hash/">
+      <div class="ic"><img src="hash/icon-192.png" alt=""></div>
+      <div class="t"><strong>mHash</strong><span>Vier Wörter im #-Gitter. Jeden Tag ein neues Rätsel.</span><span class="st" id="hashStatus"></span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
     <a class="game" href="zip/">
@@ -89,7 +89,7 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   const days=get('days',{}), d=days[t];
   const st=!d?'Heute: offen':d.s==='won'?'Heute: gelöst '+'★'.repeat(d.st||0):d.s==='lost'?'Heute: nicht geschafft':'Heute: angefangen';
   let missed=0; for(let i=0;i<t;i++) if(!days[i]||days[i].s==='play') missed++;
-  document.getElementById('hashtagStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
+  document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}
 </script>

@@ -9,9 +9,9 @@
 <meta name="theme-color" content="#141518">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icon-180.png">
-<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Hashtag · mLogic</title>
+<title>mHash</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap">
 <style>
@@ -135,7 +135,7 @@ header{display:flex;align-items:center;gap:10px;padding-block:14px}
 <div class="app">
   <header>
     <a class="ibtn" id="back" href="../" aria-label="Zurück zu mLogic" style="text-decoration:none;color:inherit">←</a>
-    <div class="logo">Hashtag</div>
+    <div class="logo"><img src="icon-192.png" alt="" width="34" height="34" style="border-radius:8px;flex:none">mHash</div>
     <div class="coins" aria-label="Münzen"><span class="coin"></span><span id="coins">0</span></div>
     <button class="ibtn" id="help" aria-label="Regeln">?</button>
     <button class="ibtn" id="menuBtn" aria-label="Menü">☰</button>
@@ -389,7 +389,7 @@ function calendar(){
 }
 
 function rules(){
-  overlay(`<h2>So spielst du Hashtag</h2><ul>
+  overlay(`<h2>So spielst du mHash</h2><ul>
     <li>Im Gitter stecken vier deutsche Wörter: zwei waagerecht (von links nach rechts) und zwei senkrecht (von oben nach unten).</li>
     <li>Tausche zwei Buchstaben, indem du einen auf den anderen ziehst. Oder tippe nacheinander auf beide.</li>
     <li><span class="sw" style="background:var(--green)"></span>Grün: Der Buchstabe steht richtig und bleibt fest.</li>
