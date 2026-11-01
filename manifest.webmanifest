@@ -1,7 +1,7 @@
 {
   "name": "mLogic",
   "short_name": "mLogic",
-  "description": "Rätsel-Sammlung: mHash, mZip und mFlow.",
+  "description": "Rätsel-Sammlung: mHash, mCrack, mZip und mFlow.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",

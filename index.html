@@ -67,6 +67,11 @@ footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
       <div class="t"><strong>mHash</strong><span>Vier Wörter im #-Gitter. Jeden Tag ein neues Rätsel.</span><span class="st" id="hashStatus"></span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
+    <a class="game" href="crack/">
+      <div class="ic"><img src="crack/icon-192.png" alt=""></div>
+      <div class="t"><strong>mCrack</strong><span>Das Passwort des Tages in sechs Versuchen knacken.</span><span class="st" id="crackStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
     <a class="game" href="zip/">
       <div class="ic"><img src="zip/icon-192.png" alt=""></div>
       <div class="t"><strong>mZip</strong><span>Zahlen der Reihe nach verbinden und jedes Feld füllen.</span></div>
@@ -89,6 +94,8 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   const days=get('days',{}), d=days[t];
   const st=!d?'Heute: offen':d.s==='won'?'Heute: gelöst '+'★'.repeat(d.st||0):d.s==='lost'?'Heute: nicht geschafft':'Heute: angefangen';
   let missed=0; for(let i=0;i<t;i++) if(!days[i]||days[i].s==='play') missed++;
+  const cd=get('crack',{})[t];
+  document.getElementById('crackStatus').textContent=!cd||(!cd.g.length&&cd.s==='play')?'Heute: offen':cd.s==='won'?'Heute: geknackt '+'★'.repeat(cd.st||0):cd.s==='lost'?'Heute: nicht geknackt':'Heute: angefangen';
   document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}

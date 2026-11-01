@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#141518">
+<title>mCrack</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap">
+<style>
+/* Ein Bildschirm: Kopf, Datumsleiste, Ratefeld, Tastatur unten */
+:root{
+  --bg:#141518; --panel:#24262b; --tile:#34363c; --tile-edge:#232428; --empty:#2b2d32;
+  --fg:#f3f1ea; --muted:#9a9ca3;
+  --green:#4c8a12; --green-edge:#2f5a08;
+  --yellow:#e5a600; --yellow-edge:#9a6f00;
+  --gray:#4a4c52; --gray-edge:#323439;
+  --accent:#FDD602; --accent-edge:#a88e00;
+  --display:"Lilita One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-weight:800;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;padding:0}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.app{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding-block:10px 6px}
+.ibtn{width:42px;height:42px;border-radius:9px;background:var(--panel);border:2px solid var(--accent);
+  box-shadow:0 4px 0 var(--accent-edge);display:grid;place-items:center;font-size:20px;flex:none;color:var(--fg);text-decoration:none}
+.ibtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-edge)}
+.logo{font-family:var(--display);font-size:26px;line-height:1;flex:1;min-width:0;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
+.logo img{width:32px;height:32px;border-radius:8px;flex:none}
+.coins{display:flex;align-items:center;gap:6px;background:var(--panel);border-radius:999px;padding:4px 10px 4px 4px;font-variant-numeric:tabular-nums;font-size:15px;flex:none}
+.coin{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff08a,var(--accent) 60%,var(--accent-edge));border:2px solid #ffe44a;flex:none}
+.datebar{display:flex;align-items:center;gap:8px}
+.nav{width:38px;height:38px;border-radius:10px;background:var(--panel);font-size:22px;display:grid;place-items:center;flex:none}
+.nav:disabled{opacity:.3;cursor:default}
+.datebtn{flex:1;min-width:0;height:38px;border-radius:10px;background:var(--panel);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;white-space:nowrap;overflow:hidden}
+.pill{font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--bg)}
+.pill.past{background:var(--tile);color:var(--fg)}.pill.future{background:#5b6bd6;color:#fff}
+.status{min-height:20px;color:var(--muted);font-weight:700;font-size:14px;margin-top:6px;text-align:center}
+.status .st{color:var(--accent);letter-spacing:2px}
+.boardwrap{flex:1;min-height:0;display:grid;place-items:center;padding-block:6px}
+.board{display:grid;gap:6px}
+.row{display:grid;gap:6px}
+.row.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.cell{width:var(--s);height:var(--s);border-radius:6px;background:var(--empty);display:grid;place-items:center;
+  font-weight:900;font-size:calc(var(--s)*.52);text-transform:uppercase;position:relative}
+.cell.filled{background:var(--tile);animation:pop .12s}
+@keyframes pop{50%{transform:scale(1.08)}}
+.cell.cur{box-shadow:inset 0 0 0 2px #6b6e76}
+.cell .ghost{color:var(--green);opacity:.55}
+.cell.g{background:var(--green);box-shadow:0 3px 0 var(--green-edge)}
+.cell.y{background:var(--yellow);box-shadow:0 3px 0 var(--yellow-edge);color:var(--bg)}
+.cell.x{background:var(--gray);box-shadow:0 3px 0 var(--gray-edge);color:#c9cbd1}
+.cell.flip{animation:flip .45s ease both}
+@keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+.board.win .row.last .cell{animation:hop .5s ease both}
+@keyframes hop{40%{transform:translateY(-12px)}}
+.kb{display:flex;flex-direction:column;gap:7px;padding-block:6px 10px}
+.kr{display:flex;gap:5px;justify-content:center}
+.key{flex:1;max-width:46px;height:52px;border-radius:7px;background:var(--tile);box-shadow:0 3px 0 var(--tile-edge);font-size:20px;font-weight:900;display:grid;place-items:center}
+.key:active{transform:translateY(2px);box-shadow:0 1px 0 var(--tile-edge)}
+.key.g{background:var(--green);box-shadow:0 3px 0 var(--green-edge)}
+.key.y{background:var(--yellow);box-shadow:0 3px 0 var(--yellow-edge);color:var(--bg)}
+.key.x{background:#202125;color:#5d6068;box-shadow:none}
+.key.wide{max-width:72px;flex:1.5;border:2px solid var(--accent);box-shadow:0 3px 0 var(--accent-edge)}
+.kact{display:flex;gap:8px;margin-top:3px}
+.kact button{flex:1;height:50px;border-radius:10px;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+.hintbtn{background:var(--panel);border:2px solid var(--accent)!important;box-shadow:0 4px 0 var(--accent-edge)}
+.hintbtn small{display:flex;align-items:center;gap:3px;color:var(--muted);font-size:13px}
+.hintbtn small .coin{width:14px;height:14px}
+.enter{background:var(--accent);color:var(--bg);box-shadow:0 4px 0 var(--accent-edge);font-size:18px!important}
+.kact button:disabled{opacity:.4}
+/* Overlays */
+.ov{position:fixed;inset:0;background:rgba(10,10,12,.78);display:grid;place-items:center;z-index:60;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.card{background:var(--panel);border-radius:18px;padding:22px;max-width:400px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.card h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0;text-wrap:balance}
+.card p,.card li{font-weight:600;line-height:1.45;color:#d9d7d0;margin:0}
+.card ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.stars{font-size:38px;letter-spacing:6px;text-align:center;color:var(--accent)}
+.stars .off{color:var(--tile)}
+.word{display:flex;gap:5px;justify-content:center}
+.word span{width:38px;height:38px;border-radius:7px;background:var(--green);display:grid;place-items:center;font-weight:900;font-size:20px;text-transform:uppercase}
+.word.lost span{background:var(--tile)}
+.brow{display:flex;gap:10px}
+.btn{flex:1;padding:13px;border-radius:12px;background:var(--accent);color:var(--bg);font-weight:900;font-size:16px;box-shadow:0 4px 0 var(--accent-edge);text-align:center;text-decoration:none}
+.btn.alt{background:var(--tile);color:var(--fg);box-shadow:0 4px 0 var(--tile-edge)}
+.cal-head{display:flex;align-items:center;gap:8px}
+.cal-head h2{flex:1;text-align:center;font-size:24px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .wd{text-align:center;color:var(--muted);font-size:12px;font-weight:800;padding-bottom:2px}
+.cal button{aspect-ratio:1;border-radius:9px;background:var(--tile);font-weight:900;font-size:15px;position:relative;display:grid;place-items:center}
+.cal button.won{background:var(--green)}
+.cal button.play{background:var(--yellow);color:var(--bg)}
+.cal button.lost{background:#5a2f2a}
+.cal button.today{outline:3px solid var(--fg);outline-offset:1px}
+.cal button.cur{box-shadow:inset 0 0 0 3px var(--accent)}
+.cal button:disabled{background:transparent;color:#4a4c52;cursor:default}
+.cal button small{position:absolute;bottom:2px;left:0;right:0;font-size:8px;color:#fff08a;letter-spacing:1px;line-height:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);font-weight:700}
+.prog{color:var(--muted)!important;font-size:14px;text-align:center}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 120px);transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:800;z-index:70;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="ibtn" href="../" aria-label="Zurück zu mLogic">←</a>
+    <div class="logo"><img src="icon-192.png" alt="">mCrack</div>
+    <div class="coins" aria-label="Münzen"><span class="coin"></span><span id="coins">0</span></div>
+    <button class="ibtn" id="help" aria-label="Regeln">?</button>
+    <button class="ibtn" id="menuBtn" aria-label="Menü">☰</button>
+  </header>
+  <div class="datebar">
+    <button class="nav" id="prevDay" aria-label="Vorheriger Tag">‹</button>
+    <button class="datebtn" id="dateBtn" aria-label="Kalender öffnen">📅 <span id="dateLbl"></span> <span class="pill" id="pill"></span></button>
+    <button class="nav" id="nextDay" aria-label="Nächster Tag">›</button>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="boardwrap" id="boardwrap"><div class="board" id="board"></div></div>
+  <div class="kb" id="kb">
+    <div class="kr" id="kr1"></div>
+    <div class="kr" id="kr2"></div>
+    <div class="kr" id="kr3"></div>
+    <div class="kact">
+      <button class="hintbtn" id="hint" aria-label="Buchstabe aufdecken, 100 Münzen">💡 Aufdecken <small><span class="coin"></span>100</small></button>
+      <button class="enter" id="enter">Enter</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="ov" hidden><div class="card" id="card"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script src="words.js"></script>
+<script>
+const START=[2026,10,1], TRIES=6, HINT_COST=100, LENS=[5,6,7];
+const ANS={}; for(const L of LENS) ANS[L]=window.ANSWERS[L].split(' ');
+const DICT={}; for(const L of LENS){const s=window.WORDS[L],set=new Set();for(let i=0;i<s.length;i+=L)set.add(s.slice(i,i+L));DICT[L]=set}
+const LAST=Math.min(...LENS.map(L=>ANS[L].length))*3-1;
+
+const store={
+  get(k,d){try{const v=localStorage.getItem('mlogic.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('mlogic.'+k,JSON.stringify(v))}catch(e){}}
+};
+const $=id=>document.getElementById(id);
+const DAY=86400000, utc=(y,m,d)=>Date.UTC(y,m,d), START_UTC=utc(...START);
+function todayIdx(){const n=new Date();return Math.round((utc(n.getFullYear(),n.getMonth(),n.getDate())-START_UTC)/DAY)}
+const dateOf=i=>new Date(START_UTC+i*DAY);
+const fmtLong=new Intl.DateTimeFormat('de-DE',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'});
+const fmtMonth=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',timeZone:'UTC'});
+
+let coins=store.get('coins',500);
+let days=store.get('crack',{}); // dayIdx -> {g:[guesses], h:[hint positions], s:'play'|'won'|'lost', r, st}
+let dayIdx=0, sol='', L=5, cur='', busy=false;
+function setCoins(n){coins=n;store.set('coins',n);$('coins').textContent=n.toLocaleString('de-DE')}
+const save=()=>store.set('crack',days);
+const dayState=()=>days[dayIdx]||(days[dayIdx]={g:[],h:[],s:'play'});
+const finished=()=>{const d=days[dayIdx];return !!d&&(d.s==='won'||d.s==='lost')};
+
+function score(guess,answer){
+  const res=Array(guess.length).fill('x'), rest={};
+  for(let i=0;i<guess.length;i++){ if(guess[i]===answer[i]) res[i]='g'; else rest[answer[i]]=(rest[answer[i]]||0)+1; }
+  for(let i=0;i<guess.length;i++){ if(res[i]!=='g'&&rest[guess[i]]>0){res[i]='y';rest[guess[i]]--} }
+  return res;
+}
+
+function openDay(i){
+  dayIdx=Math.max(0,Math.min(LAST,i)); L=LENS[dayIdx%3];
+  sol=ANS[L][Math.floor(dayIdx/3)%ANS[L].length]; cur='';
+  sizeBoard(); render();
+}
+
+function sizeBoard(){
+  const wrap=$('boardwrap'), w=wrap.clientWidth, h=wrap.clientHeight;
+  const s=Math.floor(Math.min((w-(L-1)*6)/L,(h-12-(TRIES-1)*6)/TRIES,64));
+  $('board').style.setProperty('--s',Math.max(28,s)+'px');
+}
+window.addEventListener('resize',()=>{sizeBoard()});
+
+function render(){
+  const d=days[dayIdx]||{g:[],h:[],s:'play'};
+  const b=$('board'); b.innerHTML=''; b.classList.remove('win');
+  for(let r=0;r<TRIES;r++){
+    const row=document.createElement('div'); row.className='row'; row.style.gridTemplateColumns=`repeat(${L},var(--s))`;
+    const g=d.g[r]; const isCur=!g&&r===d.g.length&&!finished();
+    const res=g?score(g,sol):null;
+    for(let c=0;c<L;c++){
+      const cell=document.createElement('div'); cell.className='cell';
+      if(g){cell.textContent=g[c];cell.classList.add(res[c])}
+      else if(isCur){
+        if(cur[c]){cell.textContent=cur[c];cell.classList.add('filled')}
+        else{ if(c===cur.length) cell.classList.add('cur'); if(d.h.includes(c)){const s=document.createElement('span');s.className='ghost';s.textContent=sol[c];cell.appendChild(s)} }
+      }
+      row.appendChild(cell);
+    }
+    if(isCur) row.id='currow';
+    if(g&&r===d.g.length-1) row.classList.add('last');
+    b.appendChild(row);
+  }
+  // Tastaturfarben
+  const best={};
+  d.g.forEach(g=>score(g,sol).forEach((c,i)=>{const k=g[i],rank={g:3,y:2,x:1};if(!best[k]||rank[c]>rank[best[k]])best[k]=c}));
+  d.h.forEach(i=>best[sol[i]]='g');
+  document.querySelectorAll('.key[data-k]').forEach(k=>{k.classList.remove('g','y','x');const c=best[k.dataset.k];if(c)k.classList.add(c)});
+  const t=todayIdx();
+  $('dateLbl').textContent=fmtLong.format(dateOf(dayIdx));
+  const pill=$('pill'); pill.textContent=dayIdx===t?'Heute':dayIdx<t?'Nachholen':'Vorziehen';
+  pill.className='pill'+(dayIdx<t?' past':dayIdx>t?' future':'');
+  $('prevDay').disabled=dayIdx<=0; $('nextDay').disabled=dayIdx>=LAST;
+  $('status').innerHTML=d.s==='won'?'Geknackt <span class="st">'+'★'.repeat(d.st||0)+'</span>':d.s==='lost'?'Nicht geknackt · Lösung: '+sol.toUpperCase():L+' Buchstaben · '+(TRIES-d.g.length)+' Versuche übrig';
+  $('hint').disabled=finished(); $('enter').disabled=finished();
+}
+
+function type(ch){ if(finished()||cur.length>=L) return; cur+=ch; render(); }
+function back(){ if(finished()||!cur) return; cur=cur.slice(0,-1); render(); }
+function shake(msg){ toast(msg); const r=$('currow'); if(r){r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake')} }
+function submit(){
+  if(busy||finished()) return;
+  if(cur.length<L){shake('Zu kurz: '+L+' Buchstaben');return}
+  if(!DICT[L].has(cur)&&!ANS[L].includes(cur)){shake('Kein bekanntes Wort');return}
+  const d=dayState(); d.g.push(cur); cur='';
+  const won=d.g[d.g.length-1]===sol;
+  if(won) d.s='won'; else if(d.g.length>=TRIES) d.s='lost';
+  save(); busy=true; render();
+  const row=$('board').children[d.g.length-1];
+  [...row.children].forEach((c,i)=>{c.style.animationDelay=(i*90)+'ms';c.classList.add('flip')});
+  setTimeout(()=>{busy=false; if(won) win(); else if(d.s==='lost') lose();}, L*90+500);
+}
+
+function win(){
+  $('board').classList.add('win');
+  const d=days[dayIdx], n=d.g.length, stars=n<=2?3:n<=4?2:1;
+  let reward=0;
+  if(!d.r){reward=60+(TRIES-n+1)*30;d.r=true;d.st=stars;setCoins(coins+reward)} else d.st=Math.max(d.st||0,stars);
+  save(); render();
+  const next=nextOpen();
+  setTimeout(()=>overlay(`<h2>Geknackt!</h2>
+    <div class="stars">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3-stars)}</span></div>
+    <div class="word">${[...sol].map(c=>'<span>'+c+'</span>').join('')}</div>
+    <p style="text-align:center">${n} von ${TRIES} Versuchen${reward?' · +'+reward+' Münzen':''}</p>
+    <div class="brow"><button class="btn alt" data-act="cal">Kalender</button>${next!=null?'<button class="btn" data-act="open" data-day="'+next+'">Nächstes offenes</button>':'<a class="btn" href="../">Übersicht</a>'}</div>`),700);
+}
+function lose(){
+  overlay(`<h2>Nicht geknackt</h2><p>Das Passwort war:</p>
+    <div class="word lost">${[...sol].map(c=>'<span>'+c+'</span>').join('')}</div>
+    <div class="brow"><button class="btn alt" data-act="retry">Nochmal</button><button class="btn" data-act="cal">Kalender</button></div>`);
+}
+function nextOpen(){
+  const t=Math.min(todayIdx(),LAST), open=i=>!days[i]||days[i].s==='play';
+  if(open(t)&&t!==dayIdx) return t;
+  for(let i=t;i>=0;i--) if(open(i)&&i!==dayIdx) return i;
+  for(let i=t+1;i<=LAST;i++) if(open(i)&&i!==dayIdx) return i;
+  return null;
+}
+
+$('hint').addEventListener('click',()=>{
+  if(finished()||busy) return;
+  const d=dayState();
+  const known=new Set(d.h); d.g.forEach(g=>score(g,sol).forEach((c,i)=>{if(c==='g')known.add(i)}));
+  const free=[...Array(L).keys()].filter(i=>!known.has(i));
+  if(free.length<=1){toast('Den letzten Buchstaben musst du selbst finden');return}
+  if(coins<HINT_COST){toast('Nicht genug Münzen für einen Hinweis');return}
+  const i=free[Math.random()*free.length|0];
+  d.h.push(i); setCoins(coins-HINT_COST); save(); render();
+  toast('Buchstabe '+(i+1)+' ist ein '+sol[i].toUpperCase());
+});
+
+/* Tastatur */
+const ROWS=['qwertzuiop','asdfghjkl','yxcvbnm'];
+ROWS.forEach((r,ri)=>{
+  const el=$('kr'+(ri+1));
+  [...r].forEach(ch=>{const k=document.createElement('button');k.className='key';k.dataset.k=ch;k.textContent=ch.toUpperCase();k.setAttribute('aria-label',ch.toUpperCase());k.addEventListener('click',()=>type(ch));el.appendChild(k)});
+  if(ri===2){const k=document.createElement('button');k.className='key wide';k.innerHTML='⌫';k.setAttribute('aria-label','Löschen');k.addEventListener('click',back);el.appendChild(k)}
+});
+$('enter').addEventListener('click',submit);
+document.addEventListener('keydown',e=>{
+  if(!$('ov').hidden||e.metaKey||e.ctrlKey||e.altKey) return;
+  if(e.key==='Enter'){e.preventDefault();submit()}
+  else if(e.key==='Backspace'){e.preventDefault();back()}
+  else if(/^[a-zA-Z]$/.test(e.key)) type(e.key.toLowerCase());
+});
+
+/* Kalender */
+let calMonth=null;
+function calendar(){
+  const d=dateOf(dayIdx);
+  if(!calMonth) calMonth=[d.getUTCFullYear(),d.getUTCMonth()];
+  const [y,m]=calMonth, first=new Date(utc(y,m,1)), dim=new Date(utc(y,m+1,0)).getUTCDate();
+  const lead=(first.getUTCDay()+6)%7, t=todayIdx();
+  let cells=['Mo','Di','Mi','Do','Fr','Sa','So'].map(w=>'<div class="wd">'+w+'</div>').join('');
+  for(let i=0;i<lead;i++) cells+='<div></div>';
+  for(let day=1;day<=dim;day++){
+    const i=Math.round((utc(y,m,day)-START_UTC)/DAY), ok=i>=0&&i<=LAST, s=days[i];
+    const st=s&&(s.g.length||s.h.length||s.s!=='play')?s.s:'';
+    const cls=[st==='won'?'won':st==='lost'?'lost':st?'play':'', i===t?'today':'', i===dayIdx?'cur':''].join(' ');
+    const stars=st==='won'?'<small>'+'★'.repeat(s.st||0)+'</small>':'';
+    cells+=`<button class="${cls}" ${ok?'data-act="open" data-day="'+i+'"':'disabled'} aria-label="${day}.">${day}${stars}</button>`;
+  }
+  const maxD=dateOf(LAST), before=y*12+m<=START[0]*12+START[1], after=y*12+m>=maxD.getUTCFullYear()*12+maxD.getUTCMonth();
+  const solved=Object.values(days).filter(x=>x.s==='won').length;
+  overlay(`<div class="cal-head"><button class="nav" data-act="calPrev" ${before?'disabled':''} aria-label="Voriger Monat">‹</button>
+    <h2>${fmtMonth.format(first)}</h2>
+    <button class="nav" data-act="calNext" ${after?'disabled':''} aria-label="Nächster Monat">›</button></div>
+    <div class="cal">${cells}</div>
+    <div class="legend"><span><span class="sw" style="background:var(--green)"></span>geknackt</span><span><span class="sw" style="background:var(--yellow)"></span>angefangen</span><span><span class="sw" style="background:#5a2f2a"></span>nicht geschafft</span><span><span class="sw" style="outline:2px solid var(--fg)"></span>heute</span></div>
+    <p class="prog">${solved} von ${LAST+1} Passwörtern geknackt</p>
+    <div class="brow"><button class="btn alt" data-act="close">Schließen</button><button class="btn" data-act="open" data-day="${Math.min(t,LAST)}">Zu heute</button></div>`);
+}
+function rules(){
+  overlay(`<h2>So spielst du mCrack</h2><ul>
+    <li>Finde das versteckte Passwort in 6 Versuchen. Jeden Tag gibt es ein neues, abwechselnd mit 5, 6 und 7 Buchstaben.</li>
+    <li>Gib ein echtes deutsches Wort mit der passenden Länge ein. Umlaute und ß kommen nicht vor.</li>
+    <li><span class="sw" style="background:var(--green)"></span>Grün: Der Buchstabe steht an der richtigen Stelle.</li>
+    <li><span class="sw" style="background:var(--yellow)"></span>Gelb: Der Buchstabe kommt vor, aber an einer anderen Stelle.</li>
+    <li><span class="sw" style="background:var(--gray)"></span>Grau: Der Buchstabe kommt im Passwort nicht vor.</li>
+    <li>„Buchstabe aufdecken“ zeigt dir für 100 Münzen einen Buchstaben an seiner Stelle. Er wird auch auf der Tastatur grün.</li>
+    <li>Über den Kalender holst du verpasste Tage nach oder ziehst kommende vor.</li></ul>
+    <button class="btn" data-act="close">Los geht's</button>`);
+}
+function menu(){
+  overlay(`<h2>Menü</h2><div style="display:flex;flex-direction:column;gap:10px">
+    <button class="btn alt" data-act="cal">Kalender</button>
+    <button class="btn alt" data-act="retry">Rätsel neu starten</button>
+    <button class="btn alt" data-act="rules">Regeln</button>
+    <button class="btn" data-act="close">Weiterspielen</button></div>`);
+}
+function overlay(html){$('card').innerHTML=html;$('ov').hidden=false}
+$('ov').addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'), act=el?.dataset.act;
+  if(!act){if(e.target.id==='ov')$('ov').hidden=true;return}
+  if(act==='calPrev'||act==='calNext'){const d=new Date(utc(calMonth[0],calMonth[1]+(act==='calNext'?1:-1),1));calMonth=[d.getUTCFullYear(),d.getUTCMonth()];calendar();return}
+  $('ov').hidden=true;
+  if(act==='open') openDay(+el.dataset.day);
+  if(act==='retry'){const d=dayState();d.g=[];d.h=[];d.s='play';cur='';save();render()}
+  if(act==='rules') rules();
+  if(act==='cal'){calMonth=null;calendar()}
+});
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,1900)}
+
+$('help').addEventListener('click',rules);
+$('menuBtn').addEventListener('click',menu);
+$('prevDay').addEventListener('click',()=>openDay(dayIdx-1));
+$('nextDay').addEventListener('click',()=>openDay(dayIdx+1));
+$('dateBtn').addEventListener('click',()=>{calMonth=null;calendar()});
+setCoins(coins);
+openDay(Math.min(todayIdx(),LAST));
+if(!store.get('crackRules',false)){store.set('crackRules',true);rules()}
+if("serviceWorker" in navigator){navigator.serviceWorker.register("../sw.js",{updateViaCache:"none"}).catch(()=>{})}
+</script>
+</body>
+</html>
