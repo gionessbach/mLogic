@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mLogic">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#141518">
+<title>mLogic</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap">
+<style>
+/* Startseite der Spielesammlung: Kopf mit Logo, darunter eine Liste großer Spielkarten */
+:root{
+  --bg:#141518; --panel:#24262b; --tile:#34363c; --fg:#f3f1ea; --muted:#9a9ca3;
+  --green:#4c8a12; --yellow:#e5a600; --accent:#f0b429; --accent-edge:#a87a12;
+  --display:"Lilita One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-weight:800;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent}
+.app{max-width:560px;margin:0 auto;padding-block:16px 32px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:center;gap:12px}
+.logo{font-family:var(--display);font-size:34px;line-height:1;flex:1;display:flex;align-items:center;gap:8px}
+.logo b{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--bg);font-size:27px;font-weight:400;transform:rotate(-6deg)}
+.coins{display:flex;align-items:center;gap:8px;background:var(--panel);border-radius:999px;padding:5px 14px 5px 5px;font-variant-numeric:tabular-nums;font-size:17px}
+.coin{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe27a,var(--accent) 60%,var(--accent-edge));border:2px solid #ffd54a}
+h1{font-family:var(--display);font-weight:400;font-size:24px;margin:8px 0 0}
+.list{display:grid;gap:12px}
+.game{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:14px;color:inherit;text-decoration:none}
+.game:active{transform:scale(.98)}
+.game:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ic{width:64px;height:64px;border-radius:14px;flex:none;overflow:hidden;background:var(--bg)}
+.ic img{width:100%;height:100%;display:block}
+.ic.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:8px}
+.ic.grid i{border-radius:3px;background:var(--tile)}
+.ic.grid i.g{background:var(--green)}.ic.grid i.y{background:var(--yellow)}.ic.grid i.e{background:transparent}
+.t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.t strong{font-family:var(--display);font-weight:400;font-size:22px}
+.t span{color:var(--muted);font-weight:600;font-size:14px;line-height:1.35}
+.t .st{color:var(--accent);font-weight:800}
+.go{font-size:26px;color:var(--muted)}
+footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><b>m</b>Logic</div>
+    <div class="coins" aria-label="Münzen"><span class="coin"></span><span id="coins">500</span></div>
+  </header>
+
+  <h1>Deine Spiele</h1>
+  <nav class="list">
+    <a class="game" href="hashtag/">
+      <div class="ic grid" aria-hidden="true"><i class="e"></i><i></i><i class="e"></i><i class="y"></i><i class="g"></i><i></i><i class="e"></i><i class="y"></i><i class="e"></i></div>
+      <div class="t"><strong>Hashtag</strong><span>Vier Wörter im #-Gitter. Jeden Tag ein neues Rätsel.</span><span class="st" id="hashtagStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+    <a class="game" href="zip/">
+      <div class="ic"><img src="zip/icon-192.png" alt=""></div>
+      <div class="t"><strong>mZip</strong><span>Zahlen der Reihe nach verbinden und jedes Feld füllen.</span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+    <a class="game" href="flow/">
+      <div class="ic"><img src="flow/icon-512.png" alt=""></div>
+      <div class="t"><strong>mFlow</strong><span>Farben im Kreislauf sortieren.</span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+  </nav>
+  <footer>Dein Spielstand bleibt auf diesem Gerät gespeichert.</footer>
+</div>
+<script>
+function get(k,d){try{const v=localStorage.getItem('mlogic.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+document.getElementById('coins').textContent=get('coins',500).toLocaleString('de-DE');
+(function(){
+  const n=new Date(), start=Date.UTC(2026,10,1);
+  const t=Math.round((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-start)/86400000);
+  const days=get('days',{}), d=days[t];
+  const st=!d?'Heute: offen':d.s==='won'?'Heute: gelöst '+'★'.repeat(d.st||0):d.s==='lost'?'Heute: nicht geschafft':'Heute: angefangen';
+  let missed=0; for(let i=0;i<t;i++) if(!days[i]||days[i].s==='play') missed++;
+  document.getElementById('hashtagStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
+})();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}
+</script>
+</body>
+</html>
