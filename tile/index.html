@@ -39,11 +39,18 @@ header{display:flex;align-items:center;gap:8px;padding-block:10px 0}
 .logo img{width:32px;height:32px;border-radius:8px;flex:none}
 .coins{display:flex;align-items:center;gap:6px;background:var(--panel);border-radius:999px;padding:4px 12px 4px 4px;font-variant-numeric:tabular-nums;font-size:16px;flex:none}
 .coin{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff08a,var(--accent) 60%,var(--accent-edge));border:2px solid #ffe44a;flex:none}
-.stats{display:grid;grid-template-columns:1fr 1.3fr .8fr;gap:6px}
+.stats{display:grid;grid-template-columns:.95fr 1.2fr 1fr;gap:6px}
 .stat{background:var(--panel);border-radius:10px;padding:5px 8px;min-width:0}
 .stat small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .stat b{font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .stat b em{font-style:normal;color:var(--accent)}
+.gcell{background:var(--bg);border-radius:12px;padding:8px 4px;text-align:center;font-size:13px;color:var(--accent)}
+.gcell canvas{width:60px;height:60px;image-rendering:pixelated;display:block;margin:0 auto 4px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.bigart{width:200px;height:200px;image-rendering:pixelated;display:block;margin:6px auto 10px}
+.stars{font-size:34px;color:var(--accent);text-align:center;letter-spacing:4px;margin-bottom:6px}
+.dtxt{font-size:14px;color:#d8d6cf;text-align:center;margin-bottom:14px;line-height:1.4}
+.dtxt b{color:var(--accent)}
 .tickbar{height:6px;border-radius:3px;background:var(--panel);overflow:hidden}
 .tickbar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(0)}
 .boardwrap{flex:1;min-height:0;position:relative;border-radius:14px;background:#191a1e;overflow:hidden}
@@ -59,6 +66,7 @@ canvas#board{width:100%;height:100%;display:block;touch-action:none}
 .pbtn.ok{background:var(--green);box-shadow:0 3px 0 #2f5a08;font-size:17px}
 .pbtn:disabled{opacity:.35;cursor:default}
 .ms{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.ms canvas{width:30px;height:30px;flex:none;image-rendering:pixelated}
 .ms .bar{flex:none;width:90px;height:8px;border-radius:4px;background:var(--panel);overflow:hidden}
 .ms .bar i{display:block;height:100%;background:#a8d8f0;width:0}
 .ms span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -83,7 +91,8 @@ canvas#board{width:100%;height:100%;display:block;touch-action:none}
 .cbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-edge)}
 .cbtn.sec{background:var(--tile);color:var(--fg);box-shadow:0 4px 0 #111;flex:none;padding:0 14px;font-size:14px}
 .cbtn.warn{background:var(--red);color:#fff;box-shadow:0 4px 0 #8a2f2c}
-@media (max-width:400px){.ibtn{width:38px;height:38px}.logo{font-size:23px}.logo img{width:28px;height:28px}.offer canvas{width:48px;height:48px}.reroll{width:50px}}
+@media (max-width:430px){.logo img{display:none}}
+@media (max-width:400px){.grid5{grid-template-columns:repeat(4,1fr)}.ibtn{width:38px;height:38px}.logo{font-size:23px}.logo img{width:28px;height:28px}.offer canvas{width:48px;height:48px}.reroll{width:50px}}
 </style>
 </head>
 <body>
@@ -91,13 +100,14 @@ canvas#board{width:100%;height:100%;display:block;touch-action:none}
   <header>
     <a class="ibtn" href="../" aria-label="Zurück zu mLogic">←</a>
     <div class="logo"><img src="icon-192.png" alt="">mTile</div>
+    <button class="ibtn" id="galBtn" aria-label="Galerie">🖼</button>
     <button class="ibtn" id="helpBtn" aria-label="Spielregeln">?</button>
     <div class="coins" title="Punkte"><span class="coin"></span><span id="pts">0</span></div>
   </header>
   <div class="stats">
     <div class="stat"><small>Pro Takt</small><b id="sInc">+0</b></div>
     <div class="stat"><small>Dichte → Bonus</small><b id="sDen">100 % → <em>×2,5</em></b></div>
-    <div class="stat"><small>Volle Linien</small><b id="sLin">0</b></div>
+    <div class="stat"><small>Bild</small><b id="sBild">0</b></div>
   </div>
   <div class="tickbar"><i id="tick"></i></div>
   <div class="boardwrap">
@@ -110,7 +120,7 @@ canvas#board{width:100%;height:100%;display:block;touch-action:none}
     <button class="pbtn" id="cancel" aria-label="Abbrechen" hidden>✕</button>
     <button class="pbtn ok" id="ok" hidden>✓ Kaufen</button>
   </div>
-  <div class="ms"><div class="bar"><i id="msBar"></i></div><span id="msTxt"></span></div>
+  <div class="ms"><canvas id="thumb" width="60" height="60"></canvas><div class="bar"><i id="msBar"></i></div><span id="msTxt"></span></div>
   <div class="shop" id="shop"></div>
 </div>
 
@@ -118,14 +128,33 @@ canvas#board{width:100%;height:100%;display:block;touch-action:none}
   <div class="card">
     <h2>So geht mTile</h2>
     <ul>
-      <li>Alle paar Sekunden gibt jedes Quadrat Punkte – bei null Druck, du kannst nie verlieren.</li>
-      <li>Kaufe unten Teile und setze sie an deine Form an (Kanten müssen sich berühren). Ziehen verschiebt, ↻ dreht.</li>
-      <li><b>Dichte:</b> Je voller und quadratischer das Rechteck um deine Form, desto höher der Bonus. Eingeschlossene Löcher zählen doppelt schlecht.</li>
-      <li><b>Volle Linien:</b> Jede lückenlose Zeile oder Spalte (ab 3 Feldern) gibt +0,1 Bonus.</li>
-      <li>Der Preis wächst mit der Fläche – kleine Teile bleiben aber immer am günstigsten, so kannst du Lücken später stopfen.</li>
-      <li>Meilensteine schalten neue Formen und Verbesserungen frei. Wenn die App zu ist, läuft das Einkommen bis zu 8 Stunden weiter.</li>
+      <li>Alle paar Sekunden gibt jedes Feld Punkte – ohne Druck, verlieren geht nicht.</li>
+      <li>Jede Karte zeigt ein <b>Pixelbild</b> als Schatten. Kaufe Teile und setze sie ins Bild, immer mit einer Kante am Bestand. Ziehen verschiebt, ↻ dreht.</li>
+      <li><b>Dichte:</b> Kleine, abgeschnittene Lücken (1–3 Felder) senken den Bonus. Plane so, dass freie Flächen groß und zusammenhängend bleiben.</li>
+      <li><b>Volle Linien:</b> Jede komplett gefüllte Bildzeile oder -spalte (ab 3 Feldern) gibt +0,1.</li>
+      <li><b>Sterne:</b> Je größer die Teile im Schnitt, desto mehr Sterne (bis 3). Neue Sterne erhöhen dauerhaft dein Einkommen um 4 % pro Stern.</li>
+      <li>Ist das Bild voll, startet die nächste Karte. Fertige Bilder siehst du in der Galerie 🖼 und kannst sie später mit mehr Sternen wiederholen.</li>
+      <li>Meilensteine schalten neue Formen und Verbesserungen frei. Bei geschlossener App läuft das Einkommen bis zu 8 Stunden weiter.</li>
     </ul>
     <div class="row"><button class="cbtn sec" id="reset">Neu starten</button><button class="cbtn" id="rulesOk">Los geht’s</button></div>
+  </div>
+</div>
+
+<div class="ov" id="done" hidden>
+  <div class="card">
+    <h2 id="doneTitle" style="text-align:center"></h2>
+    <canvas class="bigart" id="doneArt" width="400" height="400"></canvas>
+    <div class="stars" id="doneStars"></div>
+    <div class="dtxt" id="doneTxt"></div>
+    <div class="row"><button class="cbtn" id="doneBtn">Nächste Karte</button></div>
+  </div>
+</div>
+<div class="ov" id="gal" hidden>
+  <div class="card">
+    <h2>Galerie</h2>
+    <div class="grid5" id="galGrid"></div>
+    <div class="dtxt" id="galTxt"></div>
+    <div class="row"><button class="cbtn" id="galOk">Schließen</button></div>
   </div>
 </div>
 
@@ -158,41 +187,71 @@ const SHAPES=[
 SHAPES.forEach((s,i)=>{const h=(i*137.5+20)%360;s.col=`hsl(${h} 72% 80%)`;s.edge=`hsl(${h} 42% 54%)`});
 const START={col:'#FDD602',edge:'#a88e00'};
 const TIER_TXT=['','O- und T-Teil','L, J, S, Z und lange Stange','Fünfer P, U und L','Plus, T, W und Stange 5'];
-const MSL=[{c:6,u:1},{c:12,u:2,r:'tick'},{c:20,r:'base'},{c:25,u:3},{c:35,r:'cap'},{c:45,u:4,r:'tick'},{c:60,r:'base'},{c:80,r:'cap'},{c:100,r:'tick'},{c:130,r:'base'},{c:170,r:'cap'},{c:220,r:'tick'}];
-function msAt(k){return k<MSL.length?MSL[k]:{c:220+60*(k-MSL.length+1),r:['base','cap','tick'][(k-MSL.length)%3]}}
+const MSL=[{c:6,u:1},{c:14,u:2,r:'tick'},{c:26,r:'base'},{c:40,u:3},{c:60,r:'cap'},{c:85,u:4,r:'tick'},{c:115,r:'base'},{c:150,r:'cap'},{c:200,r:'tick'},{c:260,r:'base'},{c:330,r:'cap'},{c:420,r:'tick'}];
+function msAt(k){return k<MSL.length?MSL[k]:{c:420+90*(k-MSL.length+1),r:['base','cap','tick'][(k-MSL.length)%3]}}
 const RTXT={tick:'Takt −8 %',base:'+1 Punkt pro Feld',cap:'Dichte-Bonus +0,25'};
 
+/* ---------- Pixelbilder (Zielformen) ---------- */
+const PAL={r:'#f28b9b',R:'#d96a82',o:'#f9b872',y:'#fbe37a',g:'#98d99a',G:'#68b872',b:'#8cc4f2',B:'#5f92d8',p:'#c8a6ee',w:'#f6f4ee',k:'#55505c',n:'#c9a07a',N:'#9d7552'};
+const MOTIFS=[
+ {n:'Herz',g:['.rw.rr.','rrrrrrr','rrrrrrR','.rrrrR.','..rRR..','...R...']},
+ {n:'Stern',g:['...y...','...y...','..yyy..','yyyyyyy','.yyoyy.','..yyy..','.yy.yy.','.y...y.']},
+ {n:'Fisch',g:['...BBB....','.bbbbbbb.b','bbbwkbbbbb','.bbbbbbb.b','...BBB....']},
+ {n:'Baum',g:['..ggg..','.ggGgg.','ggggGgg','gGgggGg','.ggggg.','..gGg..','...n...','...n...','..nnn..']},
+ {n:'Segelboot',g:['....n....','...wnr...','..wwnrr..','.wwwnrrr.','wwwwnrrrr','....n....','NNNNNNNNN','.NNNNNNN.']},
+ {n:'Krone',g:['y...y...y','yy.yyy.yy','yyyyyyyyy','yyryyyryy','yyyyyyyyy','.ooooooo.']},
+ {n:'Rakete',g:['...r...','..rrr..','..www..','.wwbww.','.wwbww.','.wwwww.','.wwwww.','rwwwwwr','rrwwwrr','..ooo..','...o...']},
+ {n:'Pilz',g:['..rrrrr..','.rwrrrwr.','rrrrrrrrr','rwrrrrrwr','rrrrrrrrr','...yyy...','...yyy...','..yyyyy..']},
+ {n:'Haus',g:['....R....','...RRR...','..RRRRR..','.RRRRRRR.','RRRRRRRRR','.yyyyyyy.','.byyNyyb.','.byyNyyb.','.yyyNyyy.']},
+ {n:'Eule',g:['n.nnnn.n','nnnnnnnn','nwwnnwwn','nwkwwkwn','nwwnnwwn','nnnoonnn','nnNNNNnn','.nNNNNn.','..oo.oo.']}
+];
 const K=(x,y)=>(x+512)*1024+(y+512);
+MOTIFS.forEach(m=>{m.w=m.g[0].length;m.h=m.g.length;m.N=m.g.join('').replace(/\./g,'').length});
+function drawArt(c,m,mode){ // mode: 'full' | 'sil'
+  const g2=c.getContext('2d'),W2=c.width,H2=c.height,u=Math.floor(Math.min(W2/m.w,H2/m.h)),ox=Math.floor((W2-u*m.w)/2),oy=Math.floor((H2-u*m.h)/2);
+  g2.clearRect(0,0,W2,H2);
+  m.g.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch==='.')return;g2.fillStyle=mode==='sil'?'#34363c':PAL[ch];g2.fillRect(ox+x*u,oy+y*u,u,u)}));
+}
 const rotCells=(c,r)=>{let a=c.map(p=>p.slice());for(let i=0;i<r%4;i++)a=a.map(([x,y])=>[-y,x]);
   const mx=Math.min(...a.map(p=>p[0])),my=Math.min(...a.map(p=>p[1]));return a.map(([x,y])=>[x-mx,y-my])};
 const dims=c=>[Math.max(...c.map(p=>p[0]))+1,Math.max(...c.map(p=>p[1]))+1];
 
 /* ---------- Zustand ---------- */
-let S;
-function fresh(){return{pts:16,list:[[0,0,-1]],ups:{tick:0,base:0,cap:0},offers:[],tier:0,ms:0,last:Date.now()}}
+let S,T,M;
+function fresh(){return{v:2,pts:16,mapIdx:0,list:[],pieces:0,total:1,best:{},ups:{tick:0,base:0,cap:0},offers:[],tier:0,ms:0,last:Date.now()}}
+function setupMap(idx){
+  S.mapIdx=idx%MOTIFS.length;const m=MOTIFS[S.mapIdx];
+  T={m,w:m.w,h:m.h,N:m.N,at:new Map(),arr:new Uint8Array(m.w*m.h)};
+  let sx=0,sy=0,cx=0,cy=0;
+  m.g.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.'){T.at.set(K(x,y),ch);T.arr[y*m.w+x]=1;cx+=x;cy+=y}}));
+  cx/=m.N;cy/=m.N;let bd=1e9;
+  T.at.forEach((ch,k)=>{const x=Math.floor(k/1024)-512,y=k%1024-512,dd=(x-cx)**2+(y-cy)**2;if(dd<bd){bd=dd;sx=x;sy=y}});
+  S.list=[[sx,sy,-1]];S.pieces=0;
+}
 function rebuild(){S.map=new Map(S.list.map(c=>[K(c[0],c[1]),c[2]]));M=metrics([])}
 const tickMs=()=>Math.max(1000,3000*Math.pow(.92,S.ups.tick));
 const capV=()=>1.5+.25*S.ups.cap;
 const baseV=()=>1+S.ups.base;
-let M;
+const starSum=()=>Object.values(S.best).reduce((a,b)=>a+b,0);
+const starMult=()=>1+.04*starSum();
+const starsFor=avg=>avg>=2.4?3:avg>=1.8?2:1;
 function metrics(extra){
-  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,n=0;
-  const each=f=>{for(const c of S.list)f(c[0],c[1]);for(const c of extra)f(c[0],c[1])};
-  each((x,y)=>{n++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y});
-  const w=x1-x0+1,h=y1-y0+1,W2=w+2,H2=h+2,occ=new Uint8Array(W2*H2);
-  each((x,y)=>{occ[(y-y0+1)*W2+(x-x0+1)]=1});
-  const seen=new Uint8Array(W2*H2),st=[0];seen[0]=1;
-  while(st.length){const i=st.pop(),cx=i%W2,cy=(i/W2)|0;
-    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;
-      if(nx<0||ny<0||nx>=W2||ny>=H2)continue;const j=ny*W2+nx;if(!occ[j]&&!seen[j]){seen[j]=1;st.push(j)}}}
-  let holes=0,lines=0;
-  for(let y=1;y<=h;y++){let r=0;for(let x=1;x<=w;x++){const i=y*W2+x;if(occ[i])r++;else if(!seen[i])holes++}if(r===w&&w>=3)lines++}
-  for(let x=1;x<=w;x++){let r=0;for(let y=1;y<=h;y++)if(occ[y*W2+x])r++;if(r===h&&h>=3)lines++}
-  const area=w*h,asp=Math.sqrt(Math.min(w,h)/Math.max(w,h)),d=n/area*asp,dEff=Math.max(0,(n-2*holes)/area)*asp;
-  const mult=1+capV()*Math.pow(dEff,4)+.1*lines;
-  return{n,w,h,area,d,dEff,holes,lines,mult,x0,x1,y0,y1};
+  const w=T.w,h=T.h,fill=new Uint8Array(w*h);let n=0;
+  const add=(x,y)=>{if(x>=0&&y>=0&&x<w&&y<h&&T.arr[y*w+x]&&!fill[y*w+x]){fill[y*w+x]=1;n++}};
+  S.list.forEach(c=>add(c[0],c[1]));extra.forEach(c=>add(c[0],c[1]));
+  const E=T.N-n,seen=new Uint8Array(w*h);let pocket=0,holes=0;
+  if(E>0)for(let i=0;i<w*h;i++){if(!T.arr[i]||fill[i]||seen[i])continue;
+    let s=0;const st=[i];seen[i]=1;
+    while(st.length){const j=st.pop(),x=j%w,y=(j/w)|0;s++;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;const q=ny*w+nx;if(T.arr[q]&&!fill[q]&&!seen[q]){seen[q]=1;st.push(q)}}}
+    if(s<=3&&E>s){pocket+=s===1?3:s===2?2:1;holes++}}
+  let lines=0;
+  for(let y=0;y<h;y++){let c=0,f=0;for(let x=0;x<w;x++)if(T.arr[y*w+x]){c++;if(fill[y*w+x])f++}if(c>=3&&c===f)lines++}
+  for(let x=0;x<w;x++){let c=0,f=0;for(let y=0;y<h;y++)if(T.arr[y*w+x]){c++;if(fill[y*w+x])f++}if(c>=3&&c===f)lines++}
+  const d=n/(n+pocket*2),mult=1+capV()*Math.pow(d,4)+.1*lines;
+  return{n,d,mult,lines,holes,pocket};
 }
-const perTick=(m=M)=>m.n*baseV()*m.mult;
+const perTick=(m=M)=>m.n*baseV()*m.mult*starMult();
 const price=si=>Math.ceil(SHAPES[si].c.length*5*(M.n+2)*baseV()*Math.pow(1.03,M.n-1));
 const rerollCost=()=>Math.max(5,Math.ceil(perTick()*2));
 
@@ -200,59 +259,62 @@ const rerollCost=()=>Math.max(5,Math.ceil(perTick()*2));
 const nf1=new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}),nf0=new Intl.NumberFormat('de-DE',{maximumFractionDigits:0});
 function fmt(v){if(v>=1e9)return nf1.format(v/1e9)+' Mrd.';if(v>=1e6)return nf1.format(v/1e6)+' Mio.';if(v>=1e5)return nf1.format(v/1e3)+' k';return v>=100?nf0.format(v):nf1.format(v)}
 const fInt=v=>{v=Math.floor(v);return v>=1e6?fmt(v):nf0.format(v)};
+const starTxt=n=>'★'.repeat(n)+'☆'.repeat(3-n);
 
 /* ---------- Shop ---------- */
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function genOffers(){
   const un=SHAPES.map((s,i)=>i).filter(i=>SHAPES[i].t<=S.tier);
-  const small=un.filter(i=>SHAPES[i].c.length<=2);
-  const out=[pick(small)];
+  const out=[0];
   while(out.length<4){const i=pick(un);if(!out.includes(i))out.push(i)}
   out.sort((a,b)=>SHAPES[a].c.length-SHAPES[b].c.length||a-b);
   S.offers=out;
 }
 const shopEl=document.getElementById('shop');
+function rr(g,x,y,w,h,r,fill){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();if(fill){g.fillStyle=fill;g.fill()}}
 function renderShop(){
   shopEl.innerHTML='';
   S.offers.forEach((si,i)=>{
     const b=document.createElement('button');b.className='offer';b.dataset.i=i;
     b.innerHTML='<canvas width="112" height="112"></canvas><div class="pr"><span class="coin"></span><span class="v"></span></div>';
     b.onclick=()=>choose(i);
-    const cv=b.querySelector('canvas'),g=cv.getContext('2d'),s=SHAPES[si],[pw,ph]=dims(s.c),u=Math.min(96/pw,96/ph,30);
+    const c2=b.querySelector('canvas'),g2=c2.getContext('2d'),s=SHAPES[si],[pw,ph]=dims(s.c),u=Math.min(96/pw,96/ph,30);
     s.c.forEach(([x,y])=>{const px=56+(x-pw/2)*u,py=56+(y-ph/2)*u;
-      rr(g,px+1,py+3,u-2,u-2,u*.22,s.edge);rr(g,px+1,py+1,u-2,u-2,u*.22,s.col)});
+      rr(g2,px+1,py+3,u-2,u-2,u*.22,s.edge);rr(g2,px+1,py+1,u-2,u-2,u*.22,s.col)});
     shopEl.appendChild(b);
   });
   const r=document.createElement('button');r.className='reroll';r.id='reroll';
   r.innerHTML='<b>🎲</b><span></span>';r.onclick=reroll;shopEl.appendChild(r);
   refreshShop();
 }
-function rr(g,x,y,w,h,r,fill){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();if(fill){g.fillStyle=fill;g.fill()}}
 function refreshShop(){
   shopEl.querySelectorAll('.offer').forEach(b=>{const i=+b.dataset.i,p=price(S.offers[i]);
     b.querySelector('.v').textContent=fmt(p);b.classList.toggle('dis',p>S.pts);b.classList.toggle('sel',!!P&&P.offer===i)});
   const r=document.getElementById('reroll');if(r){const c=rerollCost();r.querySelector('span').textContent=fmt(c);r.classList.toggle('dis',c>S.pts)}
 }
-function reroll(){const c=rerollCost();if(c>S.pts){toast('Noch '+fmt(c-S.pts)+' Punkte bis zum Neumischen');return}
+function reroll(){if(isDone())return;const c=rerollCost();if(c>S.pts){toast('Noch '+fmt(c-S.pts)+' Punkte bis zum Neumischen');return}
   S.pts-=c;P=null;genOffers();renderShop();updateUI();save()}
+const isDone=()=>M.n>=T.N;
 
 /* ---------- Platzieren ---------- */
 let P=null;
 const pc=p=>rotCells(SHAPES[p.shape].c,p.rot).map(([x,y])=>[x+p.ax,y+p.ay]);
-function legal(cells){let adj=false;for(const [x,y] of cells){if(S.map.has(K(x,y)))return false;
+function legal(cells){let adj=false;for(const [x,y] of cells){
+  if(x<0||y<0||x>=T.w||y>=T.h||!T.arr[y*T.w+x]||S.map.has(K(x,y)))return false;
   if(S.map.has(K(x+1,y))||S.map.has(K(x-1,y))||S.map.has(K(x,y+1))||S.map.has(K(x,y-1)))adj=true}return adj}
 function auto(si){
   let best=null;
   for(let r=0;r<4;r++){const rel=rotCells(SHAPES[si].c,r);
-    for(let ax=M.x0-6;ax<=M.x1+2;ax++)for(let ay=M.y0-6;ay<=M.y1+2;ay++){
+    for(let ax=-4;ax<=T.w;ax++)for(let ay=-4;ay<=T.h;ay++){
       const cells=rel.map(([x,y])=>[x+ax,y+ay]);if(!legal(cells))continue;
-      const m=metrics(cells),sc=m.mult*1000-Math.abs(ax-(M.x0+M.x1)/2)*.01-Math.abs(ay-(M.y0+M.y1)/2)*.01;
+      const m=metrics(cells),sc=m.mult*1000-Math.abs(ax-T.w/2)*.01-Math.abs(ay-T.h/2)*.01;
       if(!best||sc>best.sc)best={sc,rot:r,ax,ay}}}
   return best;
 }
 function choose(i){
+  if(isDone())return;
   if(P&&P.offer===i){P=null;updateUI();return}
-  const si=S.offers[i],b=auto(si)||{rot:0,ax:M.x1+1,ay:M.y0};
+  const si=S.offers[i],b=auto(si)||{rot:0,ax:0,ay:0};
   P={offer:i,shape:si,rot:b.rot,ax:b.ax,ay:b.ay};updateUI();
 }
 document.getElementById('rot').onclick=()=>{if(!P)return;const [w0,h0]=dims(rotCells(SHAPES[P.shape].c,P.rot));
@@ -265,68 +327,96 @@ function buy(){
   if(!legal(cells)||p>S.pts)return;
   const old=M;S.pts-=p;const now=performance.now();
   cells.forEach(([x,y])=>{S.list.push([x,y,P.shape]);born[K(x,y)]=now});
-  rebuild();P=null;
-  while(M.n>=msAt(S.ms).c){const m=msAt(S.ms);S.ms++;
-    if(m.u){S.tier=Math.max(S.tier,m.u)}
+  S.total+=cells.length;S.pieces++;rebuild();P=null;let ms=false;
+  while(S.total>=msAt(S.ms).c){const m=msAt(S.ms);S.ms++;ms=true;
+    if(m.u)S.tier=Math.max(S.tier,m.u);
     if(m.r)S.ups[m.r]++;
     toast('Meilenstein '+m.c+' Felder: '+[m.u?'Neue Formen!':'',m.r?RTXT[m.r]:''].filter(Boolean).join(' + '),3600)}
-  if(M.holes<old.holes&&!/Meilenstein/.test(toastEl.textContent))toast('Loch geschlossen! ✨');
-  else if(M.lines>old.lines&&!/Meilenstein/.test(toastEl.textContent))toast('Volle Linie! +0,1 Bonus');
-  else if(M.mult>old.mult+.005&&!/Meilenstein/.test(toastEl.textContent))toast('Dichte '+Math.round(M.d*100)+' % → ×'+nf1.format(M.mult));
-  genOffers();renderShop();updateUI();save();
+  if(!ms){
+    if(M.holes<old.holes)toast('Lücke geschlossen! ✨');
+    else if(M.holes>old.holes)toast('Achtung: kleine Lücke – Bonus sinkt');
+    else if(M.lines>old.lines)toast('Volle Linie! +0,1 Bonus');
+    else if(M.mult>old.mult+.005)toast('Dichte '+Math.round(M.d*100)+' % → ×'+nf1.format(M.mult))}
+  if(isDone())finishMap();else genOffers();
+  renderShop();updateUI();save();
 }
+function finishMap(){
+  const st=starsFor((T.N-1)/Math.max(1,S.pieces)),id=S.mapIdx,prev=S.best[id]||0;
+  S.doneStars=st;if(st>prev)S.best[id]=st;
+  const prize=Math.ceil(perTick()*10*st);S.pts+=prize;S.prize=prize;S.newStars=Math.max(0,st-prev);
+  S.last=Date.now();save();
+  setTimeout(showDone,1500);
+}
+function showDone(){
+  if(!isDone())return;const st=S.doneStars||starsFor((T.N-1)/Math.max(1,S.pieces));
+  $('doneTitle').textContent=T.m.n+' fertig!';
+  drawArt($('doneArt'),T.m,'full');
+  $('doneStars').textContent=starTxt(st);
+  $('doneTxt').innerHTML='Ø '+nf1.format((T.N-1)/Math.max(1,S.pieces))+' Felder pro Teil. '+(S.newStars>0?'<b>+'+nf1.format(S.newStars*4)+' % Einkommen</b> für immer. ':'Kein neuer Stern – größere Teile bringen mehr. ')+(S.prize?'Prämie: <b>+'+fmt(S.prize)+'</b> Punkte.':'');
+  $('done').hidden=false;
+}
+$('doneBtn').onclick=()=>{$('done').hidden=true;S.newStars=0;S.prize=0;setupMap(S.mapIdx+1);rebuild();genOffers();view.init=false;P=null;renderShop();updateUI();save()};
 
 /* ---------- UI ---------- */
-const $=id=>document.getElementById(id);
+function $(id){return document.getElementById(id)}
 const toastEl=$('toast');let toastT;
 function toast(t,ms=2200){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),ms)}
+function projStars(){return S.pieces?starsFor((M.n-1)/S.pieces):3}
 function updateUI(){
   $('pts').textContent=fInt(S.pts);
   $('sInc').textContent='+'+fmt(perTick())+' / '+nf1.format(tickMs()/1000)+' s';
   $('sDen').innerHTML=Math.round(M.d*100)+' % → <em>×'+nf1.format(M.mult)+'</em>';
-  $('sLin').textContent=M.lines;
-  const m=msAt(S.ms),prev=S.ms?msAt(S.ms-1).c:1;
-  $('msBar').style.width=Math.min(100,(M.n-prev)/(m.c-prev)*100)+'%';
-  $('msTxt').textContent=M.n+' / '+m.c+' Felder: '+[m.u?TIER_TXT[m.u]:'',m.r?RTXT[m.r]:''].filter(Boolean).join(' + ');
+  $('sBild').innerHTML=M.n+'/'+T.N+' <em>'+starTxt(projStars())+'</em>';
+  const m=msAt(S.ms),prev=S.ms?msAt(S.ms-1).c:0;
+  $('msBar').style.width=Math.min(100,(S.total-prev)/(m.c-prev)*100)+'%';
+  $('msTxt').textContent=S.total+' / '+m.c+' Felder: '+[m.u?TIER_TXT[m.u]:'',m.r?RTXT[m.r]:''].filter(Boolean).join(' + ');
+  drawArt($('thumb'),T.m,'full');$('thumb').title=T.m.n;
   const msg=$('msg'),ok=$('ok');
   $('rot').hidden=$('cancel').hidden=ok.hidden=!P;
-  if(!P){msg.innerHTML='Wähle unten ein Teil und setze es an deine Form.'}
+  if(!P){msg.innerHTML='Füll das Bild <b>'+T.m.n+'</b> aus. Kleine Lücken senken den Bonus, große Teile bringen Sterne.'}
   else{const cells=pc(P),lg=legal(cells),p=price(P.shape);
-    if(!lg){msg.innerHTML='<span class="bad">Hier nicht möglich</span> – das Teil muss mit einer Kante anliegen.';ok.disabled=true}
-    else{const m2=metrics(cells),d=m2.mult-M.mult,inc=perTick(m2)-perTick();
-      msg.innerHTML='Dichte <b>'+Math.round(m2.d*100)+' %</b> → <b>×'+nf1.format(m2.mult)+'</b> · <span class="'+(inc>=0?'good':'bad')+'">'+(inc>=0?'+':'')+fmt(inc)+' pro Takt</span>'+(m2.holes>M.holes?' · <span class="bad">Loch!</span>':'');
+    if(!lg){msg.innerHTML='<span class="bad">Hier nicht möglich</span> – nur im Bild, frei und mit Kante am Bestand.';ok.disabled=true}
+    else{const m2=metrics(cells),inc=perTick(m2)-perTick();
+      msg.innerHTML='Dichte <b>'+Math.round(m2.d*100)+' %</b> → <b>×'+nf1.format(m2.mult)+'</b> · <span class="'+(inc>=0?'good':'bad')+'">'+(inc>=0?'+':'')+fmt(inc)+' pro Takt</span>'+(m2.holes>M.holes?' · <span class="bad">neue Lücke!</span>':m2.lines>M.lines?' · <span class="good">volle Linie</span>':'');
       ok.disabled=p>S.pts;if(p>S.pts)msg.innerHTML+=' · noch '+fmt(p-S.pts)+' Punkte'}
     ok.textContent='✓ '+fmt(p);}
   refreshShop();
 }
+function renderGallery(){
+  const el=$('galGrid');el.innerHTML='';
+  MOTIFS.forEach((m,i)=>{const b=S.best[i]||0,d=document.createElement('div');d.className='gcell';
+    d.innerHTML='<canvas width="72" height="72"></canvas><div>'+(b?starTxt(b):'?')+'</div>';
+    drawArt(d.querySelector('canvas'),m,b?'full':'sil');el.appendChild(d)});
+  $('galTxt').textContent='Sterne gesamt: '+starSum()+' / '+MOTIFS.length*3+' · Einkommen +'+nf1.format(starSum()*4)+' %';
+}
+$('galBtn').onclick=()=>{renderGallery();$('gal').hidden=false};
+$('galOk').onclick=()=>{$('gal').hidden=true};
 
 /* ---------- Zeichnen ---------- */
 const cv=$('board'),g=cv.getContext('2d');let W=0,H=0,dpr=1;
 const view={cx:0,cy:0,cs:40,init:false};const born={},floats=[];
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(3,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);view.init=false}
 new ResizeObserver(resize).observe(cv);
-function bounds(){let x0=M.x0,x1=M.x1,y0=M.y0,y1=M.y1;if(P)for(const [x,y] of pc(P)){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}return{x0,x1,y0,y1}}
 function draw(now){
   if(!W)return;g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
-  const b=bounds(),w=b.x1-b.x0+1,h=b.y1-b.y0+1,tcs=Math.max(8,Math.min(W/(w+2),H/(h+2),70)),tcx=(b.x0+b.x1)/2,tcy=(b.y0+b.y1)/2;
+  const tcs=Math.max(8,Math.min(W/(T.w+1.5),H/(T.h+1.5),64)),tcx=(T.w-1)/2,tcy=(T.h-1)/2;
   if(!view.init){view.cs=tcs;view.cx=tcx;view.cy=tcy;view.init=true}
-  const k=.14;view.cs+=(tcs-view.cs)*k;view.cx+=(tcx-view.cx)*k;view.cy+=(tcy-view.cy)*k;
-  const cs=view.cs,X=x=>W/2+(x-view.cx)*cs-cs/2,Y=y=>H/2+(y-view.cy)*cs-cs/2,pad=cs*.05,sz=cs-pad*2,r=cs*.2,edge=cs*.08;
-  // Lücken im Rechteck
-  g.fillStyle='rgba(255,255,255,.035)';
-  for(let y=M.y0;y<=M.y1;y++)for(let x=M.x0;x<=M.x1;x++)if(!S.map.has(K(x,y)))rr(g,X(x)+pad,Y(y)+pad,sz,sz,r,'rgba(255,255,255,.055)');
-  g.setLineDash([cs*.15,cs*.12]);g.strokeStyle='rgba(255,255,255,.16)';g.lineWidth=1.5;
-  rr(g,X(M.x0)+pad/2,Y(M.y0)+pad/2,M.w*cs-pad,M.h*cs-pad,r,null);g.stroke();g.setLineDash([]);
+  const k=.18;view.cs+=(tcs-view.cs)*k;view.cx+=(tcx-view.cx)*k;view.cy+=(tcy-view.cy)*k;
+  const cs=view.cs,X=x=>W/2+(x-view.cx)*cs-cs/2,Y=y=>H/2+(y-view.cy)*cs-cs/2,pad=cs*.05,sz=cs-pad*2,r=cs*.2,edge=cs*.08,done=isDone();
+  // Zielbild als Schatten
+  T.at.forEach((ch,key)=>{const x=Math.floor(key/1024)-512,y=key%1024-512;if(S.map.has(key))return;
+    g.globalAlpha=.3;rr(g,X(x)+pad,Y(y)+pad,sz,sz,r,PAL[ch]);g.globalAlpha=1;
+    g.lineWidth=1.5;g.strokeStyle='rgba(255,255,255,.10)';rr(g,X(x)+pad,Y(y)+pad,sz,sz,r,null);g.stroke()});
   // Felder
-  for(const [x,y,si] of S.list){const s=si<0?START:SHAPES[si],bt=born[K(x,y)];let sc=1;
-    if(bt){const a=(now-bt)/380;if(a<1){sc=.5+.5*(1-Math.pow(1-a,3))*1.0+(a<.7?0:0)}else delete born[K(x,y)]}
-    const px=X(x)+pad+sz*(1-sc)/2,py=Y(y)+pad+sz*(1-sc)/2,q=sz*sc;
-    rr(g,px,py+edge,q,q,r,s.edge);rr(g,px,py,q,q,r,s.col);
+  for(const [x,y,si] of S.list){const key=K(x,y),s=si<0?START:SHAPES[si],bt=born[key];let sc=1;
+    if(bt){const a=(now-bt)/380;if(a<1)sc=.5+.5*(1-Math.pow(1-a,3));else delete born[key]}
+    const px=X(x)+pad+sz*(1-sc)/2,py=Y(y)+pad+sz*(1-sc)/2,q=sz*sc,col=done?PAL[T.at.get(key)]:s.col,ed=done?'rgba(0,0,0,.25)':s.edge;
+    rr(g,px,py+edge,q,q,r,done?col:ed);if(done){g.globalAlpha=.28;rr(g,px,py+edge,q,q,r,'#000');g.globalAlpha=1}rr(g,px,py,q,q,r,col);
     if(bt&&sc<1){g.globalAlpha=.5*(1-sc);rr(g,px,py,q,q,r,'#fff');g.globalAlpha=1}}
   // Geist
   if(P){const cells=pc(P),lg=legal(cells),s=SHAPES[P.shape];g.globalAlpha=.88;
     for(const [x,y] of cells){rr(g,X(x)+pad,Y(y)+pad+edge,sz,sz,r,lg?s.edge:'#8a2f2c');rr(g,X(x)+pad,Y(y)+pad,sz,sz,r,lg?s.col:'#ff8a85')}
-    g.globalAlpha=1;g.lineWidth=2.5;g.strokeStyle=lg?'#fff':'#fff';g.setLineDash([cs*.12,cs*.1]);
+    g.globalAlpha=1;g.lineWidth=2.5;g.strokeStyle='#fff';g.setLineDash([cs*.12,cs*.1]);
     for(const [x,y] of cells)rr(g,X(x)+pad,Y(y)+pad,sz,sz,r,null),g.stroke();g.setLineDash([])}
   // Punkte-Texte
   for(let i=floats.length-1;i>=0;i--){const f=floats[i],a=(now-f.t)/1300;if(a>=1){floats.splice(i,1);continue}
@@ -343,11 +433,12 @@ cv.addEventListener('pointermove',e=>{if(down)movePiece(e)});
 cv.addEventListener('pointerup',()=>down=false);cv.addEventListener('pointercancel',()=>down=false);
 
 /* ---------- Takt & Speichern ---------- */
-function save(){S.saved=Date.now();store.set(KEY,{pts:S.pts,list:S.list,ups:S.ups,offers:S.offers,tier:S.tier,ms:S.ms,last:S.last})}
+function save(){store.set(KEY,{v:2,pts:S.pts,mapIdx:S.mapIdx,list:S.list,pieces:S.pieces,total:S.total,best:S.best,ups:S.ups,offers:S.offers,tier:S.tier,ms:S.ms,last:S.last})}
 function loop(now){
   const t=Date.now(),tm=tickMs();let el=t-S.last;
-  if(el>=tm){const k=Math.floor(el/tm),gain=k*perTick();S.pts+=gain;S.last+=k*tm;
-    floats.push({x:(M.x0+M.x1)/2,y:(M.y0+M.y1)/2,s:'+'+fmt(gain),t:now});updateUI();el=t-S.last}
+  if(!isDone()&&el>=tm){const k=Math.floor(el/tm),gain=k*perTick();S.pts+=gain;S.last+=k*tm;
+    floats.push({x:(T.w-1)/2,y:(T.h-1)/2,s:'+'+fmt(gain),t:now});updateUI();el=t-S.last}
+  if(isDone())S.last=t;
   $('tick').style.transform='scaleX('+Math.min(1,el/tm)+')';
   const p=fInt(S.pts);if($('pts').textContent!==p){$('pts').textContent=p;refreshShop()}
   draw(now);requestAnimationFrame(loop);
@@ -361,23 +452,28 @@ const rules=$('rules');
 $('helpBtn').onclick=()=>{rules.hidden=false};
 $('rulesOk').onclick=()=>{rules.hidden=true;store.set(RKEY,1)};
 let rt;$('reset').onclick=e=>{const b=e.currentTarget;
-  if(b.classList.contains('warn')){S=fresh();S.map=null;rebuild();genOffers();P=null;view.init=false;renderShop();updateUI();save();rules.hidden=true;store.set(RKEY,1);toast('Neu gestartet');b.classList.remove('warn');b.textContent='Neu starten';return}
+  if(b.classList.contains('warn')){S=fresh();setupMap(0);rebuild();genOffers();P=null;view.init=false;renderShop();updateUI();save();rules.hidden=true;store.set(RKEY,1);toast('Neu gestartet');b.classList.remove('warn');b.textContent='Neu starten';return}
   b.classList.add('warn');b.textContent='Wirklich löschen?';clearTimeout(rt);rt=setTimeout(()=>{b.classList.remove('warn');b.textContent='Neu starten'},3000)};
 
 /* ---------- Start ---------- */
 (function init(){
   const d=store.get(KEY,null);
-  S=d&&Array.isArray(d.list)&&d.list.length?Object.assign(fresh(),d):fresh();
-  S.ups=Object.assign({tick:0,base:0,cap:0},S.ups);
+  S=fresh();
+  if(d){Object.assign(S,{pts:d.pts,ups:Object.assign(S.ups,d.ups),offers:d.offers||[],tier:d.tier||0,ms:d.ms||0,last:d.last||Date.now()});
+    if(d.v===2){S.mapIdx=d.mapIdx;S.best=d.best||{};S.total=d.total||1;S.pieces=d.pieces||0}
+    else S.total=Array.isArray(d.list)?d.list.length:1}
+  setupMap(S.mapIdx);
+  if(d&&d.v===2&&Array.isArray(d.list)&&d.list.length)S.list=d.list;
   rebuild();
   if(!S.offers||S.offers.length<4||S.offers.some(i=>!SHAPES[i]))genOffers();
   const t=Date.now(),cap=8*3600e3;let el=Math.min(t-S.last,cap);
   if(t-S.last>cap)S.last=t-cap;
   const tm=tickMs(),k=Math.floor((t-S.last)/tm);
-  if(d&&k>0&&(t-S.last)>60e3){const gain=k*perTick();S.pts+=gain;S.last+=k*tm;
+  if(d&&!isDone()&&k>0&&(t-S.last)>60e3){const gain=k*perTick();S.pts+=gain;S.last+=k*tm;
     const mins=Math.round(el/60e3);setTimeout(()=>toast('Willkommen zurück! +'+fmt(gain)+' Punkte ('+(mins>=60?Math.floor(mins/60)+' h '+mins%60+' min':mins+' min')+')',4200),500)}
   renderShop();updateUI();
   if(!store.get(RKEY,0))rules.hidden=false;
+  if(isDone())showDone();
   requestAnimationFrame(loop);
 })();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js').catch(()=>{});
