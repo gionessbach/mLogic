@@ -169,7 +169,7 @@ const dims=c=>[Math.max(...c.map(p=>p[0]))+1,Math.max(...c.map(p=>p[1]))+1];
 
 /* ---------- Zustand ---------- */
 let S;
-function fresh(){return{pts:8,list:[[0,0,-1]],ups:{tick:0,base:0,cap:0},offers:[],tier:0,ms:0,last:Date.now()}}
+function fresh(){return{pts:16,list:[[0,0,-1]],ups:{tick:0,base:0,cap:0},offers:[],tier:0,ms:0,last:Date.now()}}
 function rebuild(){S.map=new Map(S.list.map(c=>[K(c[0],c[1]),c[2]]));M=metrics([])}
 const tickMs=()=>Math.max(1000,3000*Math.pow(.92,S.ups.tick));
 const capV=()=>1.5+.25*S.ups.cap;
@@ -193,7 +193,7 @@ function metrics(extra){
   return{n,w,h,area,d,dEff,holes,lines,mult,x0,x1,y0,y1};
 }
 const perTick=(m=M)=>m.n*baseV()*m.mult;
-const price=si=>Math.ceil(SHAPES[si].c.length*6*Math.pow(1.045,M.n-1));
+const price=si=>Math.ceil(SHAPES[si].c.length*5*(M.n+2)*baseV()*Math.pow(1.03,M.n-1));
 const rerollCost=()=>Math.max(5,Math.ceil(perTick()*2));
 
 /* ---------- Formatierung ---------- */
