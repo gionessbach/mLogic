@@ -462,6 +462,7 @@ let rt;$('reset').onclick=e=>{const b=e.currentTarget;
   if(d){Object.assign(S,{pts:d.pts,ups:Object.assign(S.ups,d.ups),offers:d.offers||[],tier:d.tier||0,ms:d.ms||0,last:d.last||Date.now()});
     if(d.v===2){S.mapIdx=d.mapIdx;S.best=d.best||{};S.total=d.total||1;S.pieces=d.pieces||0}
     else S.total=Array.isArray(d.list)?d.list.length:1}
+  if(d&&!store.get('mlogic.tileFix1',0)){S.pts=0;S.last=Date.now();store.set('mlogic.tileFix1',1)}
   setupMap(S.mapIdx);
   if(d&&d.v===2&&Array.isArray(d.list)&&d.list.length)S.list=d.list;
   rebuild();
