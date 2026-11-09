@@ -667,6 +667,7 @@ function updFab(){
   const f=$('#fab');if(!f)return;
   const on=mode==='build'&&!cfg.kids&&!ended&&!test,g=!!(ghost&&ghost.free);
   f.classList.toggle('hidden',!on);if(!on)return;
+  f.style.bottom=(barEl.offsetHeight+12)+'px';
   $('#fDrop').classList.toggle('hidden',!g);$('#fCancel').classList.toggle('hidden',!g);
   const n=parts.filter(b=>b.plugin.m.prep).length,fp=$('#fPrep');fp.textContent=prepOn?(n?`▶ Start (${n})`:'▶ Start'):'❄ Vorbereiten';fp.className='btn '+(prepOn?'y':'g');
   if(!g)return;
@@ -674,18 +675,31 @@ function updFab(){
   f.style.bottom=(barEl.offsetHeight+12)+'px';
 }
 function landingY(b){let top=0;const gb=b.bounds;for(const o of parts){const ob=o.bounds;if(ob.max.x<gb.min.x||ob.min.x>gb.max.x)continue;if(ob.min.y<gb.max.y-1)continue;if(ob.min.y<top)top=ob.min.y;}return top}
+function anchorsOf(b){
+  const m=b.plugin.m;if(m.anc)return m.anc;
+  const v=shapeVerts(m.shape,m.k),pick=[];
+  if(v.length<=4){v.forEach((p,i)=>{const q=v[(i+1)%v.length];pick.push(p,{x:(p.x+q.x)/2,y:(p.y+q.y)/2});});}
+  else{const st=v.length/8;for(let i=0;i<8;i++)pick.push(v[Math.round(i*st)%v.length]);}
+  m.anc=[{x:0,y:0}].concat(pick.map(p=>{const l=Math.hypot(p.x,p.y)||1,d=Math.min(5,l*0.3);return {x:p.x-p.x/l*d,y:p.y-p.y/l*d};}));
+  return m.anc;
+}
+function nearestAnchor(w,exclude){
+  let best=null,bd=26/cam.s;
+  for(const b of parts){if(b===exclude)continue;for(const l of anchorsOf(b)){const p=toWorld(b,l),d=vdist(p,w);if(d<bd){bd=d;best={b,l,p};}}}
+  return best;
+}
 function toolTap(w){
   unfreezeAll();
   const tol=16/cam.s;
   const near=parts.map(b=>({b,d:distToBody(w,b)})).filter(o=>o.d<=tol).sort((a,b)=>a.d-b.d);
   if(tool==='rope'){
-    if(!near.length){pendingRope=null;return;}
     const pr=pendingRope&&byId(pendingRope.id);
-    if(!pr){pendingRope={id:near[0].b.plugin.m.id,p:w};return;}
-    const o=near.find(x=>x.b!==pr);
-    if(!o){toast('Jetzt ein zweites Teil antippen');return;}
+    const a=nearestAnchor(w,pr);
+    if(!a){pendingRope=null;toast('Auf einen Ankerpunkt tippen');return;}
+    if(!pr){pendingRope={id:a.b.plugin.m.id,l:a.l};return;}
     if(connUsed>=cfg.budget){toast('Keine Verbinder mehr');pendingRope=null;return;}
-    makeRope(pr,pendingRope.p,o.b,w);pendingRope=null;userEdit();updBudget();return;
+    if(variant==='free')pushUndo();
+    makeRope(pr,toWorld(pr,pendingRope.l),a.b,a.p);pendingRope=null;userEdit();updBudget();return;
   }
   if(near.length<2){toast(cfg.kids?'👆 Zwischen zwei Teile tippen':'Auf eine Stelle tippen, an der sich zwei Teile berühren');return;}
   const A=near[0].b,B=near[1].b;
@@ -825,7 +839,9 @@ function draw(){
       if(j.t==='glue'){ctx.fillStyle='#FDD602';ctx.strokeStyle='#262625';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(SX(x),SY(y),Math.max(5,9*s),Math.max(4,6*s),an,0,7);ctx.fill();ctx.stroke();}
       else{ctx.fillStyle='#262625';ctx.beginPath();ctx.arc(SX(x),SY(y),Math.max(4,6*s),0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(SX(x),SY(y),Math.max(1.5,2.2*s),0,7);ctx.fill();}}
   }
-  if(pendingRope&&byId(pendingRope.id)){ctx.fillStyle='#FDD602';ctx.strokeStyle='#262625';ctx.lineWidth=2;ctx.beginPath();ctx.arc(SX(pendingRope.p.x),SY(pendingRope.p.y),7,0,7);ctx.fill();ctx.stroke();}
+  if(mode==='build'&&tool==='rope'){ctx.lineWidth=1.3;ctx.strokeStyle='#262625';for(const b of parts)for(const l of anchorsOf(b)){const p=toWorld(b,l);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),3.6,0,7);ctx.fill();ctx.stroke();}}
+  const prb=pendingRope&&byId(pendingRope.id);
+  if(prb){const p=toWorld(prb,pendingRope.l);ctx.fillStyle='#FDD602';ctx.strokeStyle='#262625';ctx.lineWidth=2;ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),7,0,7);ctx.fill();ctx.stroke();}
   // Geschosse
   for(const p of projs){
     const b=p.b,x=SX(b.position.x),y=SY(b.position.y),r=b.circleRadius*s;
@@ -861,7 +877,7 @@ function draw(){
   if(mode==='build'&&!parts.length&&!ghost){ctx.font=cfg.kids?'44px system-ui':'600 15px -apple-system,system-ui,sans-serif';ctx.fillText(cfg.kids?'👇':'Teil unten in der Leiste antippen',W/2,gy-120);}
   if(mode==='build'&&ghost&&ghost.free&&!tool){ctx.font='600 12.5px -apple-system,system-ui,sans-serif';ctx.fillText('Wischen: verschieben · zwei Finger: fein · Pfeile gedrückt halten: drehen',W/2,112);}
   if(prepOn&&mode==='build'){ctx.font='700 13px -apple-system,system-ui,sans-serif';ctx.fillStyle='#5E9DC4';ctx.fillText('❄ Vorbereitung: Teile bleiben eingefroren bis „Start“',W/2,132);ctx.fillStyle='#8A877F';}
-  if(mode==='build'&&tool&&!cfg.kids){ctx.font='600 13px -apple-system,system-ui,sans-serif';ctx.fillText({glue:'Kleber: auf eine Berührstelle zweier Teile tippen',pin:'Stift: auf die Stelle tippen, an der sich zwei Teile drehen sollen',rope:pendingRope?'Seil: jetzt das zweite Teil antippen':'Seil: erstes Teil antippen'}[tool],W/2,112);}
+  if(mode==='build'&&tool&&!cfg.kids){ctx.font='600 13px -apple-system,system-ui,sans-serif';ctx.fillText({glue:'Kleber: auf eine Berührstelle zweier Teile tippen',pin:'Stift: auf die Stelle tippen, an der sich zwei Teile drehen sollen',rope:pendingRope?'Seil: jetzt den zweiten Ankerpunkt antippen':'Seil: ersten Ankerpunkt antippen'}[tool],W/2,112);}
   if(test){ctx.font='700 15px -apple-system,system-ui,sans-serif';ctx.fillStyle='#262625';ctx.fillText((test.kind==='wind'?'Windtest ':'Erdbebentest ')+Math.max(0,Math.ceil(7-test.t/1000))+' s',W/2,88);}
   if(mode==='destroy'&&dz&&!dz.kids&&dz.shots===0&&!shotG){ctx.font='600 14px -apple-system,system-ui,sans-serif';ctx.fillText({kanone:'Irgendwo hinziehen, zurückziehen und loslassen',katapult:'Zurückziehen und loslassen',bowling:'Zurückziehen und loslassen',birne:'Wischen – die Birne schwingt los',wasser:'Gedrückt halten und zielen'}[dz.weapon],W/2,88);}
   ctx.textAlign='left';
@@ -1120,6 +1136,7 @@ window.mriseTest={
   },
   ghost:{newGhost,dropGhost,startPrep,get g(){return ghost},setPrep(v){prepOn=v}},
   frozen(){return frozen.size},
+  w2s(x,y){return [SX(x),SY(y)]},
   state(){return {mode,variant,parts:parts.length,joints:joints.length,projs:projs.length,fx:fx.length,shots:dz&&dz.shots,done:dz&&dz.done}},
   api:{engine,startBuild,startDestroy,startTest,snapshot,rebuild,addPart,makeWeld,makeRope,curH,curFP,demoPlan,get parts(){return parts},get joints(){return joints},get lastValid(){return lastValid}}
 };
