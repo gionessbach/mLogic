@@ -61,6 +61,7 @@ header{display:flex;align-items:center;gap:8px;padding-block:10px 6px}
 .cell.filled{background:var(--tile);animation:pop .12s}
 @keyframes pop{50%{transform:scale(1.08)}}
 .cell.cur{box-shadow:inset 0 0 0 2px #6b6e76}
+#currow .cell{cursor:pointer}
 .cell .ghost{color:var(--green);opacity:.55}
 .cell.g{background:var(--green);box-shadow:0 3px 0 var(--green-edge)}
 .cell.y{background:var(--yellow);box-shadow:0 3px 0 var(--yellow-edge);color:var(--bg)}
@@ -166,7 +167,8 @@ const fmtMonth=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',time
 
 let coins=store.get('coins',500);
 let days=store.get('crack',{}); // dayIdx -> {g:[guesses], h:[hint positions], s:'play'|'won'|'lost', r, st}
-let dayIdx=0, sol='', L=5, cur='', busy=false;
+let dayIdx=0, sol='', L=5, cur=[], sel=0, busy=false;
+function resetCur(){cur=Array(L).fill('');sel=0}
 function setCoins(n){coins=n;store.set('coins',n);$('coins').textContent=n.toLocaleString('de-DE')}
 const save=()=>store.set('crack',days);
 const dayState=()=>days[dayIdx]||(days[dayIdx]={g:[],h:[],s:'play'});
@@ -181,7 +183,7 @@ function score(guess,answer){
 
 function openDay(i){
   dayIdx=Math.max(0,Math.min(LAST,i)); L=LENS[dayIdx%3];
-  sol=ANS[L][Math.floor(dayIdx/3)%ANS[L].length]; cur='';
+  sol=ANS[L][Math.floor(dayIdx/3)%ANS[L].length]; resetCur();
   sizeBoard(); render();
 }
 
@@ -204,7 +206,9 @@ function render(){
       if(g){cell.textContent=g[c];cell.classList.add(res[c])}
       else if(isCur){
         if(cur[c]){cell.textContent=cur[c];cell.classList.add('filled')}
-        else{ if(c===cur.length) cell.classList.add('cur'); if(d.h.includes(c)){const s=document.createElement('span');s.className='ghost';s.textContent=sol[c];cell.appendChild(s)} }
+        else if(d.h.includes(c)){const s=document.createElement('span');s.className='ghost';s.textContent=sol[c];cell.appendChild(s)}
+        if(c===sel) cell.classList.add('cur');
+        cell.addEventListener('click',()=>{if(busy||finished())return;sel=c;render()});
       }
       row.appendChild(cell);
     }
@@ -226,14 +230,22 @@ function render(){
   $('hint').disabled=finished(); $('enter').disabled=finished();
 }
 
-function type(ch){ if(finished()||cur.length>=L) return; cur+=ch; render(); }
-function back(){ if(finished()||!cur) return; cur=cur.slice(0,-1); render(); }
+function nextEmpty(from){for(let k=1;k<=L;k++){const i=(from+k)%L;if(!cur[i])return i}return from}
+function type(ch){ if(finished()) return; cur[sel]=ch; sel=nextEmpty(sel); render(); }
+function back(){
+  if(finished()) return;
+  if(cur[sel]) cur[sel]='';
+  else{let i=sel-1;while(i>=0&&!cur[i])i--;if(i<0)return;sel=i;cur[i]=''}
+  render();
+}
+function moveSel(d){ if(finished()||busy) return; sel=(sel+d+L)%L; render(); }
 function shake(msg){ toast(msg); const r=$('currow'); if(r){r.classList.remove('shake');void r.offsetWidth;r.classList.add('shake')} }
 function submit(){
   if(busy||finished()) return;
-  if(cur.length<L){shake('Zu kurz: '+L+' Buchstaben');return}
-  if(!DICT[L].has(cur)&&!ANS[L].includes(cur)){shake('Kein bekanntes Wort');return}
-  const d=dayState(); d.g.push(cur); cur='';
+  const w=cur.join('');
+  if(w.length<L){const e=cur.indexOf('');if(e>=0)sel=e;render();shake('Noch '+(L-w.length)+' Feld'+(L-w.length>1?'er':'')+' frei');return}
+  if(!DICT[L].has(w)&&!ANS[L].includes(w)){shake('Kein bekanntes Wort');return}
+  const d=dayState(); d.g.push(w); resetCur();
   const won=d.g[d.g.length-1]===sol;
   if(won) d.s='won'; else if(d.g.length>=TRIES) d.s='lost';
   save(); busy=true; render();
@@ -292,6 +304,8 @@ document.addEventListener('keydown',e=>{
   if(!$('ov').hidden||e.metaKey||e.ctrlKey||e.altKey) return;
   if(e.key==='Enter'){e.preventDefault();submit()}
   else if(e.key==='Backspace'){e.preventDefault();back()}
+  else if(e.key==='ArrowLeft'){e.preventDefault();moveSel(-1)}
+  else if(e.key==='ArrowRight'){e.preventDefault();moveSel(1)}
   else if(/^[a-zA-Z]$/.test(e.key)) type(e.key.toLowerCase());
 });
 
@@ -346,7 +360,7 @@ $('ov').addEventListener('click',e=>{
   if(act==='calPrev'||act==='calNext'){const d=new Date(utc(calMonth[0],calMonth[1]+(act==='calNext'?1:-1),1));calMonth=[d.getUTCFullYear(),d.getUTCMonth()];calendar();return}
   $('ov').hidden=true;
   if(act==='open') openDay(+el.dataset.day);
-  if(act==='retry'){const d=dayState();d.g=[];d.h=[];d.s='play';cur='';save();render()}
+  if(act==='retry'){const d=dayState();d.g=[];d.h=[];d.s='play';resetCur();save();render()}
   if(act==='rules') rules();
   if(act==='cal'){calMonth=null;calendar()}
 });
