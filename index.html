@@ -87,6 +87,11 @@ footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
       <div class="t"><strong>mFlow</strong><span>Farben im Kreislauf sortieren.</span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
+    <a class="game" href="grow/">
+      <div class="ic"><img src="grow/icon-192.png" alt=""></div>
+      <div class="t"><strong>mGrow</strong><span>Ruhiges Ökosystem-Spiel: Vielfalt statt Monokultur, den Garten am Leben halten.</span><span class="st" id="growStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
     <a class="game" href="rise/">
       <div class="ic"><img src="rise/icon-192.png" alt=""></div>
       <div class="t"><strong>mRise</strong><span>Physik-Turmbau: hoch bauen auf kleiner Fläche, danach umschießen.</span><span class="st" id="riseStatus"></span></div>
@@ -108,6 +113,7 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   document.getElementById('crackStatus').textContent=!cd||(!cd.g.length&&cd.s==='play')?'Heute: offen':cd.s==='won'?'Heute: geknackt '+'★'.repeat(cd.st||0):cd.s==='lost'?'Heute: nicht geknackt':'Heute: angefangen';
   const tl=get('tile',null);document.getElementById('tileStatus').textContent=tl&&tl.list?tl.list.length+' Felder · '+Math.floor(tl.pts).toLocaleString('de-DE')+' Punkte':'Neu: einfach loslegen';
   try{const rb=JSON.parse(localStorage.getItem('mrise.board')||'[]');document.getElementById('riseStatus').textContent=rb.length?'Rekord: '+rb[0].pts.toLocaleString('de-DE')+' Punkte · '+rb[0].h.toFixed(1).replace('.',',')+' m':'Neu: einfach loslegen';}catch(e){}
+  try{const gr=parseInt(localStorage.getItem('mgrow.record')||'0',10)||0;document.getElementById('growStatus').textContent=gr?'Rekord: '+gr+' Jahreszeiten':'Neu: einfach loslegen';}catch(e){}
   document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}

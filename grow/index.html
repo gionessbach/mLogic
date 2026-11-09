@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>mGrow</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mGrow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#FDD602">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{--y:#FDD602;--d:#262625;--bg:#f5f3ea;--card:#fffdf6;--line:#e4dfce;--mut:#7b776a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--d);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden;touch-action:manipulation}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:1100px;margin:0 auto}
+#top{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:10px 14px 4px}
+.logo{background:var(--d);color:var(--y);font-weight:800;border-radius:12px;padding:6px 12px;font-size:18px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:14px;white-space:nowrap}
+.vbar{position:relative;width:130px;height:28px;border-radius:12px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+.vbar i{position:absolute;left:0;top:0;bottom:0;background:var(--y);width:0;transition:width .6s}
+.vbar b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+#ev{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:#fff;border:1px dashed #cfc9b4;border-radius:10px;padding:4px 8px;font-size:12px;color:#55524a;white-space:nowrap}
+.chip.now{border-style:solid;border-color:var(--d)}
+#snd{margin-left:auto;background:transparent;border:1px solid var(--line);border-radius:10px;font-size:16px;padding:4px 10px}
+#help{background:transparent;border:1px solid var(--line);border-radius:10px;font-size:16px;font-weight:700;padding:4px 12px;color:var(--d)}
+#newg{background:transparent;border:1px solid var(--line);border-radius:10px;font-size:16px;padding:4px 10px;color:var(--mut)}
+#board{position:relative;flex:1;min-height:0;transition:background .8s}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#info{position:absolute;left:10px;top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.55;display:none;max-width:215px}
+#report{position:absolute;left:8px;right:8px;bottom:8px;max-height:64%;overflow:auto;background:rgba(255,253,246,.97);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.45;display:none;z-index:4}
+#report h3{margin:0 0 6px;font-size:15px}
+#report .sec{margin:8px 0 2px;font-weight:700;font-size:13px}
+#report .ln{padding:5px 9px;border-radius:9px;margin:3px 0}
+#report .p{background:#eaf3e4}#report .n{background:#fbe9e2}#report .z{color:var(--mut);padding:2px 9px}
+#report button,#legend button{margin-top:8px;min-height:40px;font-size:14px}
+#legend{position:absolute;inset:0;background:rgba(245,243,234,.94);display:none;z-index:6;overflow:auto;padding:14px}
+#legend .box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;max-width:560px;margin:0 auto;font-size:14px;line-height:1.5}
+#legend h2{margin:0 0 6px;font-size:18px}#legend h4{margin:12px 0 3px;font-size:14px}
+#legend ul{margin:0;padding-left:18px}
+#toast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--d);color:#fff;border-radius:14px;padding:8px 14px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:90%}
+#over{position:absolute;inset:0;background:rgba(245,243,234,.88);display:none;align-items:center;justify-content:center;z-index:5}
+#over div{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px 26px;text-align:center;max-width:320px}
+#over h2{margin:0 0 6px;font-size:22px}
+#bottom{padding:6px 14px calc(10px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:8px}
+#cards{display:flex;gap:8px;width:100%}
+.card{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:6px 8px;display:flex;align-items:center;gap:8px;text-align:left;font:inherit;color:inherit}
+.card canvas{width:44px;height:52px;flex:none}
+.card b{display:block;font-size:15px}.card small{display:block;color:var(--mut);font-size:11px;line-height:1.3}
+.card>div{min-width:0}
+@media (max-width:640px){.card{flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;gap:4px;padding:8px 6px}.card b{font-size:14px}.card small{white-space:normal;overflow-wrap:anywhere}}
+.card.sel{border-color:var(--y);box-shadow:0 0 0 3px rgba(253,214,2,.4)}
+.card.dis{opacity:.38}
+.btn{background:var(--d);color:var(--y);border:0;border-radius:14px;padding:0 20px;font-weight:700;font-size:16px;min-height:50px;font-family:inherit}
+.btn.alt{background:var(--card);color:var(--d);border:2px solid var(--line);font-weight:600}
+.btn.alt.sel{border-color:var(--y);box-shadow:0 0 0 3px rgba(253,214,2,.4)}
+.btn[disabled]{opacity:.45}
+#cnt{margin-left:auto;align-self:center;font-size:13px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div id="app">
+ <div id="top">
+  <a id="back" class="pill" href="../" aria-label="Zurück zu mLogic" title="Zurück zu mLogic" style="text-decoration:none;color:inherit;font-weight:700">←</a>
+  <div class="logo">mGrow</div>
+  <div class="pill" id="season"></div>
+  <div class="pill" id="seedsP"></div>
+  <div class="vbar" title="Vitalität des Gartens"><i id="vfill"></i><b id="vtxt"></b></div>
+  <div class="pill" id="rec"></div>
+  <div id="ev"></div>
+  <button id="snd" title="Ton an/aus">🔊</button>
+  <button id="help" title="Legende">?</button>
+  <button id="newg" title="Neues Spiel">↻</button>
+ </div>
+ <div id="board">
+  <canvas id="cv"></canvas>
+  <div id="info"></div>
+  <div id="report"></div>
+  <div id="legend"><div class="box"><h2>Legende</h2>
+<h4>Felder-Werte (0–5)</h4><ul>
+<li>💧 <b>Wasser</b> – ↑ jede Runde +1, Starkregen · ↓ Dürre, Getreide und Baum verbrauchen</li>
+<li>🍂 <b>Nährstoffe</b> – ↑ Klee, Mulch, Baumlaub im Herbst · ↓ Getreide verbraucht, Monokultur-Boden, Erosion</li>
+<li>☀️ <b>Licht</b> – 5, minus 2 für jeden Baum (ab Stufe 2) auf einem Nachbarfeld</li>
+<li>🪱 <b>Bodenleben</b> – ↑ Klee, Mulch, gesunde Pflanzen · ↓ Monokultur-Boden, Überflutung, Erosion</li>
+<li>🐛 <b>Schädlinge</b> – Blattläuse. Ab 3 verliert die Pflanze jede Runde Vitalität · ↓ Marienkäfer, Ringelblume</li></ul>
+<h4>Pflanzen: Bedarf → Wirkung</h4><ul>
+<li><b>Klee</b> 💧1 ☀️2 → +🍂 auf sich und (ab Stufe 2) Nachbarn; schützt vor Dürre und Erosion</li>
+<li><b>Ringelblume</b> ☀️3 💧1 → senkt 🐛 bei Nachbarn; lockt Biene und Marienkäfer an</li>
+<li><b>Getreide</b> 🍂3 💧2 ☀️4 → bringt 🌰 Saatgut; verbraucht 🍂 und 💧; Nachbar-Getreide = mehr Ertrag, aber auch Blattläuse-Autobahn</li>
+<li><b>Baum</b> 💧2 (ab Stufe 2 auch 🪱2) → Schatten, Laub (🍂), hilft bei Dürre; wächst langsam</li></ul>
+<h4>Vitalität ♥ und Stufen</h4><ul>
+<li>Bedarf erfüllt: ♥ +1 und Wachstum. Nicht erfüllt: ♥ −1. Bei 0 wird die Pflanze zu Mulch.</li>
+<li>Mulch gibt später 🍂 und 🪱 und schützt vor Dürre.</li></ul>
+<h4>Vielfalt schützt</h4><ul>
+<li><b>Resilienz</b>: je mehr verschiedene Arten (auch Tiere) um ein Feld, desto weniger Schaden durch Ereignisse.</li>
+<li><b>Gilde</b>: Boden-, Kraut- und Baumschicht beieinander = Bonus, ein knapp verfehlter Bedarf schadet nicht.</li>
+<li>Gleiche Art direkt nachpflanzen laugt das Feld dauerhaft aus (⚠️).</li></ul>
+<h4>Garten-Vitalität</h4><ul><li>Viele gesunde Felder, viele Arten und viel Bodenleben. Bleibt sie zu lange niedrig, ist das Spiel vorbei.</li></ul>
+<button class="btn" id="legendClose">Schließen</button></div></div>
+  <div id="toast"></div>
+  <div id="over"><div><h2>Der Garten ist erschöpft</h2><p id="overTxt"></p><button class="btn" id="again">Neues Spiel</button></div></div>
+ </div>
+ <div id="bottom">
+  <div id="cards"></div>
+  <button class="btn alt" id="weed">✂️ Jäten</button>
+  <button class="btn" id="next">Weiter ▶</button>
+  <span id="cnt"></span>
+ </div>
+</div>
+<script>
+(function(){
+'use strict';
+/* ================= Konfiguration ================= */
+var CFG={startW:2,startN:3,startL:5,startB:1,startSeeds:5,income:1,mulchRounds:2,gameOverBelow:25,grow:4,growBaum:8};
+var SQ3=Math.sqrt(3);
+var DIRS=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+
+/* ================= Raster ================= */
+var CELLS=[],IDX={},N1=[],N2=[];
+(function(){
+ for(var r=-3;r<=3;r++)for(var q=-3;q<=3;q++){if(Math.abs(q+r)<=3){IDX[q+','+r]=CELLS.length;CELLS.push({q:q,r:r});}}
+ CELLS.forEach(function(c,i){N1[i]=[];N2[i]=[];CELLS.forEach(function(d,j){var dd=hexDist(c,d);if(dd===1)N1[i].push(j);else if(dd===2)N2[i].push(j);});});
+})();
+function hexDist(a,b){var dq=a.q-b.q,dr=a.r-b.r;return(Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2}
+var NCELL=CELLS.length;
+
+var SPECIES={
+ klee:{name:'Klee',layer:'boden',cost:1,hint:'💧1 ☀️2'},
+ ringel:{name:'Ringelblume',layer:'kraut',cost:1,hint:'☀️3 💧1'},
+ getreide:{name:'Getreide',layer:'kraut',cost:2,hint:'🍂3 💧2 ☀️4'},
+ baum:{name:'Baum',layer:'baum',cost:3,hint:'💧2 · 🪱2 ab Stufe 2'}
+};
+var ANIMAL={biene:'Biene',kaefer:'Marienkäfer'};
+var SEASONS=['Frühling','Sommer','Herbst','Winter'];
+var EVNAME={schaedling:'Blattläuse',duerre:'Dürre',regen:'Starkregen',winter:'Winterruhe'};
+var EVSYM={schaedling:'🐛',duerre:'☀️',regen:'🌧️',winter:'❄️'};
+
+/* ================= Simulation ================= */
+function mkOrg(g,t){return{t:t,vit:2,st:1,hr:0,ph:g.rng()*6.283,born:-1e9,gAnim:-1e9};}
+function newGame(seed,opts){
+ opts=opts||{};
+ var rng=mulberry32(seed>>>0);
+ var g={seed:seed,rng:rng,evRng:mulberry32(((seed^0x9e3779b9)>>>0)),round:0,seeds:CFG.startSeeds,cells:[],animals:[],hand:[],used:[],planted:0,weeded:false,lowStreak:0,over:false,events:[],firstEvent:false,vitality:0,fx:[],log:[],snap:{vit:0,N:0,B:0},totalYield:0,lastYield:0,deckOnly:opts.deckOnly||null};
+ var raw=CELLS.map(function(){return rng()*2});
+ var sm=CELLS.map(function(c,i){var s=raw[i]*2,n=2;N1[i].forEach(function(j){s+=raw[j];n++});return s/n});
+ for(var i=0;i<NCELL;i++){g.cells.push({W:CFG.startW,N:CFG.startN,L:CFG.startL,B:CFG.startB,S:0,H:0,org:null,mulch:0,lastType:null,mono:false});}
+ var c0=IDX['0,0'];g.cells[c0].org=mkOrg(g,'baum');
+ var ring=N1[c0].slice();for(var k=ring.length-1;k>0;k--){var j=Math.floor(rng()*(k+1));var t=ring[k];ring[k]=ring[j];ring[j]=t;}
+ g.cells[ring[0]].org=mkOrg(g,'klee');g.cells[ring[1]].org=mkOrg(g,'klee');
+ computeLight(g);g.vitality=calcVitality(g);drawHand(g);
+ return g;
+}
+function eventAt(g,i){
+ while(g.events.length<=i){
+  var k=g.events.length,season=k%4,r=g.evRng(),type='none';
+  if(season===0)type=r<0.7?'schaedling':'none';
+  else if(season===1)type=r<0.55?'duerre':(r<0.85?'schaedling':'none');
+  else if(season===2)type=r<0.75?'regen':'none';
+  else type='winter';
+  var st=2+Math.floor(k/12);
+  if(type!=='none'&&type!=='winter'&&!g.firstEvent){st=1;g.firstEvent=true;}
+  g.events.push({type:type,st:st});
+ }
+ return g.events[i];
+}
+var DECK=['klee','klee','klee','ringel','ringel','ringel','getreide','getreide','getreide','baum','baum'];
+function drawHand(g){g.hand=[];g.used=[false,false,false];for(var i=0;i<3;i++)g.hand.push(g.deckOnly||DECK[Math.floor(g.rng()*DECK.length)]);
+ if(!g.deckOnly&&g.hand[0]===g.hand[1]&&g.hand[1]===g.hand[2]){var oth=Object.keys(SPECIES).filter(function(t){return t!==g.hand[0]});g.hand[1+Math.floor(g.rng()*2)]=oth[Math.floor(g.rng()*oth.length)];}}
+function countR1(g,i,t,minSt){var n=0;N1[i].forEach(function(j){var o=g.cells[j].org;if(o&&o.t===t&&o.st>=minSt)n++});return n}
+function computeLight(g){for(var i=0;i<NCELL;i++){g.cells[i].L=Math.max(0,5-2*countR1(g,i,'baum',2));}}
+function resilience(g,i){
+ var set={},layers={},n=0;
+ function add(j){var o=g.cells[j].org;if(o){if(!set[o.t]){set[o.t]=1;n++}layers[SPECIES[o.t].layer]=1}}
+ add(i);N1[i].forEach(add);
+ g.animals.forEach(function(a){if(a.ci===i||N1[i].indexOf(a.ci)>=0){if(!set[a.t]){set[a.t]=1;n++}}});
+ var R=n<=2?0:(n<=4?1:2),gilde=Object.keys(layers).length>=3;if(gilde)R+=1;
+ return{R:R,gilde:gilde,n:n};
+}
+function shortfall(c){
+ var o=c.org,s=0;
+ if(o.t==='klee')s=Math.max(0,1-c.W)+Math.max(0,2-c.L);
+ else if(o.t==='ringel')s=Math.max(0,3-c.L)+Math.max(0,1-c.W);
+ else if(o.t==='getreide')s=Math.max(0,3-c.N)+Math.max(0,2-c.W)+Math.max(0,4-c.L);
+ else s=Math.max(0,2-c.W)+(o.st>=2?Math.max(0,2-c.B):0);
+ return s;
+}
+function killOrg(g,i){var c=g.cells[i];g.fx.push({k:'die',ci:i,t:c.org.t,st:c.org.st});c.lastType=c.org.t;c.org=null;c.mulch=CFG.mulchRounds;}
+function canPlant(g,hi,ci){var c=g.cells[ci];return !g.over&&!g.used[hi]&&g.planted<2&&!c.org&&g.seeds>=SPECIES[g.hand[hi]].cost}
+function plant(g,hi,ci){
+ if(!canPlant(g,hi,ci))return false;
+ var t=g.hand[hi],c=g.cells[ci];g.seeds-=SPECIES[t].cost;c.org=mkOrg(g,t);if(c.lastType===t)c.mono=true;
+ g.used[hi]=true;g.planted++;computeLight(g);g.vitality=calcVitality(g);return true;
+}
+function weed(g,ci){var c=g.cells[ci];if(g.over||g.weeded||!c.org)return false;killOrg(g,ci);g.weeded=true;computeLight(g);g.vitality=calcVitality(g);return true}
+
+function sumOf(g,k){var t=0;g.cells.forEach(function(c){t+=c[k]});return t}
+function missList(c){
+ var o=c.org,m=[];
+ if(o.t==='klee'){if(c.W<1)m.push('W');if(c.L<2)m.push('L');}
+ else if(o.t==='ringel'){if(c.L<3)m.push('L');if(c.W<1)m.push('W');}
+ else if(o.t==='getreide'){if(c.N<3)m.push('N');if(c.W<2)m.push('W');if(c.L<4)m.push('L');}
+ else{if(c.W<2)m.push('W');if(o.st>=2&&c.B<2)m.push('B');}
+ return m;
+}
+function phaseBoden(g){
+ g.log=[];g.snap={vit:g.vitality,N:sumOf(g,'N'),B:sumOf(g,'B')};
+ var winter=g.round%4===3,season=g.round%4,odd=(g.round%2)===1;
+ var dN=new Array(NCELL).fill(0),dB=new Array(NCELL).fill(0);
+ for(var i=0;i<NCELL;i++){
+  var c=g.cells[i];
+  if(c.mulch>0){c.mulch--;if(c.mulch===0){dN[i]++;dB[i]++;}}
+  if(winter)continue;
+  var o=c.org;
+  if(o){
+   if(o.t==='klee'){dN[i]++;if(odd)dB[i]++;if(o.st>=2&&!odd)N1[i].forEach(function(j){dN[j]++});}
+   if(o.vit>=2&&g.round%3===2)dB[i]++;
+   if(o.t==='baum'&&o.st>=2&&season===2)N1[i].forEach(function(j){dN[j]++});
+  }
+  if(c.mono){dN[i]--;dB[i]--;}
+ }
+ for(var k=0;k<NCELL;k++){var d=g.cells[k];d.N=clamp(d.N+dN[k],0,5);d.B=clamp(d.B+dB[k],0,5);}
+}
+function phaseWasser(g){
+ computeLight(g);
+ var dW=new Array(NCELL).fill(0),i;
+ for(i=0;i<NCELL;i++)g.cells[i].W=Math.min(5,g.cells[i].W+1);
+ flow(g,3,dW);
+ for(i=0;i<NCELL;i++)g.cells[i].W=clamp(g.cells[i].W+dW[i],0,5);
+}
+function flow(g,thr,dW){
+ for(var i=0;i<NCELL;i++){
+  var c=g.cells[i];if(c.W<=thr)continue;
+  var best=-1,bh=c.H;N1[i].forEach(function(j){if(g.cells[j].H<bh){bh=g.cells[j].H;best=j}});
+  if(best>=0){var d=Math.min(c.W-thr,c.H-bh);dW[i]-=d;dW[best]+=d;}
+ }
+}
+function phaseBedarf(g){
+ if(g.round%4===3)return;
+ var info=[],i,res=[];
+ for(i=0;i<NCELL;i++)info[i]=resilience(g,i);
+ for(i=0;i<NCELL;i++){
+  var c=g.cells[i];if(!c.org)continue;
+  var sf=shortfall(c),aph=c.S>=3,delta=sf===0?1:((sf<=1&&info[i].gilde)?0:-1);
+  if(aph)delta-=1;
+  res.push({i:i,delta:delta,miss:missList(c),aph:aph,tol:(sf>0&&sf<=1&&info[i].gilde&&!aph),healthy:sf===0&&!aph,
+   cN:(c.org.t==='getreide'&&countR1(g,i,'klee',2)===0)?1:0,
+   cW:(c.org.t==='getreide'||c.org.t==='baum'?1:0)+(c.org.t==='baum'&&countR1(g,i,'baum',2)>0?1:0)});
+ }
+ res.forEach(function(r){
+  var c=g.cells[r.i],o=c.org;
+  var vb=o.vit,grew=false;o.vit=Math.min(3,o.vit+r.delta);
+  if(r.healthy){o.hr++;var th=o.t==='baum'?CFG.growBaum:CFG.grow;if(o.hr>=th&&o.st<3){o.st++;o.hr=0;grew=true;g.fx.push({k:'grow',ci:r.i});}}
+  else if(r.delta<0)o.hr=0;
+  c.N=Math.max(0,c.N-r.cN);c.W=Math.max(0,c.W-r.cW);
+  g.log.push({k:'org',t:o.t,d:o.vit>vb?'up':(o.vit<vb?'down':'same'),miss:r.miss,aph:r.aph,tol:r.tol,grew:grew,st:o.st,died:o.vit<=0});
+  if(o.vit<=0)killOrg(g,r.i);
+ });
+ computeLight(g);
+ updateAnimals(g);
+ var dS=new Array(NCELL).fill(0);
+ g.animals.forEach(function(a){if(a.t==='kaefer'){dS[a.ci]-=2;N1[a.ci].forEach(function(j){dS[j]-=2})}});
+ for(i=0;i<NCELL;i++){
+  var cc=g.cells[i];
+  var ri=countR1(g,i,'ringel',2);
+  dS[i]-=ri;
+  if(cc.org&&cc.org.t==='getreide'&&ri>0)dS[i]-=1;
+  if(!cc.org&&cc.S>0)dS[i]-=1;
+ }
+ for(i=0;i<NCELL;i++)g.cells[i].S=clamp(g.cells[i].S+dS[i],0,5);
+}
+function ringelWithin2(g,i){var n=0;for(var j=0;j<NCELL;j++){if(hexDist(CELLS[i],CELLS[j])<=2){var o=g.cells[j].org;if(o&&o.t==='ringel'&&o.st>=2)n++}}return n}
+function updateAnimals(g){
+ var i,bee=null;
+ g.animals.forEach(function(a){if(a.t==='biene')bee=a});
+ if(bee){if(ringelWithin2(g,bee.ci)>=2)bee.idle=0;else{bee.idle++;if(bee.idle>=2){g.animals.splice(g.animals.indexOf(bee),1);g.log.push({k:'animal',t:'biene',join:false});}}}
+ else{var best=1,bc=-1;for(i=0;i<NCELL;i++){var n=ringelWithin2(g,i);if(n>best||(n===best&&bc>=0&&g.rng()<0.3)){best=n;bc=i}}if(bc>=0){g.animals.push({t:'biene',ci:bc,idle:0});g.log.push({k:'animal',t:'biene',join:true});}}
+ var kids=g.animals.filter(function(a){return a.t==='kaefer'});
+ kids.forEach(function(a){if(countR1(g,a.ci,'ringel',2)>0)a.idle=0;else{a.idle++;if(a.idle>=2){g.animals.splice(g.animals.indexOf(a),1);g.log.push({k:'animal',t:'kaefer',join:false});}}});
+ kids=g.animals.filter(function(a){return a.t==='kaefer'});
+ if(kids.length<2){
+  var cand=[],pri=[];
+  for(i=0;i<NCELL;i++){
+   if(countR1(g,i,'ringel',2)===0)continue;
+   if(kids.some(function(a){return a.ci===i}))continue;
+   var o=g.cells[i].org;if(!o)continue;
+   cand.push(i);pri.push(o.t==='getreide'?2:1);
+  }
+  if(cand.length){var bi=0,bp=-1;cand.forEach(function(ci,k){var p=pri[k]+g.rng();if(p>bp){bp=p;bi=ci}});g.animals.push({t:'kaefer',ci:bi,idle:0});g.log.push({k:'animal',t:'kaefer',join:true});}
+ }
+}
+function phaseEreignis(g){
+ var ev=eventAt(g,g.round),res={type:ev.type,st:ev.st,hits:[],order:[]},i,info=[];
+ if(ev.type==='none'||ev.type==='winter'){g.lastEvent=res;return res}
+ for(i=0;i<NCELL;i++)info[i]=resilience(g,i);
+ function kleeP(i){var c=g.cells[i];return((c.org&&c.org.t==='klee')||countR1(g,i,'klee',2)>0)?1:0}
+ if(ev.type==='duerre'){
+  for(i=0;i<NCELL;i++){var c=g.cells[i],p=kleeP(i)+(c.mulch>0?1:0),dmg=Math.max(0,ev.st-info[i].R-p);if(dmg>0){c.W=Math.max(0,c.W-dmg);res.hits.push(i);}}
+  for(i=0;i<NCELL;i++){var o=g.cells[i].org;if(o&&o.t==='baum'&&o.st>=3)N1[i].forEach(function(j){g.cells[j].W=Math.min(5,g.cells[j].W+1)});}
+ }else if(ev.type==='regen'){
+  var dmgs=[];
+  for(i=0;i<NCELL;i++){var cc=g.cells[i],bp=((cc.org&&cc.org.t==='baum'&&cc.org.st>=2)||countR1(g,i,'baum',2)>0)?1:0;dmgs[i]=Math.max(0,ev.st-info[i].R-kleeP(i)-bp);cc.W=Math.min(5,cc.W+2);}
+  var dW=new Array(NCELL).fill(0);flow(g,0,dW);
+  for(i=0;i<NCELL;i++)g.cells[i].W=clamp(g.cells[i].W+dW[i],0,5);
+  for(i=0;i<NCELL;i++){
+   var q=g.cells[i];if(dmgs[i]<1)continue;
+   var hit=false;
+   if(q.W>=5){q.B=Math.max(0,q.B-1);hit=true;}
+   var bare=!q.org&&q.mulch===0;
+   if(bare){var kl=0;N1[i].forEach(function(j){var o=g.cells[j].org;if(o&&o.t==='klee')kl++});if(kl===0){q.N=Math.max(0,q.N-1);q.B=Math.max(0,q.B-1);hit=true;}}
+   if(hit)res.hits.push(i);
+  }
+ }else if(ev.type==='schaedling'){
+  var ge=[],all=[];
+  for(i=0;i<NCELL;i++){var o2=g.cells[i].org;if(o2){all.push(i);if(o2.t==='getreide')ge.push(i);}}
+  var pool=ge.length?ge:all;
+  if(pool.length){
+   var start=pool[Math.floor(g.rng()*pool.length)],list=[start];
+   if(ge.length){var seen={};seen[start]=1;for(var h=0;h<list.length;h++){N1[list[h]].forEach(function(j){var oo=g.cells[j].org;if(oo&&oo.t==='getreide'&&!seen[j]){seen[j]=1;list.push(j)}});}}
+   res.order=list;
+   list.forEach(function(ci){
+    var cs=g.cells[ci],p=0;
+    var lady=g.animals.some(function(a){return a.t==='kaefer'&&(a.ci===ci||N1[ci].indexOf(a.ci)>=0)});
+    if(lady)p++;if(countR1(g,ci,'ringel',2)>0)p++;
+    if(Math.max(0,ev.st-info[ci].R-p)>0){cs.S=Math.min(5,cs.S+3);res.hits.push(ci);}
+   });
+  }
+ }
+ computeLight(g);g.lastEvent=res;return res;
+}
+function calcVitality(g){
+ var good=0,sp={},ns=0,sumB=0;
+ g.cells.forEach(function(c){if(c.org){if(c.org.vit>=2)good++;if(!sp[c.org.t]){sp[c.org.t]=1;ns++}}sumB+=c.B});
+ g.animals.forEach(function(a){if(!sp[a.t]){sp[a.t]=1;ns++}});
+ return Math.round(40*(good/NCELL)+30*Math.min(1,ns/6)+30*(sumB/NCELL/5));
+}
+function phaseErnte(g){
+ var winter=g.round%4===3,y=0,bee=null;
+ g.animals.forEach(function(a){if(a.t==='biene')bee=a});
+ if(!winter){
+  for(var i=0;i<NCELL;i++){
+   var o=g.cells[i].org;if(!o||o.t!=='getreide'||o.vit<2)continue;
+   var v=(o.st>=2?2:1)+Math.min(3,countR1(g,i,'getreide',1));
+   if(bee&&hexDist(CELLS[i],CELLS[bee.ci])<=2)v*=2;
+   v=Math.ceil(v/2);
+   y+=v;
+  }
+ }
+ g.lastYield=y;g.totalYield+=y;g.seeds+=y+CFG.income;
+ g.vitality=calcVitality(g);
+ if(g.round>=4&&g.vitality<CFG.gameOverBelow)g.lowStreak++;else g.lowStreak=0;
+ if(g.lowStreak>=2)g.over=true;
+ g.round++;
+ if(!g.over){drawHand(g);g.planted=0;g.weeded=false;}
+}
+function runRoundFull(g){phaseBoden(g);phaseWasser(g);phaseBedarf(g);phaseEreignis(g);phaseErnte(g);}
+
+/* ================= Test-Hook (Autoplay) ================= */
+function countTypes(g){var n={klee:0,ringel:0,getreide:0,baum:0};g.cells.forEach(function(c){if(c.org)n[c.org.t]++});return n}
+function scoreCell(g,card,ci,cnt){
+ var c=g.cells[ci];if(c.org)return -99;
+ var kl=0,ri=0,ge=0,ba=0,any=0;
+ N1[ci].forEach(function(j){var o=g.cells[j].org;if(o){any++;if(o.t==='klee')kl++;else if(o.t==='ringel')ri++;else if(o.t==='getreide')ge++;else ba++;}});
+ var d=hexDist(CELLS[ci],{q:0,r:0});
+ if(card==='klee')return 2*ge+(kl===0?1:-kl)+0.4*any-0.2*d-(cnt.klee>=7?9:0);
+ if(card==='ringel')return 2*ge+(ri===0?1:-ri)+0.4*any-0.2*d-(cnt.ringel>=7?9:0);
+ if(card==='getreide'){if(c.N<3||ba>0)return -9;return 2*(kl>0?1:0)+2*(ri>0?1:0)-0.3*ge+0.3*any-0.2*d-(cnt.getreide>=8?9:0);}
+ if(cnt.baum>=3)return -9;
+ return -6*ba-5*ge+(d>=2?1.5:0)-0.2*d;
+}
+function autoPlan(g,strat){
+ for(var k=0;k<2;k++){
+  var cnt=countTypes(g),best=-5,bh=-1,bc=-1;
+  for(var h=0;h<3;h++){
+   if(g.used[h]||g.seeds<SPECIES[g.hand[h]].cost)continue;
+   for(var i=0;i<NCELL;i++){
+    var s;
+    if(strat==='getreide'){if(g.cells[i].org)continue;var ge=countR1(g,i,'getreide',1);s=ge+g.rng()*0.5-0.1*hexDist(CELLS[i],{q:0,r:0});}
+    else s=scoreCell(g,g.hand[h],i,cnt)+g.rng()*0.05;
+    if(s>best){best=s;bh=h;bc=i}
+   }
+  }
+  if(bh<0)break;
+  plant(g,bh,bc);
+ }
+}
+function runRounds(n,strategy,seed){
+ seed=seed==null?12345:seed;strategy=strategy||'gemischt';
+ var g=newGame(seed,{deckOnly:strategy==='getreide'?'getreide':null}),y10=null,curve=[g.vitality];
+ for(var k=0;k<n&&!g.over;k++){autoPlan(g,strategy);runRoundFull(g);g.fx.length=0;curve.push(g.vitality);if(g.round===10)y10=g.totalYield;}
+ var r={strategy:strategy,seed:seed,rounds:g.round,over:g.over,harvest10:y10==null?g.totalYield:y10,seedsEnd:g.seeds,vitality:g.vitality,curve:curve.join(','),types:countTypes(g)};
+ console.log('mgrowTest '+JSON.stringify(r));return r;
+}
+function compare(n,count){
+ n=n||40;count=count||8;var out={gemischt:[],getreide:[]};
+ ['gemischt','getreide'].forEach(function(s){for(var k=0;k<count;k++)out[s].push(runRounds(n,s,100+k*37));});
+ function avg(a,f){return a.reduce(function(x,r){return x+f(r)},0)/a.length}
+ var sum={};['gemischt','getreide'].forEach(function(s){sum[s]={avgRounds:avg(out[s],function(r){return r.rounds}),avgHarvest10:avg(out[s],function(r){return r.harvest10}),overCount:out[s].filter(function(r){return r.over}).length};});
+ console.log('mgrowCompare '+JSON.stringify(sum));return sum;
+}
+window.mgrowTest={runRounds:runRounds,compare:compare,get state(){return g}};
+
+/* ================= Sprites ================= */
+var SP=4,SW=240,SH=280,AX=120,AY=248,sprites={};
+var PAL={g1:[132,196,144],g2:[88,158,110],gold:[238,206,116],gold2:[206,166,82],br:[140,104,72],yel:[253,214,2],dk:[38,38,37],grey:[176,174,164],coral:[226,112,98],wh:[255,255,250]};
+function pc(a,v){var m=[0.92,0.6,0.3,0][v],g=PAL.grey;return'rgb('+Math.round(a[0]+(g[0]-a[0])*m)+','+Math.round(a[1]+(g[1]-a[1])*m)+','+Math.round(a[2]+(g[2]-a[2])*m)+')'}
+function mk(fn){var c=document.createElement('canvas');c.width=SW;c.height=SH;var x=c.getContext('2d');x.scale(SP,SP);x.translate(AX/SP,AY/SP);fn(x);return{c:c}}
+function poly(x,pts,f){x.fillStyle=f;x.beginPath();for(var i=0;i<pts.length;i+=2){if(i)x.lineTo(pts[i],pts[i+1]);else x.moveTo(pts[i],pts[i+1]);}x.closePath();x.fill()}
+function dia(x,cx,cy,rx,ry,f){poly(x,[cx-rx,cy,cx,cy-ry,cx+rx,cy,cx,cy+ry],f)}
+function shadow(x,rx){dia(x,0,0,rx,rx*.38,'rgba(60,45,20,.14)')}
+function sKlee(x,st,v){var k=[.7,.9,1.08][st-1];shadow(x,14*k);
+ poly(x,[-13*k,-2.5*k,-6*k,-7*k,6*k,-7*k,13*k,-2.5*k,6*k,2*k,-6*k,2*k],pc(PAL.g1,v));
+ dia(x,-5.5*k,-4*k,5*k,3.6*k,pc(PAL.g2,v));dia(x,5.5*k,-4*k,5*k,3.6*k,pc(PAL.g2,v));dia(x,0,-7*k,5*k,3.6*k,pc(PAL.g2,v));
+ if(st>=3){dia(x,-6*k,-5*k,1.6*k,1.6*k,pc(PAL.yel,v));dia(x,6*k,-3*k,1.6*k,1.6*k,pc(PAL.yel,v));dia(x,0,-8.5*k,1.6*k,1.6*k,pc(PAL.yel,v));}}
+function sRingel(x,st,v){var hh=[8,14,20][st-1];shadow(x,7);
+ poly(x,[-.9,0,.9,0,.9,-hh,-.9,-hh],pc(PAL.g2,v));
+ poly(x,[0,-hh*.3,-6,-hh*.5,0,-hh*.5],pc(PAL.g1,v));
+ if(st>=2)poly(x,[0,-hh*.5,6,-hh*.7,0,-hh*.7],pc(PAL.g1,v));
+ if(st===1){dia(x,0,-hh-1,2.4,3,pc(PAL.gold,v));return}
+ var rp=st===2?5:6.6,n=st===2?6:8;
+ for(var i=0;i<n;i++){var a=i/n*6.283,b=a+6.283/n*.5;
+  poly(x,[0,-hh,Math.cos(a-.28)*rp*.6,-hh+Math.sin(a-.28)*rp*.36,Math.cos(a)*rp,-hh+Math.sin(a)*rp*.6,Math.cos(a+.28)*rp*.6,-hh+Math.sin(a+.28)*rp*.36],pc(i%2?PAL.yel:PAL.gold,v));}
+ dia(x,0,-hh,rp*.32,rp*.24,pc(PAL.dk,v));}
+function sGetreide(x,st,v){var w=[6,9,12][st-1],h=[11,19,27][st-1],a=st===1?PAL.g1:PAL.gold,b=st===1?PAL.g2:PAL.gold2;shadow(x,w+3);
+ poly(x,[-w,-1,0,-h,0,-1],pc(a,v));poly(x,[0,-1,0,-h,w,-1],pc(b,v));
+ poly(x,[-w,-1,0,2,w,-1,0,-1],pc(b,v));
+ if(st>=2){poly(x,[-w*.5,-h*.45,0,-h*.45-3,w*.5,-h*.45,0,-h*.2],pc(b,v));dia(x,0,-h-1,1.6,3,pc(PAL.gold2,v));}}
+function sBaum(x,st,v){var r=[8,12.5,17][st-1],th=[7,12,18][st-1],tw=[2.4,3.2,4][st-1];shadow(x,r);
+ poly(x,[-tw/2,0,tw/2,0,tw/2,-th,-tw/2,-th],pc(PAL.br,v));
+ function crown(cy,rr){var P=[];for(var i=0;i<6;i++){var an=(-90+60*i)*Math.PI/180;P.push(Math.cos(an)*rr,cy+Math.sin(an)*rr);}
+  var tones=[PAL.g1,PAL.g2,PAL.g1,PAL.g2,PAL.g1,PAL.g2];
+  for(var i2=0;i2<6;i2++){var j=(i2+1)%6;poly(x,[0,cy,P[i2*2],P[i2*2+1],P[j*2],P[j*2+1]],pc(i2%3===0?PAL.g1:(i2%3===1?PAL.g2:[110,176,126]),v));}}
+ crown(-th-r*.8,r);
+ if(st>=3){crown(-th-r*1.7,r*.62);}}
+function buildSprites(){
+ var fns={klee:sKlee,ringel:sRingel,getreide:sGetreide,baum:sBaum};
+ Object.keys(fns).forEach(function(t){for(var st=1;st<=3;st++)for(var v=0;v<=3;v++){(function(t,st,v){sprites[t+st+v]=mk(function(x){fns[t](x,st,v)});})(t,st,v);}});
+ sprites.biene=mk(function(x){poly(x,[-4,-1,-1,-6,0,-1],'rgba(255,255,250,.95)');poly(x,[0,-1,1,-6,4,-1],'rgba(255,255,250,.95)');poly(x,[-4,0,-2,-2.6,2,-2.6,4,0,2,2.6,-2,2.6],pc(PAL.yel,3));poly(x,[-1.4,-2.6,-.2,-2.6,-.2,2.6,-1.4,2.6],pc(PAL.dk,3));poly(x,[1,-2.4,2.2,-2.4,2.2,2.4,1,2.4],pc(PAL.dk,3));dia(x,4.4,0,1.5,1.5,pc(PAL.dk,3));});
+ sprites.kaefer=mk(function(x){poly(x,[-3.4,0,-1.6,-2.6,1.6,-2.6,3.4,0,1.6,2.6,-1.6,2.6],pc(PAL.coral,3));poly(x,[-.3,-2.6,.3,-2.6,.3,2.6,-.3,2.6],pc(PAL.dk,3));dia(x,-1.4,-.8,.7,.7,pc(PAL.dk,3));dia(x,1.4,.8,.7,.7,pc(PAL.dk,3));dia(x,3.6,0,1.2,1.2,pc(PAL.dk,3));});
+ sprites.aphid=mk(function(x){dia(x,-2,0,1.8,1.2,pc(PAL.grey,2));dia(x,1.5,-1.5,1.8,1.2,pc(PAL.grey,2));dia(x,2,1.5,1.8,1.2,pc(PAL.grey,2));});
+}
+
+/* ================= UI / Rendering ================= */
+var g=null,sel=null,selCell=-1,busy=false,terrainDirty=true;
+var $=function(id){return document.getElementById(id)};
+var boardEl=$('board'),cv=$('cv'),ctx=cv.getContext('2d'),terrainCv=document.createElement('canvas'),tctx=terrainCv.getContext('2d');
+var PS=6.2,PA=4.4,W=0,H=0,DPR=1,S=36,K=1,OX=0,OY=0,activeUntil=0,last=0,raf=0;
+var dying=[],fxList=[],POOL=[];for(var pi=0;pi<150;pi++)POOL.push({on:false,x:0,y:0,vx:0,vy:0,ty:0});
+var VX=[],VY=[],POS=[],ORDER=[],rotA=0,rotT=0;
+function setGeom(){
+ var ca=Math.cos(rotA),sa=Math.sin(rotA),i;
+ for(i=0;i<6;i++){var an=(30+60*i)*Math.PI/180+rotA;VX[i]=Math.cos(an);VY[i]=Math.sin(an)*0.6;}
+ for(i=0;i<NCELL;i++){var c=CELLS[i],px=S*SQ3*(c.q+c.r/2),py=S*1.5*c.r;POS[i]={x:OX+px*ca-py*sa,y:OY+0.6*(px*sa+py*ca)};}
+ ORDER=CELLS.map(function(_,i){return i}).sort(function(a,b){return POS[a].y-POS[b].y||POS[a].x-POS[b].x});
+}
+var SEASONBG=['#f3f7ea','#faf5e1','#f8ede2','#edf2f6'];
+
+function bump(ms){activeUntil=Math.max(activeUntil,performance.now()+ms)}
+function resize(){
+ var b=boardEl.getBoundingClientRect();W=Math.max(100,b.width);H=Math.max(100,b.height);DPR=Math.min(2,window.devicePixelRatio||1);
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);terrainCv.width=cv.width;terrainCv.height=cv.height;
+ S=Math.max(14,Math.min(W/12.2,H/7.9));K=S/36;OX=W/2;OY=H/2+S*0.55;setGeom();terrainDirty=true;bump(500);
+}
+function cellPos(i){return POS[i]}
+function mix(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}
+function rgb(a,m){m=m||1;return'rgb('+Math.round(a[0]*m)+','+Math.round(a[1]*m)+','+Math.round(a[2]*m)+')'}
+function soilColor(c){
+ var col=mix([238,226,198],[146,106,72],Math.round(clamp((c.N+c.B)/10,0,1)*3)/3);
+ return col;
+}
+function hexPath(t,x,y,rho){t.beginPath();for(var i=0;i<6;i++){var px=x+rho*VX[i],py=y+rho*VY[i];if(i)t.lineTo(px,py);else t.moveTo(px,py);}t.closePath()}
+function goldSet(){
+ var set={},seen={},res={};
+ for(var i=0;i<NCELL;i++){
+  var o=g.cells[i].org;if(!o||o.t!=='getreide'||seen[i])continue;
+  var list=[i];seen[i]=1;
+  for(var h=0;h<list.length;h++)N1[list[h]].forEach(function(j){var oo=g.cells[j].org;if(oo&&oo.t==='getreide'&&!seen[j]){seen[j]=1;list.push(j)}});
+  if(list.length>=3)list.forEach(function(j){res[j]=1});
+ }
+ return res;
+}
+function drawTerrain(){
+ var t=tctx;t.setTransform(DPR,0,0,DPR,0,0);t.clearRect(0,0,W,H);
+ var rho=S*0.94,i;
+ for(var oi=0;oi<NCELL;oi++){
+  i=ORDER[oi];var p=cellPos(i),c=g.cells[i],hh=c.H*8*K,ty=p.y-hh,base=5*K,col=soilColor(c);
+  for(var e=0;e<6;e++){var na=(60+60*e)*Math.PI/180+rotA;if(Math.sin(na)<=0.05)continue;var e2=(e+1)%6;t.fillStyle=rgb(col,0.78-0.069*Math.cos(na));t.beginPath();t.moveTo(p.x+rho*VX[e],ty+rho*VY[e]);t.lineTo(p.x+rho*VX[e2],ty+rho*VY[e2]);t.lineTo(p.x+rho*VX[e2],p.y+rho*VY[e2]+base);t.lineTo(p.x+rho*VX[e],p.y+rho*VY[e]+base);t.closePath();t.fill();}
+  hexPath(t,p.x,ty,rho);t.fillStyle=rgb(col);t.fill();t.strokeStyle='rgba(255,255,255,.28)';t.lineWidth=1;t.stroke();
+  if(c.mulch>0){t.fillStyle='rgba(95,66,40,.55)';for(var m=0;m<7;m++){var dx=(((i*7+m*13)%11)-5)/5*rho*0.55,dy=(((i*5+m*17)%9)-4)/4*rho*0.22;t.fillRect(p.x+dx,ty+dy,4*K+1.5,2*K+1);}}
+ }
+ var gs=goldSet();
+ t.strokeStyle='#E0B300';t.lineWidth=Math.max(1.5,2*K);t.lineCap='butt';
+ Object.keys(gs).forEach(function(k){
+  var i=+k,p=cellPos(i),ty=p.y-g.cells[i].H*8*K,c=CELLS[i];
+  for(var d=0;d<6;d++){
+   var j=IDX[(c.q+DIRS[d][0])+','+(c.r+DIRS[d][1])];
+   if(j===undefined||!gs[j]){var e=5-d,e2=(e+1)%6;t.beginPath();t.moveTo(p.x+rho*VX[e],ty+rho*VY[e]);t.lineTo(p.x+rho*VX[e2],ty+rho*VY[e2]);t.stroke();}
+  }
+ });
+}
+function pick(px,py){
+ var ca=Math.cos(-rotA),sa=Math.sin(-rotA);
+ for(var k=NCELL-1;k>=0;k--){
+  var i=ORDER[k],p=cellPos(i),dx=px-p.x,dy=(py-p.y)/0.6,x=(dx*ca-dy*sa)/S,y=(dx*sa+dy*ca)/S;
+  if(Math.abs(x)<=SQ3/2&&Math.abs(y)+Math.abs(x)/SQ3<=1)return i;
+ }
+ return -1;
+}
+function spawnDrop(now){
+ for(var i=0;i<POOL.length;i++){var p=POOL[i];if(!p.on){p.on=true;p.x=Math.random()*W;p.y=-10;p.vx=-50;p.vy=520+Math.random()*180;p.ty=H*0.2+Math.random()*H*0.7;return}}
+}
+function drawSprite(sp,x,y,sc,rot,al){
+ ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);ctx.scale(sc,sc);if(al<1)ctx.globalAlpha=al;
+ ctx.drawImage(sp.c,-AX/SP,-AY/SP,SW/SP,SH/SP);ctx.restore();
+}
+function render(now){
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
+ if(!g)return;
+ var tgt=rotT*Math.PI/3;
+ if(rotA!==tgt){var dr=Math.min(0.05,(now-(render.rt||now))/1000);rotA+=(tgt-rotA)*Math.min(1,dr*12);if(Math.abs(tgt-rotA)<0.004)rotA=tgt;setGeom();terrainDirty=true;bump(300);}
+ render.rt=now;
+ if(terrainDirty){drawTerrain();terrainDirty=false}
+ ctx.drawImage(terrainCv,0,0,W,H);
+ var t=now/1000,i;
+ if(sel&&sel.k==='card'){
+  ctx.fillStyle='rgba(253,214,2,.28)';ctx.strokeStyle='rgba(38,38,37,.5)';ctx.lineWidth=1.2;
+  for(i=0;i<NCELL;i++){if(!g.cells[i].org){var p=cellPos(i);hexPath(ctx,p.x,p.y-g.cells[i].H*8*K,S*0.94);ctx.fill();ctx.stroke();}}
+ }else if(sel&&sel.k==='weed'){
+  ctx.strokeStyle='rgba(120,80,40,.7)';ctx.lineWidth=1.5;
+  for(i=0;i<NCELL;i++){if(g.cells[i].org){var p2=cellPos(i);hexPath(ctx,p2.x,p2.y-g.cells[i].H*8*K,S*0.94);ctx.stroke();}}
+ }
+ if(selCell>=0){var ps=cellPos(selCell);hexPath(ctx,ps.x,ps.y-g.cells[selCell].H*8*K,S*0.97);ctx.strokeStyle='#262625';ctx.lineWidth=2.2;ctx.stroke();}
+ for(var ai=0;ai<g.animals.length;ai++){var an0=g.animals[ai],pa=cellPos(an0.ci);hexPath(ctx,pa.x,pa.y,S*0.88);ctx.strokeStyle=an0.t==='biene'?'rgba(253,214,2,.95)':'rgba(226,112,98,.9)';ctx.lineWidth=Math.max(2,2.4*K);ctx.stroke();}
+ var busyFx=false;
+ for(var f=fxList.length-1;f>=0;f--){
+  var fx=fxList[f],el=now-fx.t0;
+  if(fx.kind==='tint'){
+   var any=false;
+   fx.items.forEach(function(it){var p=(el-it.d)/fx.dur;if(p>=0&&p<=1){any=true;var pc=cellPos(it.ci);hexPath(ctx,pc.x,pc.y-g.cells[it.ci].H*8*K,S*0.94);ctx.fillStyle='rgba('+fx.col+','+(fx.a*Math.sin(Math.PI*p)).toFixed(3)+')';ctx.fill();}else if(p<0)any=true;});
+   if(!any)fxList.splice(f,1);else busyFx=true;
+  }else if(fx.kind==='rain'){
+   if(el<fx.dur){var n=Math.round(3*(fx.dur-el)/fx.dur+1);for(var q=0;q<n;q++)spawnDrop(now);busyFx=true}else if(el>fx.dur+800)fxList.splice(f,1);
+  }else if(fx.kind==='ring'){
+   var pr=el/fx.dur;if(pr>=1){fxList.splice(f,1);continue}busyFx=true;
+   var pc2=cellPos(fx.ci);ctx.strokeStyle='rgba(38,38,37,'+(0.35*(1-pr)).toFixed(3)+')';ctx.lineWidth=1.5;hexPath(ctx,pc2.x,pc2.y-g.cells[fx.ci].H*8*K,S*(0.3+0.6*pr));ctx.stroke();
+  }
+ }
+ /* Pflanzen, Tiere, Befall: hinten nach vorn */
+ for(var oi=0;oi<NCELL;oi++){
+  i=ORDER[oi];var c=g.cells[i],pos=cellPos(i),ay=pos.y-c.H*8*K+S*0.06;
+  for(var d=dying.length-1;d>=0;d--){
+   var dy=dying[d];if(dy.ci!==i)continue;var pd=(now-dy.t0)/1300;
+   if(pd>=1){dying.splice(d,1);continue}busyFx=true;
+   drawSprite(sprites[dy.t+dy.st+'0'],pos.x,ay+pd*8*K,K*PS*0.5,0,1-pd);
+  }
+  var o=c.org;
+  if(o){
+   var pt=(now-o.born)/450,pop=1,busyP=false;
+   if(pt<1){var e=pt-1;pop=1+2.2*e*e*e+1.2*e*e;pop=Math.max(0.05,pop);busyP=true}
+   var gt=(now-o.gAnim)/900,gs=1;if(gt<1){gs=0.76+0.24*(1-Math.pow(1-gt,3));busyP=true}
+   if(busyP)busyFx=true;
+   var br=1+0.03*Math.sin(t*1.3+o.ph),sw=0.035*Math.sin(t*0.9+o.ph*1.7);
+   drawSprite(sprites[o.t+o.st+o.vit],pos.x,ay,K*PS*0.5*br*pop*gs,sw,1);
+  }
+  if(c.S>=1){var na=Math.min(3,c.S);for(var a=0;a<na;a++){drawSprite(sprites.aphid,pos.x+(a-1)*S*0.28,ay-(o?S*0.9:S*0.1)-a*2*K,K*PA*0.5,0,0.9)}}
+  for(var an=0;an<g.animals.length;an++){var am=g.animals[an];if(am.t==='kaefer'&&am.ci===i){var w=t*0.28+am.ci;drawSprite(sprites.kaefer,pos.x+Math.cos(w)*S*0.34,ay-S*0.1+Math.sin(w)*S*0.2,K*PA*0.5,w+1.57,1);}}
+ }
+ for(var b=0;b<g.animals.length;b++){var bm=g.animals[b];if(bm.t!=='biene')continue;
+  var bp=cellPos(bm.ci),th=t*0.9,bx=bp.x+Math.sin(th)*S*1.1,by=bp.y+Math.sin(2*th)*S*0.3-S*1.1;
+  var hd=Math.cos(th)>0?0.2:-0.2;drawSprite(sprites.biene,bx,by,K*PA*0.6*(1+0.08*Math.sin(t*40)),hd,1);}
+ var anyP=false;
+ ctx.strokeStyle='rgba(110,160,210,.75)';ctx.lineWidth=1.4;ctx.lineCap='butt';ctx.beginPath();
+ var dt=Math.min(0.05,(now-(render.lt||now))/1000);render.lt=now;
+ for(var pI=0;pI<POOL.length;pI++){var p3=POOL[pI];if(!p3.on)continue;anyP=true;p3.x+=p3.vx*dt;p3.y+=p3.vy*dt;if(p3.y>p3.ty)p3.on=false;ctx.moveTo(p3.x,p3.y);ctx.lineTo(p3.x+p3.vx*0.02,p3.y-10);}
+ ctx.stroke();
+ if(anyP||busyFx)bump(300);
+}
+function frame(now){
+ raf=requestAnimationFrame(frame);
+ if(document.hidden)return;
+ if(now>activeUntil&&now-last<32)return;
+ last=now;render(now);
+}
+function startLoop(){if(!raf)raf=requestAnimationFrame(frame)}
+document.addEventListener('visibilitychange',function(){if(document.hidden){cancelAnimationFrame(raf);raf=0}else{render.lt=0;startLoop()}});
+
+/* ---------- Audio (reduziert) ---------- */
+var AC=null,muted=false;try{muted=localStorage.getItem('mgrow.mute')==='1'}catch(e){}
+function ensureAudio(){
+ if(muted)return;
+ try{if(!AC){var C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C();}if(AC&&AC.state==='suspended')AC.resume();}catch(e){}
+}
+document.addEventListener('pointerdown',ensureAudio,{passive:true});
+function tone(f,t0,dur,vol,type,vib){
+ var o=AC.createOscillator(),gn=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);
+ if(vib){var l=AC.createOscillator(),lg=AC.createGain();l.frequency.value=vib[0];lg.gain.value=vib[1];l.connect(lg);lg.connect(o.frequency);l.start(t0);l.stop(t0+dur+0.05);}
+ gn.gain.setValueAtTime(0.0001,t0);gn.gain.exponentialRampToValueAtTime(vol,t0+0.04);gn.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+ o.connect(gn);gn.connect(AC.destination);o.start(t0);o.stop(t0+dur+0.05);
+}
+function playAnimal(t,leave,delay){
+ if(muted)return;ensureAudio();if(!AC)return;
+ try{
+  var n=AC.currentTime+(delay||0)+0.02,k=leave?0.8:1;
+  if(t==='biene'){tone(196*k,n,0.7,0.06,'sine',[7,5]);tone(294*k,n+0.05,0.6,0.025,'sine',[7,4]);}
+  else if(t==='kaefer'){tone(1319*k,n,0.28,0.05,'sine');tone(1760*k,n+0.09,0.35,0.04,'sine');}
+  else{tone(330,n,0.09,0.05,'triangle');tone(330,n+0.12,0.09,0.04,'triangle');tone(262,n+0.24,0.12,0.04,'triangle');}
+ }catch(e){}
+}
+function updSnd(){$('snd').textContent=muted?'🔇':'🔊'}
+$('snd').addEventListener('click',function(){muted=!muted;try{localStorage.setItem('mgrow.mute',muted?'1':'0')}catch(e){}updSnd();if(!muted){ensureAudio();playAnimal('kaefer')}});
+updSnd();
+
+/* ---------- HUD & Karten ---------- */
+function toast(msg){var t=$('toast');t.textContent=msg;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.opacity=0},2200)}
+function getRecord(){try{return parseInt(localStorage.getItem('mgrow.record')||'0',10)||0}catch(e){return 0}}
+function setRecord(v){try{localStorage.setItem('mgrow.record',String(v))}catch(e){}}
+function updateHud(){
+ var s=g.round%4,y=Math.floor(g.round/4)+1;
+ $('season').textContent=['🌸','☀️','🍂','❄️'][s]+' '+SEASONS[s]+' · Jahr '+y;
+ $('seedsP').textContent='🌰 '+g.seeds;
+ $('vfill').style.width=clamp(g.vitality,0,100)+'%';$('vtxt').textContent='Vitalität '+g.vitality;
+ $('rec').textContent='🏆 '+Math.max(getRecord(),g.round);
+ boardEl.style.background=SEASONBG[s];
+ var ev=$('ev');ev.innerHTML='';var shown=0;
+ for(var k=0;k<3;k++){var e=eventAt(g,g.round+k);if(e.type==='none')continue;shown++;
+  var d=document.createElement('span');d.className='chip'+(k===0?' now':'');d.title='Stärke '+e.st;
+  d.textContent=EVSYM[e.type]+' '+EVNAME[e.type]+' · '+(k===0?'jetzt':'in '+k+(k===1?' Runde':' Runden'));ev.appendChild(d);}
+ if(!shown){var d2=document.createElement('span');d2.className='chip';d2.textContent='☁️ ruhig';ev.appendChild(d2)}
+ $('cnt').textContent='Pflanzungen '+g.planted+'/2';
+ $('weed').classList.toggle('sel',!!(sel&&sel.k==='weed'));$('weed').disabled=busy||g.weeded||g.over;
+ $('next').disabled=busy||g.over;
+}
+function renderHand(){
+ var box=$('cards');box.innerHTML='';
+ g.hand.forEach(function(t,i){
+  var b=document.createElement('button');b.className='card';
+  var cvs=document.createElement('canvas');cvs.width=88;cvs.height=104;
+  cvs.getContext('2d').drawImage(sprites[t+'33'].c,0,0,88,104);
+  var d=document.createElement('div');d.innerHTML='<b>'+SPECIES[t].name+'</b><small>🌰 '+SPECIES[t].cost+' · '+SPECIES[t].hint+'</small>';
+  b.appendChild(cvs);b.appendChild(d);
+  var dis=g.used[i]||g.seeds<SPECIES[t].cost||g.planted>=2;
+  if(dis)b.classList.add('dis');
+  if(sel&&sel.k==='card'&&sel.i===i)b.classList.add('sel');
+  b.addEventListener('click',function(){onCard(i)});
+  box.appendChild(b);
+ });
+}
+function onCard(i){
+ if(busy||g.over)return;
+ if(g.used[i]){toast('Diese Karte ist schon gespielt');return}
+ if(g.planted>=2){toast('Mehr als 2 Pflanzungen pro Runde gehen nicht');return}
+ if(g.seeds<SPECIES[g.hand[i]].cost){toast('Zu wenig Saatgut');return}
+ sel=(sel&&sel.k==='card'&&sel.i===i)?null:{k:'card',i:i};selCell=-1;showInfo(-1);renderHand();updateHud();bump(400);
+}
+function showInfo(i){
+ var el=$('info');
+ if(i<0){el.style.display='none';return}
+ var c=g.cells[i],r=resilience(g,i),o=c.org,h='';
+ h+='💧 '+c.W+' &nbsp;🍂 '+c.N+' &nbsp;☀️ '+c.L+' &nbsp;🪱 '+c.B+' &nbsp;🐛 '+c.S+'<br>';
+ if(o)h+='<b>'+SPECIES[o.t].name+'</b> · Stufe '+o.st+' · Vitalität '+'♥'.repeat(o.vit)+'♡'.repeat(3-o.vit)+'<br>';
+ else h+='<b>Brache</b>'+(c.mulch>0?' (Mulch)':'')+'<br>';
+ if(o){var nd=o.t==='klee'?[['💧',1,c.W],['☀️',2,c.L]]:o.t==='ringel'?[['☀️',3,c.L],['💧',1,c.W]]:o.t==='getreide'?[['🍂',3,c.N],['💧',2,c.W],['☀️',4,c.L]]:[['💧',2,c.W]].concat(o.st>=2?[['🪱',2,c.B]]:[]);h+='Braucht: '+nd.map(function(x){return x[0]+x[1]+(x[2]>=x[1]?' ✓':' ✗')}).join(' · ')+'<br>';}
+ h+='Resilienz '+r.R+' · Gilde '+(r.gilde?'ja':'nein');
+ if(c.mono)h+='<br>⚠️ Monokultur-Boden (−1 🍂/Runde)';
+ g.animals.forEach(function(a){if(a.ci===i){h+='<br>'+(a.t==='biene'?'🐝 <b>Biene</b> – Getreide im Umkreis von 2 Feldern erntet doppelt':'🐞 <b>Marienkäfer</b> – senkt 🐛 hier und auf den Nachbarfeldern');playAnimal(a.t);}});
+ el.innerHTML=h;el.style.display='block';
+}
+function processFx(){
+ var now=performance.now();
+ g.fx.forEach(function(f){
+  if(f.k==='grow'){var o=g.cells[f.ci].org;if(o)o.gAnim=now}
+  else if(f.k==='die'){dying.push({ci:f.ci,t:f.t,st:f.st,t0:now})}
+ });
+ g.fx.length=0;terrainDirty=true;bump(1500);
+}
+function onCellTap(i){
+ if(busy||g.over)return;
+ if(i<0){selCell=-1;showInfo(-1);return}
+ if(sel&&sel.k==='card'){
+  if(plant(g,sel.i,i)){var o=g.cells[i].org;o.born=performance.now();fxList.push({kind:'ring',ci:i,t0:performance.now(),dur:500});sel=null;terrainDirty=true;renderHand();updateHud();bump(900);}
+  else toast('Dort kann nichts gepflanzt werden');
+  return;
+ }
+ if(sel&&sel.k==='weed'){
+  if(weed(g,i)){sel=null;processFx();updateHud();renderHand();toast('Gejätet – das Feld wird zu Mulch')}else toast('Hier gibt es nichts zu jäten');
+  return;
+ }
+ selCell=(selCell===i)?-1:i;showInfo(selCell);bump(400);
+}
+var ptr=null;
+cv.addEventListener('pointerdown',function(e){ptr={x:e.clientX,y:e.clientY,t:performance.now()}});
+cv.addEventListener('pointercancel',function(){ptr=null});
+cv.addEventListener('pointerup',function(e){
+ if(!ptr)return;var dx=e.clientX-ptr.x,dy=e.clientY-ptr.y;ptr=null;
+ if(Math.abs(dx)>45&&Math.abs(dx)>1.5*Math.abs(dy)){rotT+=dx>0?-1:1;bump(1000);return}
+ if(Math.abs(dx)<12&&Math.abs(dy)<12){var r=cv.getBoundingClientRect();onCellTap(pick(e.clientX-r.left,e.clientY-r.top))}
+});
+$('weed').addEventListener('click',function(){if(busy||g.over)return;sel=(sel&&sel.k==='weed')?null:{k:'weed'};selCell=-1;showInfo(-1);renderHand();updateHud();bump(400)});
+$('next').addEventListener('click',nextRound);
+$('newg').addEventListener('click',function(){startGame()});
+$('again').addEventListener('click',function(){startGame()});
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+function startEventFx(res){
+ var now=performance.now(),all=[];for(var i=0;i<NCELL;i++)all.push({ci:i,d:0});
+ if(res.type==='duerre'){fxList.push({kind:'tint',col:'250,226,140',a:0.3,items:all,t0:now,dur:1800});fxList.push({kind:'tint',col:'235,200,90',a:0.4,items:res.hits.map(function(ci){return{ci:ci,d:0}}),t0:now,dur:1800});}
+ else if(res.type==='regen'){fxList.push({kind:'rain',t0:now,dur:1800});}
+ else if(res.type==='schaedling'){fxList.push({kind:'tint',col:'105,105,100',a:0.5,items:res.hits.map(function(ci,n){return{ci:ci,d:n*140}}),t0:now,dur:900});}
+ bump(3500);
+}
+async function nextRound(){
+ if(busy||g.over)return;
+ busy=true;sel=null;selCell=-1;hideReport();showInfo(-1);renderHand();updateHud();
+ phaseBoden(g);phaseWasser(g);terrainDirty=true;bump(800);await sleep(450);
+ phaseBedarf(g);processFx();g.log.forEach(function(e){if(e.k==='animal')playAnimal(e.t,!e.join,0.1)});await sleep(650);
+ var res=phaseEreignis(g);startEventFx(res);if(res.type==='schaedling'&&res.hits.length)playAnimal('aphid');terrainDirty=true;
+ var msg='';
+ if(res.type!=='none'&&res.type!=='winter'){msg=EVNAME[res.type]+(res.hits.length?': '+res.hits.length+' Felder betroffen':' – der Garten hat standgehalten');}
+ else if(res.type==='winter')msg='Winterruhe';
+ await sleep(res.type==='none'||res.type==='winter'?250:1600);
+ phaseErnte(g);processFx();
+ if(g.lastYield>0)msg+=(msg?' · ':'')+'Ernte +'+g.lastYield+' 🌰';
+ if(!g.over)showReport();
+ if(g.round>getRecord())setRecord(g.round);
+ busy=false;renderHand();updateHud();
+ if(g.over)showOver();
+}
+var NAMEP={klee:'Klee',ringel:'Ringelblume',getreide:'Getreide',baum:'Baum'};
+var RTXT={W:'💧 zu wenig Wasser',N:'🍂 zu wenig Nährstoffe',L:'☀️ zu wenig Licht',B:'🪱 zu wenig Bodenleben',S:'🐛 Blattläuse'};
+function buildReport(){
+ var pos=[],neg=[],up={},dn={},di={},gr={},tol=0;
+ function add(m,t,r){var o=m[t]||(m[t]={n:0,r:{}});o.n++;(r||[]).forEach(function(x){o.r[x]=1});}
+ g.log.forEach(function(e){
+  if(e.k==='org'){
+   var rs=e.miss.slice();if(e.aph)rs.push('S');
+   if(e.died)add(di,e.t,rs);else if(e.d==='down')add(dn,e.t,rs);else if(e.d==='up')add(up,e.t);
+   if(e.grew)add(gr,e.t);if(e.tol)tol++;
+  }else if(e.k==='animal'){
+   var an=e.t==='biene'?'🐝 Biene':'🐞 Marienkäfer';
+   if(e.join)pos.push(an+' eingezogen – '+(e.t==='biene'?'Getreide in der Nähe erntet doppelt':'frisst Blattläuse'));
+   else neg.push(an+' ist weitergezogen – es fehlen Ringelblumen in der Nähe');
+  }
+ });
+ function lst(m,verb,withR){return Object.keys(m).map(function(t){var o=m[t],s=NAMEP[t]+(o.n>1?' ×'+o.n:'')+' '+verb;if(withR){var r=Object.keys(o.r).map(function(x){return RTXT[x]}).join(', ');if(r)s+=' – '+r;}return s});}
+ lst(up,'erholt sich (♥ +1)').forEach(function(x){pos.push('💚 '+x)});
+ lst(gr,'wächst eine Stufe').forEach(function(x){pos.push('🌱 '+x)});
+ if(tol)pos.push('🛡️ Gilde: '+tol+(tol>1?' Pflanzen bleiben':' Pflanze bleibt')+' trotz knappem Mangel stabil');
+ lst(di,'ist eingegangen (→ Mulch)',true).forEach(function(x){neg.push('🥀 '+x)});
+ lst(dn,'ist geschwächt (♥ −1)',true).forEach(function(x){neg.push('⚠️ '+x)});
+ var ev=g.lastEvent;
+ if(ev&&ev.type==='winter')pos.push('❄️ Winterruhe – kein Wachstum, kein Verbrauch');
+ else if(ev&&ev.type!=='none'){
+  var n=ev.hits.length;
+  if(!n)pos.push(EVSYM[ev.type]+' '+EVNAME[ev.type]+' abgewehrt – Vielfalt und Schutz haben gewirkt');
+  else neg.push(EVSYM[ev.type]+' '+EVNAME[ev.type]+': '+n+' Felder betroffen'+(ev.type==='duerre'?' (Wasser ↓)':ev.type==='regen'?' (Überflutung/Erosion: Bodenleben ↓, Nährstoffe ↓)':' (Befall)'));
+ }
+ var dN=sumOf(g,'N')-g.snap.N,dB=sumOf(g,'B')-g.snap.B;
+ if(dN>=3)pos.push('🍂 Nährstoffe im Garten +'+dN);else if(dN<=-3)neg.push('🍂 Nährstoffe im Garten '+dN);
+ if(dB>=3)pos.push('🪱 Bodenleben im Garten +'+dB);else if(dB<=-3)neg.push('🪱 Bodenleben im Garten '+dB);
+ if(g.lastYield>0)pos.unshift('🌰 Ernte +'+g.lastYield+' Saatgut');
+ var dv=g.vitality-g.snap.vit;
+ return{pos:pos,neg:neg,head:'Vitalität '+g.snap.vit+' → '+g.vitality+' ('+(dv>=0?'+':'')+dv+')',season:SEASONS[(g.round+3)%4]};
+}
+function showReport(){
+ var r=buildReport(),el=$('report');
+ function sec(t,a,c){return '<div class="sec">'+t+'</div>'+(a.length?a.map(function(x){return '<div class="ln '+c+'">'+x+'</div>'}).join(''):'<div class="z">–</div>')}
+ el.innerHTML='<h3>Rundenbericht · '+r.season+' · '+r.head+'</h3>'+sec('👍 Positiv',r.pos,'p')+sec('👎 Negativ',r.neg,'n')+'<button class="btn" id="repClose">Weiter spielen</button>';
+ el.style.display='block';$('repClose').onclick=hideReport;
+ var seen={},dl=0.5;g.animals.forEach(function(a){if(!seen[a.t]){seen[a.t]=1;playAnimal(a.t,false,dl);dl+=0.7;}});
+}
+function hideReport(){$('report').style.display='none'}
+$('help').addEventListener('click',function(){$('legend').style.display='block'});
+$('legendClose').addEventListener('click',function(){$('legend').style.display='none'});
+function showOver(){
+ var y=Math.floor(g.round/4);
+ $('overTxt').textContent='Du hast '+g.round+' Jahreszeiten überlebt ('+y+' volle Jahre). Rekord: '+Math.max(getRecord(),g.round)+'.';
+ $('over').style.display='flex';
+}
+function startGame(seed){
+ hideReport();
+ g=newGame(seed==null?((Math.random()*2147483647)|0):seed);
+ dying.length=0;fxList.length=0;sel=null;selCell=-1;busy=false;terrainDirty=true;
+ var now=performance.now();g.cells.forEach(function(c){if(c.org)c.org.born=now});
+ $('over').style.display='none';showInfo(-1);renderHand();updateHud();bump(1500);
+}
+buildSprites();
+window.addEventListener('resize',resize);
+resize();startGame();startLoop();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(function(){})})}
+setTimeout(function(){toast('Karte wählen, Feld antippen · Wischen dreht das Feld')},600);
+})();
+</script>
+</body>
+</html>
