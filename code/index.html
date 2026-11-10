@@ -327,7 +327,7 @@ const MISSIONS=[
   ref:'for i in range(4):\n    rechts()\n    vor()\n    vor()\n    nimm()',
   hint:{kid:'Eine Runde um den Asteroiden – vier gleiche Seiten.',adult:'Quadrat: vier identische Seiten.'}},
  {typ:'vorhersage',frage:'feld',start:[0,5,'N'],code:'for i in range(2):\n    {move}()\n    {move}()\n{right}()\n{move}()',antwort:[1,1],waende:[[3,3],[4,1]],
-  hint:{kid:'Lies den Code. Wo landet die Kapsel? Tippe auf das Feld.',adult:'Code lesen, Endfeld vorhersagen und antippen.'}},
+  hint:{kid:'👆 Lies den Code. Wo landet die Kapsel? Tippe direkt auf das Feld auf der Plattform – dann ▶ Prüfen.',adult:'Code lesen, dann das Endfeld direkt auf der Plattform antippen und ▶ Prüfen.'}},
  {typ:'reparieren',start:[0,5,'E'],ziel:[4,5],code:'for i in range(5):\n    {move}()',max:1,waende:[[1,4],[3,4]],
   hint:{kid:'Der Code ist kaputt! Ändere so wenig wie möglich.',adult:'Fehler finden: so wenige Änderungen wie möglich.'}},
  {start:[0,5,'E'],ziel:[4,1],sterne:[[0,4],[1,3],[2,2],[3,1]],knoepfe:['move','left','right','pick','loop'],max:6,
@@ -741,7 +741,7 @@ function renderGrid(V,view,t,ex={}){
  const corners=[[0,0],[n,0],[n,n],[0,n]].map(p=>R(...p));
  let s=DEFS+prism(corners,16,null,'#151B45','#10163A',16,true);
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const g=!ex.noGoal&&V.ziel&&x===V.ziel[0]&&y===V.ziel[1];
-  s+=`<polygon points="${P([isoR(x,y),isoR(x+1,y),isoR(x+1,y+1),isoR(x,y+1)])}" fill="${g?'#FFD166':'#1B2250'}" fill-opacity="${g?.32:1}" stroke="${g?'#FFD166':'#2E3878'}" stroke-width="1.2"/>`}
+  s+=`<polygon points="${P([isoR(x,y),isoR(x+1,y),isoR(x+1,y+1),isoR(x,y+1)])}" fill="${g?'#FFD166':'#1B2250'}" fill-opacity="${g?.32:1}" stroke="${g?'#FFD166':ex.pulse?'#FFD166':'#2E3878'}" stroke-opacity="${ex.pulse&&!g?(.25+.25*Math.sin(t/300)).toFixed(2):1}" stroke-width="1.2"/>`}
  V.loecher.forEach(([x,y])=>{const c=isoR(x+.5,y+.5);s+=`<ellipse cx="${c[0]}" cy="${c[1]}" rx="${TW*.3}" ry="${TH*.3}" fill="#04071A" stroke="#2E3878" stroke-width="2"/><ellipse cx="${c[0]}" cy="${c[1]+TH*.06}" rx="${TW*.2}" ry="${TH*.17}" fill="#000"/>`});
  if(ex.mark){const c=isoR(ex.mark[0]+.5,ex.mark[1]+.5);s+=`<ellipse cx="${c[0]}" cy="${c[1]}" rx="${TW*.38}" ry="${TH*.38}" fill="none" stroke="#FFD166" stroke-width="3" filter="url(#gl)"/>`}
  if(ex.cursor){const[x,y]=ex.cursor;s+=`<polygon points="${P([isoR(x,y),isoR(x+1,y),isoR(x+1,y+1),isoR(x,y+1)])}" fill="#7FDBFF" fill-opacity=".18" stroke="#7FDBFF" stroke-width="2"/>`}
@@ -833,7 +833,7 @@ const MSG={
   parens:'Klammern vergessen? Schreib {n}()',string:'Text braucht gerade Anführungszeichen: "gelb"',luecke:'Fülle zuerst die Lücke ___.',args:'{n}() bekommt die falsche Anzahl Werte.',
   type:'Hier passt der Wert nicht (Zahl erwartet).',zero:'Durch 0 teilen geht nicht.',endless:'Endlosschleife! Die Kapsel kommt nie an.',toolong:'Das sind zu viele Schritte!',
   recursion:'Die Funktion ruft sich endlos selbst auf.',rangeonly:'range() gibt es nur in for-Schleifen.',color:'Die Farbe „{n}“ gibt es nicht. Probier gelb, blau, weiss, orange, rot.',colorarg:'farbe() braucht eine Farbe in Anführungszeichen.',
-  tapcell:'Tippe auf das Feld, auf dem die Kapsel landet.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
+  tapcell:'👆 Lies den Code und tippe auf das Feld der Plattform, auf dem die Kapsel am Ende steht.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
  adult:{wall:'Fehler: Zielfeld durch Hindernis blockiert.',edge:'Fehler: Bewegung würde die Plattform verlassen.',enemy:'Fehler: Kollision mit einer Drohne.',hole:'Fehler: Bewegung in ein Loch.',jumpwall:'Fehler: jump() über ein Hindernis ist nicht möglich.',
   nostar:'Fehler: Kein Objekt auf diesem Feld – pick_up() schlägt fehl.',needstars:'Programmende am Ziel, aber nicht alle Objekte gesammelt.',genau:'Am Ziel, aber nicht genau die geforderte Anzahl gesammelt.',notsaid:'Am Ziel, aber say() hat nicht die richtige Anzahl ausgegeben.',
   notyet:'Programm beendet, bevor das Ziel erreicht wurde – es fehlen Anweisungen.',over:'Ziel wurde vor Programmende erreicht – überzählige Anweisung markiert.',
@@ -844,7 +844,7 @@ const MSG={
   parens:'Aufruf ohne Klammern – {n}() schreiben.',string:'SyntaxError: Zeichenkette mit "…" schreiben.',luecke:'Lücke ___ noch offen.',args:'TypeError: {n}() mit falscher Anzahl Argumente aufgerufen.',
   type:'TypeError: unpassender Datentyp.',zero:'ZeroDivisionError.',endless:'Abbruch: Endlosschleife (Operationslimit erreicht).',toolong:'Abbruch: mehr als 500 Aktionen.',
   recursion:'RecursionError: zu tiefe Rekursion.',rangeonly:'range() hier nur in for-Schleifen erlaubt.',color:'ValueError: unbekannte Farbe „{n}“ (yellow, blue, white, orange, red).',colorarg:'color() erwartet einen String, z. B. "blue".',
-  tapcell:'Endfeld der Kapsel vorhersagen und antippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
+  tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
 const TYICON={vorhersage:'🔮',reparieren:'🔧',luecke:'✏️'};
 
 /* ---------- Bildschirme & Modus ---------- */
@@ -938,7 +938,7 @@ function buildCmds(){
  const row=$('#cmdRow');
  if(L.typ==='vorhersage'){
   if(L.frage==='wert')row.innerHTML=`<span class="lbl">${kid()?'Deine Antwort:':'Antwort:'}</span>`+L.optionen.map(o=>`<button class="chip ${pick===o?'sel':''}" data-pick="${o}">${o}</button>`).join('')+`<button class="play" id="bPlay">▶ Prüfen</button>`;
-  else row.innerHTML=`<span class="lbl">${pick?(kid()?'Feld gewählt ✓':'Feld gewählt ✓'):(kid()?'Feld antippen':'Feld antippen')}</span><button class="play" id="bPlay">▶ Prüfen</button>`;
+  else row.innerHTML=`<span class="lbl" style="color:#FFD166">${pick?(kid()?'Feld gewählt ✓ – anderes Feld? Einfach antippen':'Feld gewählt ✓'):(kid()?'👆 Tippe oben auf ein Feld der Plattform':'👆 Feld auf der Plattform antippen')}</span><button class="play" id="bPlay">▶ Prüfen</button>`;
   return}
  if(chips){row.innerHTML=chips.items.map((c,i)=>`<button class="chip" data-chip="${i}">${esc(c.l)}</button>`).join('')+'<button class="chip x" data-chipx="1">✕</button>';return}
  let h=L.knoepfe.map(id=>`<button class="cmd ${BLOCK.includes(id)?'blk':''}" data-id="${id}"><span class="ic">${ICON[id]||''}</span>${esc(btnLabel(id))}</button>`).join('');
@@ -1136,7 +1136,7 @@ addEventListener('resize',()=>cur==='sGame'&&layout());
 function cellAt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
  const u=(q.x-OX)/(TW/2),v=(q.y-OY)/(TH/2),[x,y]=Rinv((u+v)/2,(v-u)/2),cx=Math.floor(x),cy=Math.floor(y);return cx>=0&&cy>=0&&cx<RN&&cy<RN?[cx,cy]:null}
 function swipeTap(el,onTap){let p0=null;
- el.addEventListener('pointerdown',e=>{p0=[e.clientX,e.clientY]});
+ el.addEventListener('pointerdown',e=>{p0=[e.clientX,e.clientY];try{el.setPointerCapture(e.pointerId)}catch(x){}});
  el.addEventListener('pointerup',e=>{if(!p0)return;const dx=e.clientX-p0[0],dy=e.clientY-p0[1];p0=null;
   if(Math.abs(dx)>40&&Math.abs(dx)>1.4*Math.abs(dy)){rotT+=dx>0?-Math.PI/2:Math.PI/2;$('#rotHint').style.opacity=0;return}
   if(Math.hypot(dx,dy)<10)onTap(e)});
@@ -1144,7 +1144,7 @@ function swipeTap(el,onTap){let p0=null;
 swipeTap($('#world'),e=>{if(!L||L.turtle||L.typ!=='vorhersage'||L.frage!=='feld'||running)return;const c=cellAt($('#world'),e);if(!c)return;pick=c;buildCmds();showHint('chosen')});
 (function loop(t){
  if(cur==='sGame'&&L&&view){if(L.turtle)$('#world').innerHTML=renderTurtle(view,TMPL,t);
-  else{const V=V_(vi),r=renderGrid(V,view,t||0,{mark:L.typ==='vorhersage'&&L.frage==='feld'?pick:null,noGoal:L.typ==='vorhersage'});$('#world').innerHTML=r.svg;
+  else{const V=V_(vi),r=renderGrid(V,view,t||0,{mark:L.typ==='vorhersage'&&L.frage==='feld'?pick:null,noGoal:L.typ==='vorhersage',pulse:L.typ==='vorhersage'&&L.frage==='feld'&&!pick&&!running});$('#world').innerHTML=r.svg;
    const sv=V.sterne.length;$('#hud').textContent=sv?`★ ${r.got.length}/${V.zielTyp==='genau'?V.anzahl:sv}`:''}}
  if(cur==='sEdit')renderEditor(t||0);
  requestAnimationFrame(loop)})();
