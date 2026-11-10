@@ -146,7 +146,7 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 @media (orientation:landscape) and (max-height:600px){.stage{padding-top:20px}#figBig{height:28vh}.chat{min-height:150px}}
 
 .homeLink{position:absolute;top:calc(12px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));color:#7FDBFF;text-decoration:none;font-weight:600;font-size:15px;padding:10px 6px}
-.missionList{flex:1;overflow:auto;padding:14px 14px 40px;display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto}
+.missionList{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:14px 14px 40px;display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto}
 .mis{background:rgba(18,23,53,.85);border:1.5px solid #1F2752;border-radius:20px;padding:14px 14px 16px}
 .mis.lock{opacity:.4}
 .misHead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
