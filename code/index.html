@@ -194,6 +194,7 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 .ctrls{flex-wrap:wrap;justify-content:flex-end}
 .cbtn{white-space:nowrap}
 @media (orientation:landscape){.codeHead #lineInfo{width:100%}input[type=range]{width:64px}}
+.code li.ghost{cursor:default}.code .gc{color:#FFD166;opacity:.75;font-size:14px;animation:blink 1.2s steps(1) infinite}
 </style>
 </head>
 <body>
@@ -942,7 +943,7 @@ function buildCmds(){
  if(chips){row.innerHTML=chips.items.map((c,i)=>`<button class="chip" data-chip="${i}">${esc(c.l)}</button>`).join('')+'<button class="chip x" data-chipx="1">✕</button>';return}
  let h=L.knoepfe.map(id=>`<button class="cmd ${BLOCK.includes(id)?'blk':''}" data-id="${id}"><span class="ic">${ICON[id]||''}</span>${esc(btnLabel(id))}</button>`).join('');
  h+=userFns().map(f=>`<button class="cmd fn" data-fn="${f}"><span class="ic">ƒ</span>${f}()</button>`).join('');
- if(bind>0&&!editing)h+=`<button class="cmd end" data-end="1"><span class="ic">⇤</span>${kid()?'Block Ende':'dedent'}</button>`;
+ if(bind>0&&!editing)h+=`<button class="cmd end" data-end="1"><span class="ic">⇤</span>${kid()?(bind>1?'Block Ende (1 Ebene)':'Block Ende'):'dedent'}</button>`;
  row.innerHTML=h+`<button class="play" id="bPlay">▶ Play</button>`;
 }
 function conds(kind){const n=N(),r=[];
@@ -951,7 +952,7 @@ function conds(kind){const n=N(),r=[];
  (L.bed||[]).forEach(b=>r.push(fillT(b,M())));return r}
 function openChips(id){const n=N(),k=kid();let items=[];
  switch(id){
-  case 'loop':items=[2,3,4,5,6].map(v=>({l:(k?v+'×':`range(${v})`),t:`for i in range(${v}):`,o:1}));break;
+  case 'loop':{const lv=editing?curIndent():bind,iv='ijkmn'[Math.min(4,openFors(lv))];items=[2,3,4,5,6].map(v=>({l:(k?v+'×':`range(${v})`),t:`for ${iv} in range(${v}):`,o:1}));break}
   case 'if':items=conds('if').map(c=>({l:c,t:`if ${c}:`,o:1}));break;
   case 'while':items=conds('while').map(c=>({l:c,t:`while ${c}:`,o:1}));break;
   case 'def':items=DEFNAMES[M()].filter(f=>!userFns().includes(f)).map(f=>({l:f+'()',t:`def ${f}():`,o:1,top:1}));break;
@@ -961,6 +962,8 @@ function openChips(id){const n=N(),k=kid();let items=[];
   case 'stift':items=[{l:n.penup+'()',t:n.penup+'()',id:'stift'},{l:n.pendown+'()',t:n.pendown+'()',id:'stift'}];break;
  }
  if(!items.length)return;chips={id,items};buildCmds()}
+function openFors(lv){let n=0,cur=lv*4;for(let i=src.length-1;i>=0&&cur>0;i--){const t=src[i];if(!t.trim())continue;const ind=t.match(/^ */)[0].length;if(ind<cur){cur=ind;if(/^\s*for\b/.test(t))n++}}return n}
+function curIndent(){const ta=$('#ta'),v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1;return Math.floor(v.slice(ls,p).match(/^ */)[0].length/4)}
 const SIMPLE={move:1,left:1,right:1,pick:1,jump:1,wait:1};
 function lineFor(id){const n=N();if(SIMPLE[id])return n[id]+'()';if(id==='var0')return n.v+' = 0';if(id==='inc')return n.v+' = '+n.v+' + 1';if(id==='say')return n.say+'('+n.v+')';return null}
 $('#cmdRow').onpointerdown=e=>{if(editing&&e.target.closest('button'))e.preventDefault()};
@@ -969,7 +972,7 @@ $('#cmdRow').onclick=e=>{const b=e.target.closest('button');if(!b||running)retur
  if(b.dataset.pick!=null){pick=+b.dataset.pick;buildCmds();showHint('chosen');return}
  if(b.dataset.chipx){chips=null;buildCmds();return}
  if(b.dataset.chip!=null){const c=chips.items[+b.dataset.chip];chips=null;insert(c.t,c.o,c.top,c.id||'x');buildCmds();return}
- if(b.dataset.end){bind=Math.max(0,bind-1);buildCmds();return}
+ if(b.dataset.end){bind=Math.max(0,bind-1);buildCmds();renderCode();return}
  if(b.dataset.fn){insert(b.dataset.fn+'()',0,0,'fn');return}
  const id=b.dataset.id;
  if(id==='else'){insert('else:',1,0,'else',true);return}
@@ -999,6 +1002,7 @@ function changes(){const A=origCode.replace(/\s+$/,'').split('\n').map(s=>s.repl
 function renderCode(){let h='';const ro=L.typ==='vorhersage';
  if(!src.length)h=`<li class="ph"><span class="n">1</span><span># ${kid()?'Tippe auf einen Befehl – oder auf ✎ und schreib selbst':'Befehlsknopf wählen oder mit ✎ selbst schreiben'}</span></li>`;
  src.forEach((t,i)=>h+=`<li data-i="${i}" class="${i===actLine?'act':''} ${i===errLine?'err':''} ${ro?'ro':''}"><span class="n">${i+1}</span><span class="t">${hl(t)||' '}</span></li>`);
+ if(src.length&&!ro&&!running&&L.knoepfe.length)h+=`<li class="ghost"><span class="n"></span><span class="t">${'<i class="ig"></i>'.repeat(bind)}<span class="gc">▸ ${bind?(kid()?`nächster Befehl: in Block ${bind}`:`Einrückung ${bind}`):(kid()?'nächster Befehl: ganz außen':'Einrückung 0')}</span></span></li>`;
  $('#code').innerHTML=h;updInfo();
  const a=$('#code li.act')||$('#code li.err');a&&a.scrollIntoView({block:'nearest'});
 }
@@ -1021,7 +1025,8 @@ function insertAtCursor(text,opens,isElse){const ta=$('#ta'),v=ta.value,p=ta.sel
  const ins=cur.trim()?'\n'+ind+text+tail:(isElse?'':'')+text+tail;
  if(!cur.trim()&&isElse){ta.setRangeText(ind+text+tail,ls,ta.selectionEnd,'end')}else ta.setRangeText(ins,p,ta.selectionEnd,'end');ta.focus();updInfo()}
 $('#ta').addEventListener('input',updInfo);
-$('#ta').addEventListener('keydown',e=>{const ta=$('#ta');if(e.key==='Tab'){e.preventDefault();ta.setRangeText('    ',ta.selectionStart,ta.selectionEnd,'end')}
+$('#ta').addEventListener('keydown',e=>{const ta=$('#ta');if(e.key==='Backspace'&&ta.selectionStart===ta.selectionEnd){const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);if(cur.length>=4&&/^ +$/.test(cur)){e.preventDefault();const k=cur.length%4||4;ta.setRangeText('',p-k,p,'end');updInfo();return}}
+ if(e.key==='Tab'){e.preventDefault();ta.setRangeText('    ',ta.selectionStart,ta.selectionEnd,'end')}
  else if(e.key==='Enter'){e.preventDefault();const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);
   let ind=cur.match(/^\s*/)[0];if(/:\s*$/.test(cur.replace(/#.*/,'')))ind+='    ';ta.setRangeText('\n'+ind,p,ta.selectionEnd,'end');updInfo()}});
 function translateSrc(){const from=kid()?'adult':'kid',to=M(),map={};
