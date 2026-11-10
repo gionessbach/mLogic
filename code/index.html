@@ -1090,7 +1090,7 @@ function win(){const st=score(),k=kid(),crown=!usedBtn&&L.typ!=='vorhersage'&&li
   st===3?(L.typ==='reparieren'?(k?`Repariert mit nur ${n} Änderung${n===1?'':'en'}!`:`${n} Änderung(en) – optimal.`):(k?`Perfekt – nur ${n} Zeilen!`:`Sehr gut: ${n} Zeilen.`))
   :(L.typ==='reparieren'?(k?`Schaffst du es mit ${L.max} Änderung? Dann 3 Sterne.`:`${n} Änderungen – für 3 Sterne höchstens ${L.max}.`):(k?`Schaffst du es mit ${L.max} Zeilen? Dann gibt es 3 Sterne.`:`${n} Zeilen – für 3 Sterne höchstens ${L.max}.`));
  $('#winC').textContent=L.typ==='vorhersage'?'':crown?(k?'Krone: komplett selbst geschrieben!':'Krone: Lösung vollständig getippt.'):(k?'Tipp: Schreib den Code selbst mit ✎ – dann gibt es eine Krone!':'Bonus: Code ohne Befehlsknöpfe tippen ergibt eine Krone.');
- $('#winSave').hidden=!(L.turtle&&L.turtle.frei);
+ $('#winSave').hidden=!(L.turtle&&L.turtle.frei&&/\/code\/?/.test(location.pathname));
  $('#winNext').textContent=origin.kind!=='mission'?(origin.kind==='custom'&&origin.edit!=null?'Zum Editor':'Zur Übersicht'):'Weiter';
  setTimeout(()=>$('#win').classList.add('on'),380)}
 $('#winAgain').onclick=()=>startLevel(L,origin);
