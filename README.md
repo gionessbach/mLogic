@@ -9,6 +9,7 @@ Rätsel-Sammlung als Web-App (GitHub Pages), gebaut fürs iPad und Handy.
 | mTile | `tile/` | Aufbauspiel: Pastell-Teile in ein Pixelbild setzen, Lücken meiden, Sterne sammeln, neue Karte pro Bild, Galerie, Offline-Einkommen bis 8 h. |
 | mRise | `rise/` | Physik-Turmbau (Matter.js eingebettet): hoher Turm auf kleiner Stellfläche, Verbinder, Vorbereitungsmodus, Sturmtest, Zerstörmodus, Kindermodus, lokale Bestenliste. |
 | mGrow | `grow/` | Ruhiges Ökosystem-Spiel auf Hex-Raster: Pflanzen, Tiere und Ereignisse, Vielfalt statt Monokultur, Rundenbericht, Legende, Feld per Wisch drehen, reduzierter Ton. |
+| mCode | `code/` | Spielerisch Python lernen: 7 Missionen (Abfolge, Schleifen, Funktionen, Bedingungen, while/Variablen, Turtle-Bonus, Finale), Kinder-/Erwachsenen-Modus, eigener Mini-Interpreter, Level-Editor und Tagesrätsel. |
 | mZip | `zip/` | Zahlen der Reihe nach verbinden, jedes Feld füllen. |
 | mFlow | `flow/` | Farben im Kreislauf sortieren. |
 

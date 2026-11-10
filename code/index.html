@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mCode">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B1026">
+<title>mCode</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background-color:#0B1026;color:#C9D3FF;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;image-rendering:pixelated}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;min-height:44px;min-width:44px;touch-action:manipulation}
+button:disabled{cursor:default}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.screen.on{display:flex}
+.off{color:#2E3878}
+
+/* Start */
+.startWrap{margin:auto;text-align:center;padding:24px}
+.logo{width:116px;height:116px;margin:0 auto 16px}.logo svg{width:100%;height:100%;display:block}
+.logo i{position:absolute;right:13px;bottom:11px;font-style:normal;font-size:15px;font-family:'JetBrains Mono',monospace;font-weight:700}
+h1{font-size:42px;margin:0;color:#fff;letter-spacing:-.5px}
+.sub{color:#9AA6E0;margin:4px 0 28px;font-size:17px}
+.modes{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.modeCard{width:240px;padding:24px 18px;border-radius:20px;background:#1B2250;border:2px solid #2E3878;display:flex;flex-direction:column;gap:10px;align-items:center}
+.modeCard.sel{border-color:#FFD166}
+.modeCard b{font-size:21px;color:#fff}
+.modeCard code{font-family:'JetBrains Mono',monospace;color:#FFB86B;font-size:22px}
+.modeCard span{color:#9AA6E0;font-size:14px}
+
+/* Header */
+.top{display:flex;align-items:center;gap:8px;padding:4px 10px;height:58px;flex:none;border-bottom:1px solid #1F2752;background:rgba(11,16,38,.92)}
+.top .ttl{flex:1;font-weight:700;font-size:18px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{font-size:30px;line-height:1;color:#7FDBFF}
+.hstars{color:#FFD166;letter-spacing:2px;font-size:19px}
+.modeBtn{border:1.5px solid #2E3878;border-radius:22px;padding:0 14px;font-size:14px;color:#C9D3FF}
+
+/* Map */
+.missionHead{text-align:center;padding:26px 16px 4px}
+.missionHead h2{margin:0;color:#fff;font-size:26px}
+.missionHead p{margin:6px 0 0;color:#9AA6E0}
+.levelList{flex:1;overflow:auto;display:flex;flex-wrap:wrap;gap:16px;align-content:flex-start;justify-content:center;padding:22px}
+.lv{width:150px;height:156px;border-radius:20px;background:#1B2250;border:2px solid #2E3878;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.lv b{font-size:40px;color:#fff;line-height:1.1}
+.lv small{color:#9AA6E0;font-size:13px}
+.lv.done{border-color:#7FDBFF}
+.lv.lock{opacity:.35}
+.lv.bit{border-color:#FFD166;border-style:dashed}
+.lv.bit span{font-family:'Press Start 2P',monospace;font-size:11px;color:#FFD166}
+.lv.bit svg{height:66px}
+
+/* Game */
+#split{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
+@media (orientation:landscape){#split{flex-direction:row}}
+.pane{flex:1 1 0;min-width:0;min-height:0;position:relative;transition:flex-grow .35s ease;display:flex;flex-direction:column;overflow:hidden}
+#split.drag .pane{transition:none}
+#paneCode{background:#121735}
+#divider{flex:0 0 18px;display:flex;align-items:center;justify-content:center;background:#0E1330;cursor:row-resize;touch-action:none}
+#divider i{width:52px;height:5px;border-radius:3px;background:#2E3878}
+@media (orientation:landscape){#divider{cursor:col-resize}#divider i{width:5px;height:52px}}
+#world{flex:1;min-height:0;width:100%;display:block}
+.hud{position:absolute;top:10px;left:12px;font-size:15px;color:#FFD166;font-weight:600}
+.hint{margin:0 12px;padding:9px 14px;border-radius:12px;background:rgba(27,34,80,.9);font-size:15px;line-height:1.3;min-height:40px;flex:none}
+.hint.err{background:rgba(255,92,138,.16);color:#FFC2D3}
+.hint.ok{color:#FFD166}
+.cmdRow{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;flex-wrap:wrap;flex:none}
+.cmdBar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.play{background:#FFD166;color:#0B1026;font-weight:700;border-radius:14px;padding:0 20px;min-height:54px;font-size:17px}
+.card.fail{border-color:#FF5C8A;box-shadow:0 0 34px rgba(255,92,138,.25)}
+.cmd{background:#1B2250;border:2px solid #2E3878;border-radius:14px;padding:4px 16px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;color:#FFB86B;font-size:16px;min-height:54px;transition:transform .1s,border-color .15s,box-shadow .15s}
+.cmd .ic{font-size:20px;color:#7FDBFF;font-family:'Space Grotesk',sans-serif}
+.cmd:active{transform:scale(.95)}
+.cmd.lit{border-color:#FFD166;box-shadow:0 0 0 4px rgba(255,209,102,.3);background:#252D63}
+.codeHead{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid #1F2752;gap:8px;flex-wrap:wrap;flex:none}
+#lineInfo{font-size:13px;color:#5C6699;font-family:'JetBrains Mono',monospace}
+.ctrls{display:flex;align-items:center;gap:6px}
+.cbtn{background:#1F2752;border-radius:12px;padding:0 13px;color:#C9D3FF;font-size:16px}
+.cbtn.run{background:#FFD166;color:#0B1026;font-weight:700;padding:0 16px}
+.busy .cbtn{opacity:.45}
+input[type=range]{width:84px;accent-color:#7FDBFF}
+.code{list-style:none;margin:0;padding:8px 0;overflow:auto;flex:1;font-family:'JetBrains Mono',monospace;font-size:18px;line-height:1.75}
+.code li{display:flex;padding:0 12px;cursor:pointer}
+.code .n{width:2.4em;color:#5C6699;text-align:right;padding-right:1em;flex:none}
+.code .c{color:#FFB86B}
+.code li.act{background:#1F2752}
+.code li.act .n{color:#C9D3FF}
+.code li.err{background:rgba(255,92,138,.2)}
+.code li.err .c,.code li.err .n{color:#FF5C8A}
+.code .ph{color:#5C6699;cursor:default}
+.overlay{position:absolute;inset:0;background:rgba(11,16,38,.8);display:none;align-items:center;justify-content:center;z-index:5;padding:20px}
+.overlay.on{display:flex}
+.card{background:#121735;border:2px solid #7FDBFF;border-radius:22px;padding:26px 28px;text-align:center;max-width:360px;box-shadow:0 0 34px rgba(127,219,255,.25)}
+.card h3{margin:0 0 6px;color:#fff;font-size:24px}
+.bigstars{font-size:46px;color:#FFD166;letter-spacing:6px}
+.card p{margin:8px 0 0;color:#9AA6E0}
+.btnrow{display:flex;gap:10px;justify-content:center;margin-top:18px}
+.pbtn{background:#FFD166;color:#0B1026;font-weight:700;border-radius:12px;padding:0 22px}
+.sbtn{background:#1F2752;border-radius:12px;padding:0 22px}
+
+
+.cmdRow{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 8px 8px;flex-wrap:wrap;flex:none}
+.cmdBar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.cmd{background:#1B2250;border:1.5px solid #2E3878;border-radius:10px;padding:2px 10px;display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;color:#FFB86B;font-size:13px;min-height:40px;min-width:0;transition:transform .1s,border-color .15s,box-shadow .15s}
+.cmd .ic{font-size:15px;color:#7FDBFF;font-family:'Space Grotesk',sans-serif}
+.play{background:#FFD166;color:#0B1026;font-weight:700;border-radius:10px;padding:0 14px;min-height:40px;font-size:15px}
+.hint{margin:0 10px;padding:6px 12px;border-radius:10px;background:rgba(27,34,80,.9);font-size:14px;line-height:1.3;flex:none}
+.rotHint{position:absolute;top:10px;right:12px;font-size:12px;color:#5C6699;transition:opacity .4s;pointer-events:none}
+#world{touch-action:none}
+.cbtn.edit{background:#2E3878;color:#fff}
+.code li .t{white-space:pre}
+.code .k{color:#7FDBFF}.code .d{color:#FFD166}.code .cm{color:#5C6699}
+.ta{display:none;flex:1;width:100%;resize:none;border:0;outline:0;background:#121735;color:#C9D3FF;caret-color:#FFD166;font-family:'JetBrains Mono',monospace;font-size:18px;line-height:1.75;padding:8px 14px;tab-size:4;user-select:text;-webkit-user-select:text}
+.nobtn .cmdRow{display:none}
+.crown{width:.95em;height:.72em;margin-left:5px;vertical-align:-.02em}
+.bigstars .crown{width:44px;height:33px}
+.winC{font-size:14px;color:#FFD166!important}
+/* Zwischensequenz */
+.cut{font-family:'VT323',monospace;color:#C9D3FF;cursor:pointer}
+.infoBox{position:absolute;top:calc(16px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));padding:10px 16px 14px;border-left:6px solid #C9D3FF;border-bottom:6px solid #C9D3FF;background:#0B1026;min-width:236px}
+.infoBox::after{content:'';position:absolute;left:-6px;bottom:-12px;width:12px;height:6px;background:#6B7BC4}
+.nm{font-family:'Press Start 2P',monospace;font-size:16px;color:#fff}
+.role{font-family:'Press Start 2P',monospace;font-size:9px;color:#6B7BC4;margin:8px 0 12px}
+.bar{display:flex;align-items:center;gap:8px}
+.bar span{font-family:'Press Start 2P',monospace;font-size:8px;color:#FFD166}
+.segs{display:flex;gap:3px}
+.segs i{width:18px;height:10px;background:#2E3878}
+.segs i.on{background:#FFD166}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:0;padding-top:120px}
+#figBig{height:min(36vh,300px);animation:hop 1.2s steps(1) infinite}
+@keyframes hop{50%{transform:translateY(-6px)}}
+.plat{width:min(28vh,230px);height:14px;margin-top:2px;background:#2E3878;box-shadow:0 -4px 0 #6B7BC4,0 6px 0 #1B2250}
+.chat{margin:22px 16px 16px;position:relative;background:#0B1026;border:4px solid #fff;box-shadow:inset 0 0 0 4px #0B1026,inset 0 0 0 7px #6B7BC4;padding:20px 22px 26px;min-height:190px;flex:none}
+.spk{font-family:'Press Start 2P',monospace;font-size:12px;color:#FFD166;margin-bottom:10px}
+#cutTxt{font-size:27px;line-height:1.1;color:#fff;min-height:60px}
+#cutCode{font-family:'VT323',monospace;font-size:25px;color:#C9D3FF;background:#1B2250;padding:8px 14px;margin:12px 0 0;white-space:pre;overflow:auto}
+#cutNext{position:absolute;right:12px;bottom:4px;color:#FFD166;font-size:26px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (orientation:landscape) and (max-height:600px){.stage{padding-top:20px}#figBig{height:28vh}.chat{min-height:150px}}
+
+.homeLink{position:absolute;top:calc(12px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left));color:#7FDBFF;text-decoration:none;font-weight:600;font-size:15px;padding:10px 6px}
+.missionList{flex:1;overflow:auto;padding:14px 14px 40px;display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto}
+.mis{background:rgba(18,23,53,.85);border:1.5px solid #1F2752;border-radius:20px;padding:14px 14px 16px}
+.mis.lock{opacity:.4}
+.misHead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.misNum{width:42px;height:42px;border-radius:12px;background:#1B2250;border:2px solid #2E3878;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px;color:#fff;flex:none}
+.mis.done .misNum{border-color:#7FDBFF}
+.mis.badge .misNum{background:#FFD166;color:#0B1026;border-color:#FFD166}
+.misHead h2{margin:0;font-size:19px;color:#fff}.misHead p{margin:2px 0 0;font-size:13px;color:#9AA6E0}
+.misHead .bonus{font-size:11px;color:#0B1026;background:#7FDBFF;border-radius:8px;padding:1px 7px;margin-left:6px;vertical-align:2px}
+.lvRow{display:flex;flex-wrap:wrap;gap:10px}
+.lv{width:84px;height:92px;border-radius:16px;background:#1B2250;border:2px solid #2E3878;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
+.lv b{font-size:26px;color:#fff;line-height:1.1}
+.lv small{color:#9AA6E0;font-size:11px}
+.lv .hstars{font-size:13px;letter-spacing:1px}
+.lv.done{border-color:#7FDBFF}
+.lv.lock{opacity:.35}
+.lv.cutn{border-color:#FFD166;border-style:dashed}
+.lv.cutn svg{height:44px}
+.lv.cutn span{font-family:'Press Start 2P',monospace;font-size:8px;color:#FFD166}
+.lv .ty{font-size:12px;color:#7FDBFF}
+.ws .lv{width:auto;min-width:120px;padding:0 14px}
+.vtabs{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.vtabs button{min-height:32px;min-width:38px;border-radius:10px;background:#1B2250;border:1.5px solid #2E3878;font-size:13px;font-weight:700;color:#9AA6E0}
+.vtabs button.on{border-color:#7FDBFF;color:#fff}
+.vtabs button.ok{background:#1E4B4A;color:#7FDBFF}
+.vtabs button.bad{background:#4A1E37;color:#FF8AAD}
+.cmd.blk{color:#7FDBFF}.cmd.fn{color:#0B1026;background:#7FDBFF;border-color:#7FDBFF}
+.cmd.fn .ic{color:#0B1026}
+.cmd.end{color:#C9D3FF}
+.chip{background:#252D63;border:1.5px solid #6B7BC4;border-radius:10px;padding:2px 12px;min-height:40px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#FFB86B}
+.chip.sel{background:#FFD166;color:#0B1026;border-color:#FFD166}
+.chip.x{color:#C9D3FF;font-family:'Space Grotesk',sans-serif}
+.cmdRow .lbl{font-size:13px;color:#9AA6E0}
+.code .ig{display:inline-block;width:4ch;border-left:1.5px solid #2E3878;height:1.5em;vertical-align:middle}
+.code li.ro{cursor:default}
+.edWrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;min-height:0}
+#eworld{flex:1;min-height:0;width:100%;touch-action:none}
+.tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tool{min-height:42px;border-radius:12px;background:#1B2250;border:1.5px solid #2E3878;padding:0 12px;font-size:14px}
+.tool.on{border-color:#FFD166;color:#FFD166}
+.edInfo{font-size:14px;color:#9AA6E0;text-align:center;min-height:20px}
+.btnrow.wrap{flex-wrap:wrap;margin-top:0}
+.modal .card{max-width:520px;width:100%}
+.mta{width:100%;height:160px;margin-top:10px;background:#0B1026;color:#C9D3FF;border:1.5px solid #2E3878;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px;user-select:text;-webkit-user-select:text}
+.mta[hidden]{display:none}
+.ctrls{flex-wrap:wrap;justify-content:flex-end}
+.cbtn{white-space:nowrap}
+@media (orientation:landscape){.codeHead #lineInfo{width:100%}input[type=range]{width:64px}}
+</style>
+</head>
+<body>
+<section id="sStart" class="screen">
+  <a class="homeLink" id="homeLink" href="../" aria-label="Zurück zu mLogic">← mLogic</a>
+  <div class="startWrap">
+    <div class="logo"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#FDD602"/><g fill="none" stroke="#262625" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M26 37 13 50l13 13"/><path d="M74 37 87 50 74 63"/></g><g fill="#262625"><path d="M50 16c10 9 13 24 11 46H39c-2-22 1-37 11-46z"/><path d="M39 47 31 60l1 6 8-4zM61 47l8 13-1 6-8-4z"/><path d="M44 66h12l-6 14z"/></g><circle cx="50" cy="38" r="5.5" fill="#FDD602"/></svg></div>
+    <h1>mCode</h1>
+    <p class="sub">Spielerisch Python lernen</p>
+    <div class="modes">
+      <button class="modeCard" data-mode="kid"><b>Kinder-Modus</b><code>vor()</code><span>kurz, verspielt, deutsch</span></button>
+      <button class="modeCard" data-mode="adult"><b>Erwachsenen-Modus</b><code>move()</code><span>sachlich, mehr Erklärung</span></button>
+    </div>
+  </div>
+</section>
+
+<section id="sMap" class="screen">
+  <header class="top"><button class="back" id="mapBack" aria-label="Zurück">‹</button><div class="ttl">mCode</div><div class="hstars" id="mapTotal"></div><button class="modeBtn"></button></header>
+  <div id="missionList" class="missionList"></div>
+</section>
+
+<section id="sGame" class="screen">
+  <header class="top"><button class="back" id="gBack" aria-label="Zurück">‹</button><div class="ttl" id="gTitle"></div><div id="gStars" class="hstars"></div><button class="modeBtn"></button></header>
+  <main id="split">
+    <div id="paneGame" class="pane">
+      <svg id="world" viewBox="14 32 396 258" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="hud" id="hud"></div><div class="rotHint" id="rotHint">↔ Wischen zum Drehen</div>
+      <div class="vtabs" id="vtabs"></div>
+      <div id="hint" class="hint"></div>
+      <div class="cmdRow" id="cmdRow"></div>
+    </div>
+    <div id="divider"><i></i></div>
+    <div id="paneCode" class="pane">
+      <div class="codeHead" id="codeHead">
+        <span id="lineInfo"></span>
+        <div class="ctrls">
+          <button class="cbtn edit" id="bEdit">✎ Tippen</button>
+          <button class="cbtn run" id="bRun">▶ Play</button>
+          <button class="cbtn" id="bStep" title="Schritt">⏭</button>
+          <input type="range" id="speed" min="1" max="5" value="3" aria-label="Tempo">
+          <button class="cbtn" id="bUndo" title="Letzte Zeile löschen">⌫</button>
+          <button class="cbtn" id="bClear" title="Zurücksetzen">↺</button>
+        </div>
+      </div>
+      <ol id="code" class="code"></ol>
+      <textarea id="ta" class="ta" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+    </div>
+  </main>
+  <div id="fail" class="overlay"><div class="card fail">
+    <h3 id="failT"></h3><p id="failS"></p>
+    <div class="btnrow"><button class="sbtn" id="failClear">Code löschen</button><button class="pbtn" id="failRestart">Neu starten</button></div>
+  </div></div>
+  <div id="win" class="overlay"><div class="card">
+    <h3 id="winT"></h3><div class="bigstars" id="winStars"></div><p id="winS"></p><p id="winC" class="winC"></p>
+    <div class="btnrow"><button class="sbtn" id="winAgain">Nochmal</button><button class="sbtn" id="winSave" hidden>Bild speichern</button><button class="pbtn" id="winNext">Weiter</button></div>
+  </div></div>
+</section>
+
+<section id="sCut" class="screen cut">
+  <div class="infoBox"><div class="nm" id="cutName">BIT</div><div class="role" id="cutRole">:MENTOR</div><div class="bar"><span id="cutBar">WISSEN</span><div class="segs" id="segs"></div></div></div>
+  <div class="stage"><div id="figWrap"></div><div class="plat"></div></div>
+  <div class="chat"><div class="spk" id="cutSpk">BIT</div><div id="cutTxt"></div><pre id="cutCode"></pre><button id="cutNext" aria-label="Weiter">▼</button></div>
+</section>
+
+<section id="sEdit" class="screen">
+  <header class="top"><button class="back" id="eBack" aria-label="Zurück">‹</button><div class="ttl">Level-Editor</div><button class="modeBtn"></button></header>
+  <div class="edWrap">
+    <svg id="eworld" viewBox="14 32 396 258" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="tools" id="tools"></div>
+    <div class="edInfo" id="edInfo"></div>
+    <div class="btnrow wrap">
+      <button class="sbtn" id="eNew">Neu</button><button class="sbtn" id="eSize">6×6</button><button class="sbtn" id="eCopy">Kopieren</button><button class="sbtn" id="ePaste">Einfügen</button><button class="sbtn" id="eSave">Speichern</button><button class="pbtn" id="eTest">▶ Testen</button>
+    </div>
+  </div>
+</section>
+
+<div id="modal" class="overlay modal"><div class="card">
+  <h3 id="mT"></h3><p id="mS"></p><textarea id="mTa" class="mta" spellcheck="false"></textarea>
+  <div class="btnrow"><button class="sbtn" id="mNo">Abbrechen</button><button class="pbtn" id="mOk">OK</button></div>
+</div></div>
+
+<script>
+/* ================= Daten: Namen, Missionen, Level, Zwischensequenzen ================= */
+const NAMES={
+ kid:{move:'vor',left:'links',right:'rechts',pick:'nimm',jump:'springe',wait:'warte',say:'sage',
+  wall:'wand_vorne',star:'stern_hier',drone:'drohne_vorne',hole:'loch_vorne',goal:'am_ziel',
+  turn:'drehe',color:'farbe',penup:'stift_hoch',pendown:'stift_runter',v:'sterne',du:'drehe_um'},
+ adult:{move:'move',left:'turn_left',right:'turn_right',pick:'pick_up',jump:'jump',wait:'wait',say:'say',
+  wall:'wall_ahead',star:'star_here',drone:'drone_ahead',hole:'hole_ahead',goal:'at_goal',
+  turn:'turn',color:'color',penup:'pen_up',pendown:'pen_down',v:'stars',du:'turn_around'}};
+const NAME2ID={};for(const m in NAMES)for(const id in NAMES[m])if(id!=='v'&&id!=='du')NAME2ID[NAMES[m][id]]=id;
+const SENSORS=['wall','star','drone','hole','goal'];
+const COLORS={gelb:'#FFD166',yellow:'#FFD166',blau:'#7FDBFF',blue:'#7FDBFF',weiss:'#FFFFFF',white:'#FFFFFF',orange:'#F6A04D',rot:'#FF5C8A',red:'#FF5C8A'};
+const ICON={move:'⬆',left:'↶',right:'↷',pick:'★',jump:'⤴',wait:'⏸',say:'💬',loop:'🔁',if:'❓',else:'↪',while:'⟳',def:'ƒ',var0:'=',inc:'+1',tvor:'⬆',tdreh:'⟳',farbe:'🎨',stift:'✎'};
+const DEFNAMES={kid:['drehe_um','stufe','reihe','hopser','wende','zacke'],adult:['turn_around','step','row','hop','u_turn','zigzag']};
+const fillT=(s,m)=>(s||'').replace(/\{(\w+)\}/g,(x,k)=>NAMES[m][k]!=null?NAMES[m][k]:x);
+
+/* Level-Felder: typ (bauen|vorhersage|reparieren|luecke), n (Raster), start [x,y,Richtung], ziel, waende, sterne, loecher,
+   gegner (Liste von Bahnen [[x,y],…]), varianten [{…Überschreibungen}], knoepfe, sens (Sensor-Chips), bed (weitere Bedingungen),
+   max (3★-Grenze Zeilen bzw. Änderungen), code (Startcode), ref (Musterlösung), zielTyp (genau|ansage), anzahl, frage (feld|wert), optionen,
+   turtle {start:[x,y,Winkel], vorlage} */
+const B1=['move','left','right'],B2=['move','left','right','pick'];
+const MISSIONS=[
+{id:'m1',title:{kid:'Abfolge',adult:'Abfolge (Sequenz)'},sub:{kid:'Befehle der Reihe nach',adult:'Anweisungen werden nacheinander ausgeführt'},
+ cuts:[{at:2,id:'c1'}],levels:[
+ {start:[0,5,'N'],ziel:[0,2],waende:[[2,3],[3,1],[4,4]],knoepfe:['move'],max:3,ref:'vor()\nvor()\nvor()',
+  hint:{kid:'Plane den Weg zum Planeten: Tippe so oft auf vor(), wie du Schritte brauchst – dann ▶ Play.',adult:'Plane das komplette Programm, dann ▶ Play. Es muss exakt am Ziel enden.'}},
+ {start:[0,5,'N'],ziel:[3,3],waende:[[1,4],[2,4],[4,2]],knoepfe:B1,max:6,ref:'vor()\nvor()\nrechts()\nvor()\nvor()\nvor()',
+  hint:{kid:'Jetzt mit Kurve! rechts() dreht die Kapsel.',adult:'turn_left() und turn_right() drehen um 90°, ohne das Feld zu wechseln.'}},
+ {start:[1,5,'N'],ziel:[1,1],waende:[[0,3],[2,3],[0,1],[2,1]],sterne:[[1,3]],knoepfe:B2,max:5,ref:'vor()\nvor()\nnimm()\nvor()\nvor()',
+  hint:{kid:'Sammle den Stern mit nimm() ein – dann ab zum Planeten.',adult:'pick_up() nimmt das Objekt auf dem aktuellen Feld auf.'}},
+ {start:[0,5,'E'],ziel:[3,3],waende:[[2,5],[2,4],[0,3]],sterne:[[1,3]],gegner:[[[3,4]]],knoepfe:B2,max:8,ref:'vor()\nlinks()\nvor()\nvor()\nnimm()\nrechts()\nvor()\nvor()',
+  hint:{kid:'Um die Asteroiden herum – und den Stern nicht vergessen!',adult:'Plane die Route um die Hindernisse und nimm den Stern unterwegs auf.'}},
+ {start:[0,5,'N'],ziel:[4,1],waende:[[1,4],[1,3],[3,2],[3,0]],sterne:[[0,3],[2,1]],gegner:[[[2,3]],[[4,3]]],knoepfe:B2,max:11,
+  ref:'vor()\nvor()\nnimm()\nvor()\nvor()\nrechts()\nvor()\nvor()\nnimm()\nvor()\nvor()',
+  hint:{kid:'Zwei Sterne, zwei Drohnen. Schaffst du das?',adult:'Alle Sterne einsammeln, Drohnen meiden.'}}
+]},
+{id:'m2',title:{kid:'Schleifen',adult:'Schleifen (for)'},sub:{kid:'Wiederholen statt abschreiben',adult:'for i in range(n): wiederholt einen eingerückten Block'},
+ cuts:[{at:1,id:'c2'}],levels:[
+ {start:[0,5,'N'],ziel:[2,3],waende:[[1,5],[3,3]],knoepfe:B1,max:5,ref:'vor()\nvor()\nrechts()\nvor()\nvor()',
+  hint:{kid:'Aufwärmen: Wie in Mission 1 – plane den Weg.',adult:'Aufwärmen: einfache Sequenz.'}},
+ {start:[0,5,'E'],ziel:[5,5],waende:[[1,4],[2,4],[3,4],[4,4]],knoepfe:['move','loop'],max:2,ref:'for i in range(5):\n    vor()',
+  hint:{kid:'Tippe 🔁 und wähle, wie oft. Alles darunter Eingerückte wird wiederholt.',adult:'for i in range(5): führt den eingerückten Block fünfmal aus.'}},
+ {start:[0,3,'E'],ziel:[4,3],sterne:[[2,3],[4,3]],waende:[[1,2],[3,2],[1,4],[3,4]],knoepfe:['move','pick','loop'],max:4,ref:'for i in range(2):\n    vor()\n    vor()\n    nimm()',
+  hint:{kid:'Immer gleich: zwei Schritte, Stern nehmen. Das kann die Schleife!',adult:'Wiederkehrendes Muster erkennen: der Schleifenkörper kann mehrere Zeilen haben.'}},
+ {start:[0,5,'E'],ziel:[3,2],waende:[[0,3],[1,2],[2,1],[1,5],[2,4],[3,3]],knoepfe:['move','left','right','loop'],max:5,
+  ref:'for i in range(3):\n    links()\n    vor()\n    rechts()\n    vor()',
+  hint:{kid:'Eine Treppe! Welche Befehle sind eine Stufe?',adult:'Eine Stufe = vier Anweisungen. Wie oft?'}},
+ {start:[1,4,'W'],ziel:[1,4],sterne:[[1,2],[3,2],[3,4],[1,4]],waende:[[2,3]],knoepfe:['move','left','right','pick','loop'],max:5,
+  ref:'for i in range(4):\n    rechts()\n    vor()\n    vor()\n    nimm()',
+  hint:{kid:'Eine Runde um den Asteroiden – vier gleiche Seiten.',adult:'Quadrat: vier identische Seiten.'}},
+ {typ:'vorhersage',frage:'feld',start:[0,5,'N'],code:'for i in range(2):\n    {move}()\n    {move}()\n{right}()\n{move}()',antwort:[1,1],waende:[[3,3],[4,1]],
+  hint:{kid:'Lies den Code. Wo landet die Kapsel? Tippe auf das Feld.',adult:'Code lesen, Endfeld vorhersagen und antippen.'}},
+ {typ:'reparieren',start:[0,5,'E'],ziel:[4,5],code:'for i in range(5):\n    {move}()',max:1,waende:[[1,4],[3,4]],
+  hint:{kid:'Der Code ist kaputt! Ändere so wenig wie möglich.',adult:'Fehler finden: so wenige Änderungen wie möglich.'}},
+ {start:[0,5,'E'],ziel:[4,1],sterne:[[0,4],[1,3],[2,2],[3,1]],knoepfe:['move','left','right','pick','loop'],max:6,
+  ref:'for i in range(4):\n    links()\n    vor()\n    nimm()\n    rechts()\n    vor()',
+  hint:{kid:'Meister-Level: Sterne auf jeder Stufe.',adult:'Meister: Muster mit fünf Anweisungen finden.'}}
+]},
+{id:'m3',title:{kid:'Funktionen',adult:'Funktionen (def)'},sub:{kid:'Eigene Befehle erfinden',adult:'def name(): bündelt Anweisungen unter einem Namen'},
+ cuts:[{at:1,id:'c3'}],levels:[
+ {start:[0,5,'N'],ziel:[0,1],waende:[[1,3],[1,1]],knoepfe:['move','loop'],max:2,ref:'for i in range(4):\n    vor()',
+  hint:{kid:'Aufwärmen mit der Schleife.',adult:'Aufwärmen: Schleife.'}},
+ {start:[1,3,'E'],ziel:[0,3],sterne:[[3,3],[0,3]],waende:[[0,2],[1,2],[2,2],[3,2],[0,4],[1,4],[2,4],[3,4]],knoepfe:['move','pick'],max:11,
+  code:'def {du}():\n    {left}()\n    {left}()\n\n',ref:'def drehe_um():\n    links()\n    links()\n\nvor()\nvor()\nnimm()\ndrehe_um()\nvor()\nvor()\nvor()\nnimm()',
+  hint:{kid:'Oben steht schon eine Funktion. Sie ist jetzt ein Knopf! Nutze sie zum Umdrehen.',adult:'Die Funktion ist definiert und als Knopf verfügbar. Rufe sie auf.'}},
+ {start:[0,3,'E'],ziel:[4,3],loecher:[[2,3]],waende:[[2,2],[2,4]],knoepfe:['move','jump'],max:3,ref:'vor()\nspringe()\nvor()',
+  hint:{kid:'Ein Krater! springe() hüpft über ein Feld.',adult:'jump() springt zwei Felder weit über ein Loch.'}},
+ {start:[2,2,'E'],ziel:[2,2],sterne:[[5,2],[0,2]],waende:[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]],knoepfe:['move','left','right','pick','loop','def'],max:13,
+  ref:'def drehe_um():\n    links()\n    links()\nfor i in range(3):\n    vor()\nnimm()\ndrehe_um()\nfor i in range(5):\n    vor()\nnimm()\ndrehe_um()\nvor()\nvor()',
+  hint:{kid:'Baue dir selbst drehe_um() mit ƒ – und nutze es zweimal.',adult:'Definiere eine Funktion zum Umdrehen und rufe sie zweimal auf.'}},
+ {typ:'luecke',start:[0,5,'E'],ziel:[3,2],loecher:[[2,5],[3,3]],waende:[[0,4],[1,4],[4,4]],code:'def ___():\n    {move}()\n    {jump}()\n\nhopser()\n{left}()\nhopser()',max:7,
+  hint:{kid:'Fülle die Lücke ___ mit dem richtigen Namen.',adult:'Ergänze den Funktionsnamen an der Lücke ___.'}},
+ {typ:'vorhersage',frage:'feld',start:[1,5,'N'],code:'def zacke():\n    {move}()\n    {right}()\n    {move}()\n    {left}()\n\nfor i in range(2):\n    zacke()\n{move}()',antwort:[3,2],
+  hint:{kid:'Wohin führt die Zacke zweimal? Tippe das Feld an.',adult:'Funktion und Schleife: Endfeld vorhersagen.'}},
+ {typ:'reparieren',start:[1,3,'E'],ziel:[0,3],sterne:[[2,3]],waende:[[0,2],[1,2],[2,2],[0,4],[1,4],[2,4]],code:'def {du}():\n    {left}()\n    {left}()\n\n{move}()\n{pick}()\n{move}()\n{move}()',max:1,
+  hint:{kid:'Die Funktion ist da – aber wird sie benutzt?',adult:'Eine Funktion wirkt erst, wenn sie aufgerufen wird.'}},
+ {start:[0,1,'E'],ziel:[5,5],loecher:[[2,1],[3,3],[2,5]],sterne:[[3,1],[2,3],[3,5]],waende:[[0,2],[1,2],[2,2],[3,2],[4,2],[1,4],[2,4],[3,4],[4,4],[5,4]],
+  knoepfe:['move','left','right','pick','jump','loop','def'],max:21,
+  ref:'def reihe():\n    vor()\n    springe()\n    nimm()\n    vor()\n    vor()\ndef wende_r():\n    rechts()\n    vor()\n    vor()\n    rechts()\ndef wende_l():\n    links()\n    vor()\n    vor()\n    links()\nreihe()\nwende_r()\nreihe()\nwende_l()\nreihe()',
+  hint:{kid:'Meister: Drei gleiche Reihen. Welche Funktionen helfen?',adult:'Meister: Zwei oder drei Funktionen machen den Code kurz.'}}
+]},
+{id:'m4',title:{kid:'Bedingungen',adult:'Bedingungen (if/else)'},sub:{kid:'Wenn … dann …',adult:'if/else: Code reagiert auf die Umgebung'},
+ cuts:[{at:1,id:'c4'}],levels:[
+ {start:[0,5,'N'],ziel:[2,3],waende:[[1,4],[3,2]],knoepfe:['move','right','def'],max:6,ref:'def zwei():\n    vor()\n    vor()\nzwei()\nrechts()\nzwei()',
+  hint:{kid:'Aufwärmen: Eine Funktion zwei() spart Zeilen.',adult:'Aufwärmen: Funktion definieren und zweimal nutzen.'}},
+ {start:[0,3,'E'],ziel:[4,3],varianten:[{sterne:[[2,3]]},{sterne:[[3,3]]},{sterne:[]}],waende:[[0,2],[1,2],[2,2],[3,2],[4,2]],knoepfe:['move','pick','loop','if'],sens:['star'],max:4,
+  ref:'for i in range(4):\n    vor()\n    if stern_hier():\n        nimm()',
+  hint:{kid:'Achtung: Drei Varianten! Der Stern liegt jedes Mal woanders. Frag mit ❓ nach.',adult:'Derselbe Code muss alle Varianten lösen. Prüfe mit if.'}},
+ {start:[2,4,'N'],waende:[[2,2]],varianten:[{ziel:[4,3],waende:[[2,2],[1,3]]},{ziel:[0,3],waende:[[2,2],[3,3]]}],knoepfe:['move','left','right','if'],sens:['wall'],max:7,
+  ref:'vor()\nrechts()\nif wand_vorne():\n    links()\n    links()\nvor()\nvor()',
+  hint:{kid:'Mal geht es rechts weiter, mal links. Schau, ob eine Wand vor dir ist.',adult:'Richtung abhängig von wall_ahead() wählen.'}},
+ {start:[0,3,'E'],ziel:[5,3],varianten:[{loecher:[[2,3]]},{loecher:[[3,3]]},{loecher:[[1,3]]}],knoepfe:['move','jump','loop','if','else'],sens:['hole'],max:5,
+  ref:'for i in range(4):\n    if loch_vorne():\n        springe()\n    else:\n        vor()',
+  hint:{kid:'Loch vor dir? Dann springen – sonst gehen. Dafür gibt es ↪ sonst.',adult:'if … else: zwei Wege, genau einer wird ausgeführt.'}},
+ {start:[0,4,'E'],varianten:[{ziel:[4,3],gegner:[[[2,4]]]},{ziel:[4,4],gegner:[]}],waende:[[0,3],[1,5],[2,5],[3,5]],knoepfe:['move','left','right','if'],sens:['drone'],max:8,
+  ref:'vor()\nif drohne_vorne():\n    links()\n    vor()\n    rechts()\nvor()\nvor()\nvor()',
+  hint:{kid:'Steht eine Drohne im Weg? Dann außen herum.',adult:'Ausweichen nur, wenn drone_ahead() wahr ist.'}},
+ {typ:'vorhersage',frage:'feld',start:[0,3,'E'],waende:[[2,3]],code:'for i in range(3):\n    if {wall}():\n        {right}()\n    {move}()',antwort:[1,5],
+  hint:{kid:'Wo landet die Kapsel? Achte auf die Wand.',adult:'Bedingung im Kopf ausführen, Endfeld antippen.'}},
+ {typ:'reparieren',start:[0,3,'E'],ziel:[3,3],varianten:[{sterne:[[1,3]]},{sterne:[[2,3]]}],waende:[[4,3],[0,2],[1,2],[2,2],[3,2]],
+  code:'for i in range(3):\n    {move}()\n    if {wall}():\n        {pick}()',max:1,
+  hint:{kid:'Hier wird nach dem falschen Ding gefragt.',adult:'Die Bedingung prüft das Falsche.'}},
+ {start:[0,2,'E'],ziel:[5,2],varianten:[{loecher:[[2,2]],sterne:[[1,2],[4,2]]},{loecher:[[3,2]],sterne:[[2,2]]},{loecher:[[4,2]],sterne:[[1,2],[3,2]]}],
+  waende:[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]],knoepfe:['move','pick','jump','loop','if','else'],sens:['hole','star'],max:7,
+  ref:'for i in range(4):\n    if loch_vorne():\n        springe()\n    else:\n        vor()\n    if stern_hier():\n        nimm()',
+  hint:{kid:'Meister: Löcher und Sterne liegen jedes Mal anders.',adult:'Meister: zwei Bedingungen in einer Schleife.'}}
+]},
+{id:'m5',title:{kid:'Solange & Zählen',adult:'while und Variablen'},sub:{kid:'Wiederholen, bis es passt – und mitzählen',adult:'while-Schleifen, Variablen, Ausgabe'},
+ cuts:[{at:1,id:'c5'}],levels:[
+ {start:[0,3,'E'],ziel:[4,3],varianten:[{sterne:[[2,3]]},{sterne:[[3,3]]}],knoepfe:['move','pick','loop','if'],sens:['star'],max:4,
+  ref:'for i in range(4):\n    vor()\n    if stern_hier():\n        nimm()',
+  hint:{kid:'Aufwärmen: Stern mal hier, mal da.',adult:'Aufwärmen: if in einer Schleife.'}},
+ {start:[0,3,'E'],varianten:[{ziel:[3,3]},{ziel:[5,3]},{ziel:[1,3]}],waende:[[0,2],[1,2],[2,2],[3,2],[4,2],[5,2]],knoepfe:['move','while'],sens:['goal'],max:2,
+  ref:'while not am_ziel():\n    vor()',
+  hint:{kid:'Wie weit ist es? Egal! ⟳ solange wiederholt, bis du da bist.',adult:'while wiederholt, solange die Bedingung wahr ist.'}},
+ {start:[0,3,'E'],ziel:[5,3],zielTyp:'ansage',varianten:[{sterne:[[2,3]]},{sterne:[[1,3],[4,3]]},{sterne:[[1,3],[3,3],[5,3]]}],
+  knoepfe:['move','pick','while','if','var0','inc','say'],sens:['goal','star'],max:7,
+  ref:'sterne = 0\nwhile not am_ziel():\n    vor()\n    if stern_hier():\n        nimm()\n        sterne = sterne + 1\nsage(sterne)',
+  hint:{kid:'Zähle die Sterne in der Variable sterne und sag am Ende, wie viele es waren.',adult:'Variable hochzählen und am Ziel mit say() ausgeben.'}},
+ {start:[0,3,'E'],ziel:[5,3],zielTyp:'genau',anzahl:3,varianten:[{sterne:[[1,3],[2,3],[3,3],[4,3],[5,3]]},{sterne:[[2,3],[3,3],[4,3],[5,3]]},{sterne:[[1,3],[3,3],[5,3]]}],
+  knoepfe:['move','pick','while','if','var0','inc'],sens:['goal','star'],bed:['{v} < 3'],max:7,
+  ref:'sterne = 0\nwhile not am_ziel():\n    vor()\n    if stern_hier():\n        if sterne < 3:\n            nimm()\n            sterne = sterne + 1',
+  hint:{kid:'Nimm GENAU 3 Sterne – nicht mehr!',adult:'Genau drei Objekte aufnehmen: Zähler mit Vergleich.'}},
+ {start:[0,5,'N'],ziel:[5,0],knoepfe:[],max:5,
+  waende:[[0,0],[1,2],[2,2],[2,3],[2,4],[2,5],[4,0],[4,1],[5,3],[5,4],[5,5]],
+  ref:'while not am_ziel():\n    rechts()\n    while wand_vorne():\n        links()\n    vor()',
+  hint:{kid:'Labyrinth – ohne Knöpfe! Tipp: Halte die rechte Hand an der Wand.',adult:'Ohne Knöpfe: Rechte-Hand-Regel mit while.'}},
+ {typ:'vorhersage',frage:'wert',optionen:[1,2,3,4],start:[0,3,'E'],sterne:[[1,3],[3,3],[5,3]],
+  code:'{v} = 0\nfor i in range(4):\n    {move}()\n    if {star}():\n        {pick}()\n        {v} = {v} + 1\n{say}({v})',
+  hint:{kid:'Welche Zahl sagt die Kapsel am Ende?',adult:'Welchen Wert gibt say() aus?'}},
+ {typ:'reparieren',start:[0,3,'E'],ziel:[4,3],sterne:[[2,3]],code:'while not {goal}():\n    if {star}():\n        {pick}()',max:1,
+  hint:{kid:'Die Kapsel kommt nie an. Was fehlt?',adult:'Endlosschleife: Was fehlt im Schleifenkörper?'}},
+ {start:[0,5,'N'],ziel:[5,0],zielTyp:'ansage',knoepfe:[],max:10,sterne:[[1,3],[2,1],[4,4]],
+  waende:[[0,0],[1,2],[2,2],[2,3],[2,4],[2,5],[4,0],[4,1],[5,3],[5,4],[5,5]],
+  ref:'sterne = 0\nwhile not am_ziel():\n    if stern_hier():\n        nimm()\n        sterne = sterne + 1\n    rechts()\n    while wand_vorne():\n        links()\n    vor()\nsage(sterne)',
+  hint:{kid:'Meister: Labyrinth, Sterne zählen und ansagen – alles selbst tippen.',adult:'Meister: Labyrinth, Zähler und Ausgabe kombinieren.'}}
+]},
+{id:'m6',bonus:true,title:{kid:'Sternbilder malen',adult:'Turtle-Grafik'},sub:{kid:'Bonus: Malen mit Code',adult:'Bonus: Funktionen mit Parametern'},
+ cuts:[{at:0,id:'c6'}],levels:[
+ {turtle:{start:[5,8,0],vorlage:'vor(4)'},knoepfe:['tvor','tdreh'],max:1,ref:'vor(4)',
+  hint:{kid:'Male die gestrichelte Linie nach. vor(4) geht vier Schritte.',adult:'move(4): vier Einheiten vorwärts, die Spur wird gezeichnet.'}},
+ {turtle:{start:[3,7,0],vorlage:'for i in range(4):\n    vor(4)\n    drehe(90)'},knoepfe:['tvor','tdreh','loop'],max:3,ref:'for i in range(4):\n    vor(4)\n    drehe(90)',
+  hint:{kid:'Ein Quadrat. drehe(90) dreht nach rechts.',adult:'turn(90) dreht um 90° im Uhrzeigersinn.'}},
+ {turtle:{start:[3,7,0],vorlage:'for i in range(3):\n    vor(4)\n    drehe(120)'},knoepfe:['tvor','tdreh','loop'],max:3,ref:'for i in range(3):\n    vor(4)\n    drehe(120)',
+  hint:{kid:'Ein Dreieck! Wie weit musst du dich an jeder Ecke drehen?',adult:'Außenwinkel: 360° ÷ Anzahl Ecken.'}},
+ {turtle:{start:[2,8,0],vorlage:'for i in range(4):\n    vor(1)\n    drehe(90)\n    vor(1)\n    drehe(-90)'},knoepfe:['tvor','tdreh','loop','def'],max:7,
+  ref:'def treppe(stufen):\n    for i in range(stufen):\n        vor(1)\n        drehe(90)\n        vor(1)\n        drehe(-90)\ntreppe(4)',
+  hint:{kid:'Eine Treppe mit 4 Stufen. Profi-Tipp: def treppe(stufen): – dann geht treppe(4).',adult:'Parameter: def treppe(stufen): – Aufruf treppe(4).'}},
+ {turtle:{start:[3,4,90],vorlage:'for i in range(5):\n    vor(5)\n    drehe(144)'},knoepfe:['tvor','tdreh','loop','farbe'],max:3,ref:'for i in range(5):\n    vor(5)\n    drehe(144)',
+  hint:{kid:'Ein Stern mit 5 Zacken. Drehung: 144.',adult:'Fünfzackiger Stern: turn(144).'}},
+ {turtle:{start:[5,5,0],frei:true},knoepfe:['tvor','tdreh','loop','farbe','stift','def'],max:99,ref:'vor(2)',
+  hint:{kid:'Freies Malen! Erfinde dein eigenes Sternbild.',adult:'Freies Zeichnen – keine Vorlage, keine Wertung.'}}
+]},
+{id:'m7',title:{kid:'Glibbers Station',adult:'Abschluss: Glibbers Station'},sub:{kid:'Alles zusammen',adult:'Alle Konzepte kombiniert, 8×8-Felder'},
+ cuts:[{at:0,id:'c7'},{at:4,id:'c8'}],levels:[
+ {n:8,start:[0,4,'E'],ziel:[7,4],gegner:[[[4,0],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[4,7]]],waende:[[0,3],[1,3],[2,3],[3,3],[5,3],[6,3],[7,3],[0,5],[1,5],[2,5],[3,5],[5,5],[6,5],[7,5]],
+  knoepfe:['move','wait','while'],sens:['goal','drone'],max:4,
+  ref:'while not am_ziel():\n    while drohne_vorne():\n        warte()\n    vor()',
+  hint:{kid:'Die Drohne fliegt hin und her. warte(), solange sie vor dir ist.',adult:'wait() lässt einen Takt verstreichen. Warte, solange drone_ahead().'}},
+ {n:8,start:[0,3,'E'],ziel:[7,3],varianten:[{loecher:[[2,3],[5,3]],sterne:[[1,3],[4,3],[7,3]]},{loecher:[[3,3]],sterne:[[2,3],[6,3]]},{loecher:[[1,3],[4,3],[6,3]],sterne:[[3,3],[5,3]]}],
+  waende:[[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4]],
+  knoepfe:['move','pick','jump','while','if','else'],sens:['goal','hole','star'],max:7,
+  ref:'while not am_ziel():\n    if loch_vorne():\n        springe()\n    else:\n        vor()\n    if stern_hier():\n        nimm()',
+  hint:{kid:'Das Kraterfeld: Löcher und Sterne immer woanders, und keiner weiß, wie lang.',adult:'while + if/else: unbekannte Länge, wechselnde Hindernisse.'}},
+ {n:8,start:[0,7,'N'],ziel:[7,0],zielTyp:'ansage',knoepfe:[],max:10,sterne:[[2,4],[5,2],[7,6]],
+  waende:[[0,2],[0,4],[0,5],[0,6],[1,2],[1,4],[2,1],[2,7],[3,3],[3,4],[4,0],[4,3],[4,4],[4,5],[4,6],[4,7],[5,4],[5,5],[5,7],[6,1],[6,6],[7,2]],
+  ref:'sterne = 0\nwhile not am_ziel():\n    if stern_hier():\n        nimm()\n        sterne = sterne + 1\n    rechts()\n    while wand_vorne():\n        links()\n    vor()\nsage(sterne)',
+  hint:{kid:'Großes Labyrinth: Sterne zählen und ansagen. Ohne Knöpfe!',adult:'Großes Labyrinth mit Zähler – nur Tastatur.'}},
+ {n:8,start:[0,7,'E'],ziel:[7,1],sterne:[[2,7],[4,5],[6,3]],gegner:[[[7,6],[7,5],[7,4]]],waende:[[3,7],[5,5],[7,3],[1,5],[3,3],[5,1]],
+  knoepfe:['move','left','right','pick','loop','def'],max:11,
+  ref:'def stufe():\n    vor()\n    vor()\n    nimm()\n    links()\n    vor()\n    vor()\n    rechts()\nfor i in range(3):\n    stufe()\nvor()',
+  hint:{kid:'Glibbers Kern: die große Treppe. Funktion + Schleife!',adult:'Finale: Funktion und Schleife kombinieren.'}}
+]}
+];
+MISSIONS.forEach(m=>m.levels.forEach((l,i)=>{l.id=m.id+'-'+(i+1);l.mi=m.id;l.idx=i;l.typ=l.typ||'bauen';l.n=l.n||6;
+ for(const k of ['waende','sterne','loecher','gegner'])l[k]=l[k]||[];l.knoepfe=l.knoepfe||[];}));
+
+/* Zwischensequenzen: s = Sprecher */
+const CUTS={
+ c1:{pages:[
+  {s:'bit',kid:'Hey, ich bin Bit! Hast du es gemerkt? Jeder Knopf schreibt eine Zeile echten Python-Code.',adult:'Jeder Knopf erzeugt einen Funktionsaufruf in Python: Funktionsname plus runde Klammern.',c:'{move}()\n{move}()\n{right}()'},
+  {s:'bit',kid:'Der Computer liest den Code von oben nach unten. Zeile für Zeile. Das nennt man Abfolge!',adult:'Python führt Anweisungen sequenziell aus – von oben nach unten. Die Reihenfolge bestimmt das Ergebnis.',c:'{move}()      # 1.\n{right}()   # 2.\n{move}()      # 3.'},
+  {s:'bit',kid:'Neuer Befehl: nimm(). Damit sammelst du Sterne ein – aber nur, wenn du genau draufstehst!',adult:'Neu: pick_up(). Wirkt nur, wenn auf dem aktuellen Feld ein Objekt liegt – sonst Fehler.',c:'{move}()\n{pick}()'},
+  {s:'bit',kid:'Für 3 Sterne brauchst du möglichst wenige Zeilen. Und wenn du alles selbst tippst: eine Krone!',adult:'3 Sterne für die kürzeste Lösung, eine Krone für vollständig getippten Code.',c:''}]},
+ c2:{pages:[
+  {s:'glibber',kid:'Hihi! Ich bin Glibber. Ich hab super lange Asteroiden-Gänge gebaut. Viel Spaß beim Tippen!',adult:'Glibber hier. Meine Gänge sind lang. Sehr lang. Viel Spaß beim Abschreiben.',c:'{move}()\n{move}()\n{move}()\n{move}()\n{move}()'},
+  {s:'bit',kid:'Keine Sorge! Mit einer Schleife sagst du: Mach das 5-mal!',adult:'Eine for-Schleife wiederholt einen Block. range(5) liefert 0, 1, 2, 3, 4 – also fünf Durchläufe.',c:'for i in range(5):\n    {move}()'},
+  {s:'bit',kid:'Wichtig: Alles, was eingerückt ist, gehört zur Schleife. Mit ⇤ beendest du den Block.',adult:'Die Einrückung (4 Leerzeichen) bestimmt, was zum Schleifenkörper gehört.',c:'for i in range(2):\n    {move}()     # wiederholt\n    {pick}()    # wiederholt\n{right}()      # danach, einmal'}]},
+ c3:{pages:[
+  {s:'nova',kid:'Hallo, ich bin Nova, die Navigatorin! Manche Manöver brauchst du immer wieder.',adult:'Ich bin Nova. Wiederkehrende Manöver bekommen bei uns einen Namen.',c:''},
+  {s:'nova',kid:'Mit def erfindest du einen eigenen Befehl. Danach erscheint er als neuer Knopf!',adult:'def name(): definiert eine Funktion. Ihr Körper läuft erst beim Aufruf name().',c:'def {du}():\n    {left}()\n    {left}()\n\n{du}()'},
+  {s:'nova',kid:'Und Achtung, Krater! Mit springe() hüpfst du über ein Feld.',adult:'Neu: jump() bewegt zwei Felder weit – über ein Loch hinweg.',c:'{move}()\n{jump}()'}]},
+ c4:{pages:[
+  {s:'nova',kid:'Glibber schummelt: Seine Karten sehen jedes Mal anders aus!',adult:'Ab jetzt testet ▶ Play deinen Code auf mehreren Karten-Varianten.',c:''},
+  {s:'nova',kid:'Mit if fragst du: Ist da ein Stern? Nur dann wird der eingerückte Teil gemacht.',adult:'if prüft eine Bedingung. Sensoren wie star_here() liefern True oder False.',c:'if {star}():\n    {pick}()'},
+  {s:'nova',kid:'Mit else sagst du, was sonst passieren soll.',adult:'else: der Alternativzweig, wenn die Bedingung False ist.',c:'if {hole}():\n    {jump}()\nelse:\n    {move}()'}]},
+ c5:{pages:[
+  {s:'zaehli',kid:'Piep! Ich bin Zähli, der Zähl-Satellit. Ich merke mir Zahlen.',adult:'Zähli hier. Variablen speichern Werte unter einem Namen.',c:'{v} = 0'},
+  {s:'zaehli',kid:'Mit sterne = sterne + 1 zählst du eins dazu. Und sage() spricht die Zahl aus!',adult:'Zuweisung mit Rechnung, Ausgabe mit say().',c:'{v} = {v} + 1\n{say}({v})'},
+  {s:'zaehli',kid:'while heißt „solange“: Wiederhole, bis du am Ziel bist – egal wie weit.',adult:'while wiederholt, solange die Bedingung wahr ist. Vorsicht vor Endlosschleifen!',c:'while not {goal}():\n    {move}()'}]},
+ c6:{pages:[
+  {s:'bit',kid:'Bonus! Hier malst du Sternbilder. Die Kapsel zieht eine leuchtende Spur.',adult:'Turtle-Modus: freie Fläche, die Spur wird gezeichnet.',c:'{move}(3)\n{turn}(90)'},
+  {s:'bit',kid:'Jetzt haben Befehle Zahlen in den Klammern. Das nennt man Parameter.',adult:'Funktionen mit Parametern: Werte werden beim Aufruf übergeben.',c:'def quadrat(seite):\n    for i in range(4):\n        {move}(seite)\n        {turn}(90)\n\nquadrat(3)'}]},
+ c7:{pages:[
+  {s:'glibber',kid:'Du bist ja richtig gut! Aber in meiner Station schaffst du es nie! Hihi!',adult:'Willkommen in meiner Station. Größere Felder, bewegliche Drohnen. Viel Glück.',c:''},
+  {s:'bit',kid:'Neu: warte() – dann bleibt die Kapsel kurz stehen. Gut gegen fliegende Drohnen!',adult:'wait() lässt einen Takt verstreichen; Drohnen bewegen sich weiter.',c:'while {drone}():\n    {wait}()'}]},
+ c8:{pages:[
+  {s:'glibber',kid:'Waaas? Du hast alles geschafft?! … Okay. Du bist echt cool. Freunde?',adult:'Respekt. Du hast jede Station gelöst. Freunde?',c:''},
+  {s:'bit',kid:'Juhu! Jetzt kannst du in der Werkstatt eigene Level bauen – und jeden Tag gibt es ein Tagesrätsel.',adult:'Freigeschaltet: Level-Editor und Tagesrätsel.',c:''}]}
+};
+const CHARS={bit:{name:'BIT',role:':MENTOR',bar:'WISSEN'},glibber:{name:'GLIBBER',role:':GEGNER',bar:'HÜRDE'},nova:{name:'NOVA',role:':NAVIGATORIN',bar:'WISSEN'},zaehli:{name:'ZÄHLI',role:':ZÄHLER',bar:'WISSEN'}};
+
+/* ================= Mini-Interpreter für eine Python-Teilmenge =================
+   Unterstützt: Aufrufe mit Argumenten, Zahlen, Strings, Variablen, = += -=, + - * // %, Vergleiche,
+   not/and/or, True/False, for … in range(a[,b]):, while, if/elif/else, def mit Parametern, return, pass, Kommentare. */
+const KW=new Set(['for','in','while','if','elif','else','def','return','pass','and','or','not','True','False']);
+function tokenize(s,line){
+ const t=[];let i=0;
+ while(i<s.length){const c=s[i];
+  if(c===' '){i++;continue}
+  if(c==='#')break;
+  const r=s.slice(i);let m;
+  if(m=r.match(/^\d+/)){t.push({t:'num',v:+m[0]});i+=m[0].length;continue}
+  if(m=r.match(/^"([^"]*)"|^'([^']*)'/)){t.push({t:'str',v:m[1]!=null?m[1]:m[2]});i+=m[0].length;continue}
+  if(c==='"'||c==="'"||c==='„'||c==='“')throw{line,k:'string'};
+  if(m=r.match(/^[\p{L}_][\p{L}\p{N}_]*/u)){if(/^_{2,}$/.test(m[0]))throw{line,k:'luecke'};t.push({t:'name',v:m[0]});i+=m[0].length;continue}
+  if(m=r.match(/^(==|!=|<=|>=|\+=|-=|\/\/|[-+*%<>=(),:])/)){t.push({t:'op',v:m[0]});i+=m[0].length;continue}
+  throw{line,k:'syntax'};
+ }
+ return t;
+}
+function exprParser(T,line,p){
+ const isOp=v=>T[p]&&T[p].t==='op'&&T[p].v===v, isN=v=>T[p]&&T[p].t==='name'&&T[p].v===v;
+ function or(){let a=and();while(isN('or')){p++;a={o:'or',a,b:and()}}return a}
+ function and(){let a=not();while(isN('and')){p++;a={o:'and',a,b:not()}}return a}
+ function not(){if(isN('not')){p++;return{o:'not',a:not()}}return cmp()}
+ function cmp(){let a=add();while(T[p]&&T[p].t==='op'&&['==','!=','<','>','<=','>='].includes(T[p].v)){const o=T[p++].v;a={o,a,b:add()}}return a}
+ function add(){let a=mul();while(isOp('+')||isOp('-')){const o=T[p++].v;a={o,a,b:mul()}}return a}
+ function mul(){let a=un();while(isOp('*')||isOp('//')||isOp('%')){const o=T[p++].v;a={o,a,b:un()}}return a}
+ function un(){if(isOp('-')){p++;return{o:'neg',a:un()}}return prim()}
+ function prim(){const k=T[p++];if(!k)throw{line,k:'syntax'};
+  if(k.t==='num')return{o:'lit',v:k.v};
+  if(k.t==='str')return{o:'lit',v:k.v};
+  if(k.t==='op'&&k.v==='('){const e=or();if(!isOp(')'))throw{line,k:'paren'};p++;return e}
+  if(k.t==='name'){
+   if(k.v==='True')return{o:'lit',v:true};if(k.v==='False')return{o:'lit',v:false};
+   if(KW.has(k.v))throw{line,k:'syntax'};
+   if(isOp('(')){p++;const args=[];if(!isOp(')')){args.push(or());while(isOp(',')){p++;args.push(or())}}
+    if(!isOp(')'))throw{line,k:'paren'};p++;return{o:'call',n:k.v,args}}
+   return{o:'var',n:k.v}}
+  throw{line,k:'syntax'}}
+ return{expr:()=>or(),pos:()=>p};
+}
+function parseStmt(o){
+ const T=o.T,line=o.i,n0=T[0],isOp=(i,v)=>T[i]&&T[i].t==='op'&&T[i].v===v;
+ const endColon=()=>{if(!isOp(T.length-1,':'))throw{line,k:'colon'}};
+ const ex=(from,to)=>{const P=exprParser(T.slice(0,to),line,from);const e=P.expr();if(P.pos()!==to)throw{line,k:'syntax'};return e};
+ if(n0.t==='name'){
+  switch(n0.v){
+   case 'for':{endColon();if(!T[1]||T[1].t!=='name'||!T[2]||T[2].v!=='in')throw{line,k:'forsyntax'};
+    const e=ex(3,T.length-1);if(e.o!=='call'||e.n!=='range'||!e.args.length||e.args.length>2)throw{line,k:'forsyntax'};
+    return{k:'for',v:T[1].v,args:e.args,line,block:true}}
+   case 'while':endColon();return{k:'while',c:ex(1,T.length-1),line,block:true};
+   case 'if':endColon();return{k:'if',c:ex(1,T.length-1),line,block:true,elifs:[],els:null};
+   case 'elif':endColon();return{k:'elif',c:ex(1,T.length-1),line,block:true};
+   case 'else':if(T.length!==2||!isOp(1,':'))throw{line,k:'colon'};return{k:'else',line,block:true};
+   case 'def':{endColon();if(!T[1]||T[1].t!=='name'||!isOp(2,'('))throw{line,k:'defsyntax'};
+    const ps=[];let i=3;while(!isOp(i,')')){if(!T[i]||T[i].t!=='name')throw{line,k:'defsyntax'};ps.push(T[i].v);i++;if(isOp(i,','))i++}
+    if(i!==T.length-2)throw{line,k:'defsyntax'};return{k:'def',n:T[1].v,params:ps,line,block:true}}
+   case 'return':return{k:'return',e:T.length>1?ex(1,T.length):null,line};
+   case 'pass':return{k:'pass',line};
+  }
+  if(T[1]&&T[1].t==='op'&&['=','+=','-='].includes(T[1].v)){if(KW.has(n0.v))throw{line,k:'syntax'};return{k:'assign',n:n0.v,op:T[1].v,e:ex(2,T.length),line}}
+  if(T.length===1&&NAME2ID[n0.v])throw{line,k:'parens',n:n0.v};
+ }
+ const e=ex(0,T.length);if(e.o!=='call')throw{line,k:'syntax'};return{k:'expr',e,line};
+}
+function compile(src){
+ try{
+  const ls=[];src.forEach((t,i)=>{const s=t.replace(/\t/g,'    ');if(!s.replace(/#.*/,'').trim())return;
+   ls.push({ind:s.match(/^ */)[0].length,i,T:tokenize(s,i)})});
+  let p=0;
+  function block(lv){const out=[];
+   while(p<ls.length){const o=ls[p];if(o.ind<lv)break;if(o.ind>lv)throw{line:o.i,k:'indent'};
+    const st=parseStmt(o);p++;
+    if(st.block){const nx=ls[p];if(!nx||nx.ind<=lv)throw{line:o.i,k:'emptyblock'};st.body=block(nx.ind)}
+    if(st.k==='elif'||st.k==='else'){const pr=out[out.length-1];if(!pr||pr.k!=='if'||pr.els)throw{line:o.i,k:'else'};
+     if(st.k==='elif')pr.elifs.push(st);else pr.els=st.body;continue}
+    out.push(st)}
+   return out}
+  return{tree:block(0),err:null};
+ }catch(e){if(e&&e.k)return{tree:null,err:e};throw e}
+}
+class Ret{constructor(v){this.v=v}}
+/* Führt den Baum aus. W.call(name,args,line) liefert {v} oder undefined (unbekannt). */
+function execute(tree,W,limit=30000){
+ const G={},F={};let ops=0,depth=0;
+ const tru=v=>!!v&&v!==0;
+ const num=(v,line)=>{if(typeof v!=='number')throw{line,k:'type'};return v};
+ function ev(e,env,line){if(++ops>limit)throw{line,k:'endless'};
+  switch(e.o){
+   case 'lit':return e.v;
+   case 'var':if(e.n in env)return env[e.n];if(e.n in G)return G[e.n];throw{line,k:'undef',n:e.n};
+   case 'not':return!tru(ev(e.a,env,line));
+   case 'and':{const a=ev(e.a,env,line);return tru(a)?ev(e.b,env,line):a}
+   case 'or':{const a=ev(e.a,env,line);return tru(a)?a:ev(e.b,env,line)}
+   case 'neg':return-num(ev(e.a,env,line),line);
+   case 'call':return call(e.n,e.args.map(a=>ev(a,env,line)),line);
+  }
+  const a=ev(e.a,env,line),b=ev(e.b,env,line);
+  switch(e.o){
+   case '+':if(typeof a==='string'&&typeof b==='string')return a+b;return num(a,line)+num(b,line);
+   case '-':return num(a,line)-num(b,line);
+   case '*':return num(a,line)*num(b,line);
+   case '//':if(num(b,line)===0)throw{line,k:'zero'};return Math.floor(num(a,line)/b);
+   case '%':if(num(b,line)===0)throw{line,k:'zero'};return((num(a,line)%b)+b)%b;
+   case '==':return a===b;case '!=':return a!==b;
+   case '<':return num(a,line)<num(b,line);case '>':return num(a,line)>num(b,line);
+   case '<=':return num(a,line)<=num(b,line);case '>=':return num(a,line)>=num(b,line);
+  }
+ }
+ function call(n,args,line){
+  if(F[n]){const f=F[n];if(args.length!==f.params.length)throw{line,k:'args',n};
+   if(++depth>60)throw{line,k:'recursion'};const env={};f.params.forEach((q,i)=>env[q]=args[i]);
+   try{run(f.body,env)}catch(x){if(x instanceof Ret){depth--;return x.v}throw x}depth--;return null}
+  if(n==='range')throw{line,k:'rangeonly'};
+  const r=W.call(n,args,line);if(r===undefined)throw{line,k:'unknown',n};return r.v;
+ }
+ function run(body,env){for(const s of body){if(++ops>limit)throw{line:s.line,k:'endless'};
+  switch(s.k){
+   case 'expr':ev(s.e,env,s.line);break;
+   case 'assign':{let v=ev(s.e,env,s.line);if(s.op!=='='){const cur=s.n in env?env[s.n]:s.n in G?G[s.n]:undefined;
+     if(cur===undefined)throw{line:s.line,k:'undef',n:s.n};v=s.op==='+='?num(cur,s.line)+num(v,s.line):num(cur,s.line)-num(v,s.line)}env[s.n]=v;break}
+   case 'for':{const a=s.args.map(x=>num(ev(x,env,s.line),s.line));const[from,to]=a.length===1?[0,a[0]]:a;
+    for(let i=from;i<to;i++){env[s.v]=i;run(s.body,env)}break}
+   case 'while':while(tru(ev(s.c,env,s.line)))run(s.body,env);break;
+   case 'if':{if(tru(ev(s.c,env,s.line))){run(s.body,env);break}let done=false;
+    for(const b of s.elifs)if(tru(ev(b.c,env,b.line))){run(b.body,env);done=true;break}
+    if(!done&&s.els)run(s.els,env);break}
+   case 'def':F[s.n]={params:s.params,body:s.body};break;
+   case 'return':throw new Ret(s.e?ev(s.e,env,s.line):null);
+   case 'pass':break;
+  }}}
+ try{run(tree,G)}catch(x){if(x instanceof Ret)return;throw x}
+}
+
+/* ---------- Welten ---------- */
+const DIRS={N:[0,-1],E:[1,0],S:[0,1],W:[-1,0]},ORD='NESW';
+const has=(a,x,y)=>a.findIndex(p=>p[0]===x&&p[1]===y);
+function dronePos(b,t){const L=b.length;if(L===1)return b[0];const P=2*(L-1),i=t%P;return b[i<L?i:P-i]}
+function goalOK(V,st){if(!V.ziel||st.x!==V.ziel[0]||st.y!==V.ziel[1])return false;
+ if(V.zielTyp==='genau')return st.got.length===V.anzahl;
+ if(V.zielTyp==='ansage')return st.got.length===V.sterne.length&&st.said===st.got.length;
+ return st.got.length===V.sterne.length}
+/* Rasterwelt: protokolliert Zustände (states) und Schritte (steps) */
+function gridWorld(V,opt={}){
+ const st={x:V.start[0],y:V.start[1],d:V.start[2],got:[],path:[[V.start[0],V.start[1]]],t:0,said:null};
+ const snap=()=>({x:st.x,y:st.y,d:st.d,got:[...st.got],path:st.path.map(p=>[...p]),t:st.t,said:st.said});
+ const states=[snap()],steps=[];
+ const n=V.n,inB=(x,y)=>x>=0&&y>=0&&x<n&&y<n,wall=(x,y)=>has(V.waende,x,y)>=0,hole=(x,y)=>has(V.loecher,x,y)>=0;
+ const droneAt=(x,y,t)=>V.gegner.some(b=>{const q=dronePos(b,t);return q[0]===x&&q[1]===y});
+ const front=(k=1)=>{const[dx,dy]=DIRS[st.d];return[st.x+dx*k,st.y+dy*k]};
+ function act(id,line,f){
+  if(!opt.noOver&&id!=='say'&&goalOK(V,st)){steps.push({id,line,err:'over'});throw{line,k:'over',world:1}}
+  const ox=st.x,oy=st.y,k=f();
+  if(k){steps.push({id,line,err:k});throw{line,k,world:1}}
+  if(id!=='say'){st.t++;
+   if(droneAt(st.x,st.y,st.t)||(st.x!==ox||st.y!==oy)&&V.gegner.some(b=>{const a=dronePos(b,st.t-1),c=dronePos(b,st.t);return a[0]===st.x&&a[1]===st.y&&c[0]===ox&&c[1]===oy})){
+    steps.push({id,line,err:'enemy'});states.push(snap());throw{line,k:'enemy',world:1,moved:1}}}
+  steps.push({id,line});states.push(snap());
+  if(steps.length>500)throw{line,k:'toolong'};
+ }
+ const sens={wall:()=>{const[x,y]=front();return!inB(x,y)||wall(x,y)},star:()=>{const k=has(V.sterne,st.x,st.y);return k>=0&&!st.got.includes(k)},
+  drone:()=>{const[x,y]=front();return droneAt(x,y,st.t)||droneAt(x,y,st.t+1)},hole:()=>{const[x,y]=front();return inB(x,y)&&hole(x,y)},goal:()=>!!V.ziel&&st.x===V.ziel[0]&&st.y===V.ziel[1]};
+ function call(nm,args,line){const id=NAME2ID[nm];if(!id)return;
+  if(SENSORS.includes(id)){if(args.length)throw{line,k:'args',n:nm};return{v:sens[id]()}}
+  if(id==='say'){if(args.length!==1)throw{line,k:'args',n:nm};act('say',line,()=>{st.said=args[0]});return{v:null}}
+  if(!['move','left','right','pick','jump','wait'].includes(id))return;
+  if(args.length)throw{line,k:'args',n:nm};
+  act(id,line,()=>{
+   if(id==='move'){const[x,y]=front();if(!inB(x,y))return'edge';if(wall(x,y))return'wall';if(hole(x,y))return'hole';if(droneAt(x,y,st.t)&&droneAt(x,y,st.t+1))return'enemy';
+    st.x=x;st.y=y;st.path.push([x,y])}
+   else if(id==='jump'){const[mx,my]=front(),[x,y]=front(2);if(inB(mx,my)&&wall(mx,my))return'jumpwall';if(!inB(x,y))return'edge';if(wall(x,y))return'wall';if(hole(x,y))return'hole';
+    st.x=x;st.y=y;st.path.push([x,y])}
+   else if(id==='left')st.d=ORD[(ORD.indexOf(st.d)+3)%4];
+   else if(id==='right')st.d=ORD[(ORD.indexOf(st.d)+1)%4];
+   else if(id==='pick'){const k=has(V.sterne,st.x,st.y);if(k<0||st.got.includes(k))return'nostar';st.got.push(k)}
+  });return{v:null}}
+ return{call,states,steps,st};
+}
+/* Turtle-Welt: Winkel 0 = Norden, positiv = im Uhrzeigersinn */
+function turtleWorld(T){
+ const st={x:T.start[0],y:T.start[1],a:T.start[2]||0,pen:true,col:'#FFD166',segs:[]};
+ const snap=()=>({x:st.x,y:st.y,a:st.a,pen:st.pen,col:st.col,segs:st.segs.map(s=>({...s}))});
+ const states=[snap()],steps=[];
+ function act(id,line,f){f();steps.push({id,line});states.push(snap());if(steps.length>500)throw{line,k:'toolong'}}
+ function call(nm,args,line){const id=NAME2ID[nm];if(!id)return;
+  const n1=()=>{if(args.length>1)throw{line,k:'args',n:nm};const v=args.length?args[0]:1;if(typeof v!=='number')throw{line,k:'type'};return v};
+  switch(id){
+   case 'move':{const d=n1();act('move',line,()=>{const r=st.a*Math.PI/180,nx=st.x+Math.sin(r)*d,ny=st.y-Math.cos(r)*d;
+     if(st.pen)st.segs.push({x1:st.x,y1:st.y,x2:nx,y2:ny,c:st.col});st.x=nx;st.y=ny});return{v:null}}
+   case 'turn':{const d=n1();act('turn',line,()=>{st.a=(st.a+d)%360});return{v:null}}
+   case 'right':{const d=args.length?n1():90;act('turn',line,()=>{st.a=(st.a+d)%360});return{v:null}}
+   case 'left':{const d=args.length?n1():90;act('turn',line,()=>{st.a=(st.a-d)%360});return{v:null}}
+   case 'color':{if(args.length!==1||typeof args[0]!=='string')throw{line,k:'colorarg'};const c=COLORS[args[0].toLowerCase()];if(!c)throw{line,k:'color',n:args[0]};
+    act('color',line,()=>{st.col=c});return{v:null}}
+   case 'penup':act('pen',line,()=>{st.pen=false});return{v:null};
+   case 'pendown':act('pen',line,()=>{st.pen=true});return{v:null};
+  }
+ }
+ return{call,states,steps,st};
+}
+/* Turtle-Vergleich: jede Vorlage-Linie muss abgedeckt sein und keine eigene Linie daneben liegen */
+function segDist(px,py,s){const dx=s.x2-s.x1,dy=s.y2-s.y1,L=dx*dx+dy*dy;let t=L?((px-s.x1)*dx+(py-s.y1)*dy)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(s.x1+t*dx),py-(s.y1+t*dy))}
+function covers(A,B,tol=.22){for(const s of A){const L=Math.hypot(s.x2-s.x1,s.y2-s.y1),k=Math.max(1,Math.ceil(L/.25));
+ for(let i=0;i<=k;i++){const px=s.x1+(s.x2-s.x1)*i/k,py=s.y1+(s.y2-s.y1)*i/k;if(!B.some(b=>segDist(px,py,b)<tol))return false}}return true}
+
+/* ================= Darstellung: isometrisches Raster, Turtle-Fläche, Pixel-Figuren ================= */
+const OX=212,OY=74;let TW=64,TH=32,RN=6,rotT=0,rotA=0;
+function setBoard(n){RN=n;TW=384/n;TH=TW/2}
+const iso=(x,y)=>[OX+(x-y)*TW/2,OY+(x+y)*TH/2];
+const P=a=>a.map(p=>(+p[0]).toFixed(1)+','+(+p[1]).toFixed(1)).join(' ');
+function R(x,y){const c=RN/2,dx=x-c,dy=y-c,co=Math.cos(rotA),si=Math.sin(rotA);return[c+dx*co-dy*si,c+dx*si+dy*co]}
+function Rinv(x,y){const c=RN/2,dx=x-c,dy=y-c,co=Math.cos(-rotA),si=Math.sin(-rotA);return[c+dx*co-dy*si,c+dx*si+dy*co]}
+function rv(dx,dy){const co=Math.cos(rotA),si=Math.sin(rotA);return[dx*co-dy*si,dx*si+dy*co]}
+const isoR=(x,y)=>iso(...R(x,y));
+const zOf=(x,y)=>{const r=R(x+.5,y+.5);return r[0]+r[1]};
+const DEFS='<defs><filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+const G=(x,y,s)=>`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(TW/64).toFixed(3)})">${s}</g>`;
+function prism(g,H,top,cl,cr,yOff=0,glow){const cx=(g[0][0]+g[2][0])/2,cy=(g[0][1]+g[2][1])/2;
+ const sp=g.map(p=>{const q=iso(p[0],p[1]);return[q[0],q[1]+yOff]}),up=p=>[p[0],p[1]-H];let s='';const gl=[];
+ for(let j=0;j<4;j++){const a=g[j],b=g[(j+1)%4],mx=(a[0]+b[0])/2-cx,my=(a[1]+b[1])/2-cy;
+  if(mx+my>.001){s+=`<polygon points="${P([sp[j],sp[(j+1)%4],up(sp[(j+1)%4]),up(sp[j])])}" fill="${my-mx>0?cl:cr}"/>`;gl.push([sp[j],sp[(j+1)%4]])}}
+ if(top)s+=`<polygon points="${P(sp.map(up))}" fill="${top}"/>`;
+ if(glow)gl.forEach(e=>s+=`<polyline points="${P(e)}" fill="none" stroke="#7FDBFF" stroke-width="1.5" opacity=".7" filter="url(#gl)"/>`);
+ return s}
+function cube(x,y){const i=.12,H=26*TW/64,g=[[x+i,y+i],[x+1-i,y+i],[x+1-i,y+1-i],[x+i,y+1-i]].map(p=>R(...p));
+ const m=isoR(x+.5,y+.5);m[1]-=H;const k=TW/64;
+ return prism(g,H,'#8A8FC2','#5A5E8C','#45486F')+`<ellipse cx="${m[0]-6*k}" cy="${m[1]-k}" rx="${7*k}" ry="${3.4*k}" fill="#6E73A6"/><ellipse cx="${m[0]+9*k}" cy="${m[1]+3*k}" rx="${3.2*k}" ry="${1.6*k}" fill="#6E73A6"/>`}
+function starPts(x,y,Ro,r){const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,q=i%2?r:Ro;p.push([x+Math.cos(a)*q,y+Math.sin(a)*q])}return P(p)}
+function robotL(gv,lift,said){const v=[(gv[0]-gv[1])*32,(gv[0]+gv[1])*16],pp=[(-gv[1]-gv[0])*32,(-gv[1]+gv[0])*16],tip=[v[0]*.46,v[1]*.46],bc=[v[0]*.24,v[1]*.24],vo=v[0]*.08,L=-lift;
+ let s=`<ellipse cx="0" cy="0" rx="${15-lift*.15}" ry="${7.5-lift*.08}" fill="#000" opacity=".35"/>`+
+  `<polygon points="${P([tip,[bc[0]+pp[0]*.15,bc[1]+pp[1]*.15],[bc[0]-pp[0]*.15,bc[1]-pp[1]*.15]])}" fill="#7FDBFF" filter="url(#gl)"/>`+
+  `<g transform="translate(0 ${L})"><line x1="0" y1="-35" x2="0" y2="-44" stroke="#C9D3FF" stroke-width="2"/><circle cx="0" cy="-45" r="3.3" fill="#FFD166" filter="url(#gl)"/>`+
+  `<rect x="-11" y="-36" width="22" height="33" rx="11" fill="#C9D3FF"/><ellipse cx="-4" cy="-21" rx="5" ry="11" fill="#E8ECFF"/>`+
+  `<rect x="${-9+vo}" y="-29" width="18" height="6" rx="3" fill="#7FDBFF" filter="url(#gl)"/></g>`;
+ if(said!=null){const tx=String(said).slice(0,8),w=Math.max(26,tx.length*11+14);
+  s+=`<g transform="translate(0 ${L-62})"><rect x="${-w/2}" y="-14" width="${w}" height="26" rx="9" fill="#E8ECFF"/><polygon points="-5,12 5,12 0,19" fill="#E8ECFF"/><text x="0" y="5" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="16" font-weight="700" fill="#0B1026">${esc(tx)}</text></g>`}
+ return s}
+const droneL=b=>`<ellipse cx="0" cy="${32-b}" rx="11" ry="5" fill="#FF5C8A" opacity=".2"/><polygon points="0,-13 13,0 0,13 -13,0" fill="#FF5C8A"/><polygon points="0,-13 13,0 0,0" fill="#FF86A8"/><circle cx="0" cy="0" r="3.5" fill="#FFF0F4" filter="url(#gl)"/>`;
+const starL=b=>`<ellipse cx="0" cy="0" rx="9" ry="4.5" fill="#FFD166" opacity=".18"/><polygon points="${starPts(0,-24+b,10,4.5)}" fill="#FFD166" filter="url(#gl)"/>`;
+const planetL=b=>{const h=-30+b*.6;return `<ellipse cx="0" cy="${h}" rx="21" ry="6" fill="none" stroke="#FFE3A8" stroke-width="2.5" transform="rotate(-14 0 ${h})"/><circle cx="0" cy="${h}" r="12" fill="#F6A04D"/><path d="M-11 ${h+3}Q0 ${h+7} 11 ${h+2}" stroke="#D9822F" stroke-width="3" fill="none"/><path d="M-21 ${h}A21 6 0 0 0 21 ${h}" fill="none" stroke="#FFE3A8" stroke-width="2.5" transform="rotate(-14 0 ${h})"/>`};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+/* Raster zeichnen. V = Level/Variante, view = {a,b,e,wob,id}, ex = {mark, cursor, noRobot, noGoal} */
+function renderGrid(V,view,t,ex={}){
+ if(Math.abs(rotT-rotA)>.002)rotA+=(rotT-rotA)*.18;else rotA=rotT;
+ const n=V.n,bob=Math.sin(t/450)*2.5,a=view.a,b=view.b,e=view.e;
+ let rx=a.x+(b.x-a.x)*e,ry=a.y+(b.y-a.y)*e,sx=0;
+ const d=e<.5?a.d:b.d,got=e<1?a.got:b.got,path=e<1?a.path:b.path,said=e<1?a.said:b.said;
+ if(view.wob==='shake')sx=Math.sin(e*Math.PI*6)*(1-e)*6;
+ else if(view.wob){const k=Math.sin(e*Math.PI*4)*(1-e)*.16,w=DIRS[view.wob];rx+=w[0]*k;ry+=w[1]*k}
+ const lift=view.id==='jump'&&e<1?Math.sin(e*Math.PI)*34:0;
+ const corners=[[0,0],[n,0],[n,n],[0,n]].map(p=>R(...p));
+ let s=DEFS+prism(corners,16,null,'#151B45','#10163A',16,true);
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){const g=!ex.noGoal&&V.ziel&&x===V.ziel[0]&&y===V.ziel[1];
+  s+=`<polygon points="${P([isoR(x,y),isoR(x+1,y),isoR(x+1,y+1),isoR(x,y+1)])}" fill="${g?'#FFD166':'#1B2250'}" fill-opacity="${g?.32:1}" stroke="${g?'#FFD166':'#2E3878'}" stroke-width="1.2"/>`}
+ V.loecher.forEach(([x,y])=>{const c=isoR(x+.5,y+.5);s+=`<ellipse cx="${c[0]}" cy="${c[1]}" rx="${TW*.3}" ry="${TH*.3}" fill="#04071A" stroke="#2E3878" stroke-width="2"/><ellipse cx="${c[0]}" cy="${c[1]+TH*.06}" rx="${TW*.2}" ry="${TH*.17}" fill="#000"/>`});
+ if(ex.mark){const c=isoR(ex.mark[0]+.5,ex.mark[1]+.5);s+=`<ellipse cx="${c[0]}" cy="${c[1]}" rx="${TW*.38}" ry="${TH*.38}" fill="none" stroke="#FFD166" stroke-width="3" filter="url(#gl)"/>`}
+ if(ex.cursor){const[x,y]=ex.cursor;s+=`<polygon points="${P([isoR(x,y),isoR(x+1,y),isoR(x+1,y+1),isoR(x,y+1)])}" fill="#7FDBFF" fill-opacity=".18" stroke="#7FDBFF" stroke-width="2"/>`}
+ s+=`<polygon points="${P(corners.map(p=>iso(...p)))}" fill="none" stroke="#7FDBFF" stroke-width="2" filter="url(#gl)"/>`;
+ if(!ex.noRobot){const pts=path.map(p=>isoR(p[0]+.5,p[1]+.5)),last=path[path.length-1];
+  if(Math.abs(rx-last[0])+Math.abs(ry-last[1])>.02)pts.push(isoR(rx+.5,ry+.5));
+  if(pts.length>1)s+=`<polyline points="${P(pts)}" fill="none" stroke="#7FDBFF" stroke-width="2.5" stroke-dasharray="5 6" stroke-linecap="round" opacity=".85"/>`}
+ const O=[];
+ V.waende.forEach(([x,y])=>O.push({z:zOf(x,y),s:cube(x,y)}));
+ V.gegner.forEach(bh=>{const pa=dronePos(bh,a.t||0),pb=dronePos(bh,b.t||0),gx=pa[0]+(pb[0]-pa[0])*e,gy=pa[1]+(pb[1]-pa[1])*e,c=isoR(gx+.5,gy+.5);
+  O.push({z:zOf(gx,gy),s:G(c[0],c[1]-(32-bob)*TW/64,droneL(bob))})});
+ V.sterne.forEach(([x,y],k)=>{if(got.includes(k))return;const c=isoR(x+.5,y+.5);O.push({z:zOf(x,y),s:G(c[0],c[1],starL(bob))})});
+ if(V.ziel&&!ex.noGoal){const c=isoR(V.ziel[0]+.5,V.ziel[1]+.5);O.push({z:zOf(V.ziel[0],V.ziel[1]),s:G(c[0],c[1],planetL(bob))})}
+ if(!ex.noRobot){const c=isoR(rx+.5,ry+.5);O.push({z:zOf(rx,ry)+.1,s:G(c[0]+sx,c[1],robotL(rv(...DIRS[d]),lift,said))})}
+ O.sort((p,q)=>p.z-q.z).forEach(o=>s+=o.s);
+ return{svg:s,got};
+}
+/* Turtle-Fläche 10×10 */
+const TX=x=>212+(x-5)*24.5,TY=y=>161+(y-5)*24.5;
+function segSVG(g,w,col,extra=''){return `<line x1="${TX(g.x1).toFixed(1)}" y1="${TY(g.y1).toFixed(1)}" x2="${TX(g.x2).toFixed(1)}" y2="${TY(g.y2).toFixed(1)}" stroke="${col||g.c}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`}
+function renderTurtle(view,tmpl,t){
+ const a=view.a,b=view.b,e=view.e;let s=DEFS+`<rect x="${TX(0)}" y="${TY(0)}" width="${245}" height="${245}" rx="10" fill="#0E1433" stroke="#2E3878" stroke-width="2"/>`;
+ for(let y=0;y<=10;y++)for(let x=0;x<=10;x++)s+=`<circle cx="${TX(x)}" cy="${TY(y)}" r="1.4" fill="#2E3878"/>`;
+ (tmpl||[]).forEach(g=>s+=segSVG(g,7,'#1F2752')+segSVG(g,2,'#5C6699','stroke-dasharray="4 6"'));
+ a.segs.forEach(g=>s+=segSVG(g,3.5,null,'filter="url(#gl)"'));
+ if(e<1&&b.segs.length>a.segs.length){const g=b.segs[b.segs.length-1];s+=segSVG({x1:g.x1,y1:g.y1,x2:g.x1+(g.x2-g.x1)*e,y2:g.y1+(g.y2-g.y1)*e,c:g.c},3.5,null,'filter="url(#gl)"')}
+ else if(e>=1)b.segs.slice(a.segs.length).forEach(g=>s+=segSVG(g,3.5,null,'filter="url(#gl)"'));
+ let da=b.a-a.a;if(da>180)da-=360;if(da<-180)da+=360;
+ const x=a.x+(b.x-a.x)*e,y=a.y+(b.y-a.y)*e,ang=a.a+da*e,pen=e<1?a.pen:b.pen,col=e<1?a.col:b.col;
+ s+=`<g transform="translate(${TX(x).toFixed(1)} ${TY(y).toFixed(1)}) rotate(${ang.toFixed(1)})"><polygon points="0,-13 8,8 0,4 -8,8" fill="${pen?col:'#5C6699'}" stroke="#0B1026" stroke-width="1.5"/><circle cx="0" cy="-2" r="2.4" fill="#0B1026"/></g>`;
+ return s;
+}
+/* ---------- Pixel-Figuren (Z9) ---------- */
+const PC={W:'#FFFFFF',L:'#C9D3FF',M:'#6B7BC4',D:'#2E3878',N:'#1B2250',K:'#0B1026',Y:'#FFD166'};
+function pix(W,H,draw){const g=[...Array(H)].map(()=>Array(W).fill(0));
+ const set=(x,y,c)=>{if(x>=0&&y>=0&&x<W&&y<H)g[y][x]=c};
+ const ell=(cx,cy,rx,ry,c)=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(((x-cx)/rx)**2+((y-cy)/ry)**2<=1)set(x,y,c)};
+ const pts=(a,c)=>a.forEach(p=>set(p[0],p[1],c));
+ draw({set,ell,pts,g});
+ let r='';for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x])r+=`<rect x="${x}" y="${y}" width="1.03" height="1.03" fill="${PC[g[y][x]]}"/>`;
+ return id=>`<svg ${id?`id="${id}"`:''} viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${r}</svg>`}
+const EYE=['.KK.','KWKK','KKKK','KKKW','.KK.'];
+const eyes=(D,xs,top)=>xs.forEach(ex=>{const x0=Math.floor(ex-1.5);EYE.forEach((r,j)=>[...r].forEach((c,i)=>{if(c!=='.')D.set(x0+i,top+j,c)}))});
+const FIG={
+ bit:pix(22,33,D=>{D.pts([[10,0],[11,0],[9,1],[10,1],[11,1],[12,1],[10,2],[11,2]],'Y');D.pts([[10,3],[11,3]],'M');
+  for(let y=0;y<33;y++)for(let x=0;x<22;x++){const d=Math.hypot(x-10.5,y-13.5);if(d<=9.6)D.set(x,y,d>8.5?'W':'D')}
+  D.ell(10.5,15,6.6,5.2,'L');eyes(D,[7.5,13.5],14);D.pts([[5,18],[6,18],[15,18],[16,18]],'M');D.pts([[9,18],[10,19],[11,19],[12,18]],'K');
+  D.pts([[5,8],[6,7],[7,7],[4,10]],'W');for(let y=24;y<=29;y++)for(let x=6;x<=15;x++)D.set(x,y,x>=14?'M':'L');
+  D.pts([[6,24],[15,24],[6,29],[15,29]],0);D.pts([[10,26],[11,26],[10,27],[11,27]],'Y');
+  for(let y=25;y<=27;y++)D.pts([[4,y],[5,y],[16,y],[17,y]],'M');for(let y=30;y<=31;y++)D.pts([[7,y],[8,y],[13,y],[14,y]],'D');for(const x of[6,7,8,13,14,15])D.set(x,32,'M')}),
+ glibber:pix(22,27,D=>{for(let y=1;y<=6;y++){D.set(6,y,'M');D.set(15,y,'M')}D.ell(6,1,1.4,1.2,'L');D.ell(15,1,1.4,1.2,'L');
+  D.ell(10.5,15.5,10,9.5,'M');D.ell(7,11,3,2.2,'L');D.pts([[3,25],[4,25],[8,26],[9,25],[13,25],[14,26],[17,25],[18,25]],'M');
+  [7.5,14.5].forEach(ex=>{D.ell(ex,15,2.3,2.8,'W');const x=Math.floor(ex);D.pts([[x,15],[x+1,15],[x,16],[x+1,16],[x,17],[x+1,17]],'K');D.set(x,15,'W')});
+  D.pts([[5,10],[6,10],[7,11],[8,11],[9,12]],'K');D.pts([[12,12],[13,11],[14,11],[15,10],[16,10]],'K');
+  D.pts([[9,20],[10,21],[11,21],[12,21],[13,20]],'K');D.set(10,22,'W');D.pts([[4,19],[5,19],[17,19],[18,19]],'L')}),
+ nova:pix(22,32,D=>{D.ell(10.5,13,9.4,9.4,'L');D.ell(10.5,14.5,7.4,6.6,'W');for(let y=4;y<=9;y++)for(let x=2;x<=19;x++)if(Math.hypot(x-10.5,y-13)<=9.4&&y<=8+(Math.abs(x-10.5)>5?2:0))D.set(x,y,'D');
+  D.pts([[10,0],[11,0],[9,1],[10,1],[11,1],[12,1],[8,2],[13,2],[10,2],[11,2]],'Y');D.pts([[10,3],[11,3]],'M');
+  eyes(D,[7.5,13.5],13);D.pts([[5,17],[6,17],[15,17],[16,17]],'M');D.pts([[10,18],[11,18]],'K');
+  for(let y=23;y<=28;y++)for(let x=6;x<=15;x++)D.set(x,y,x>=14?'M':'L');D.pts([[6,23],[15,23],[6,28],[15,28]],0);
+  D.pts([[9,25],[10,24],[11,25],[12,26],[10,26]],'Y');for(let y=24;y<=26;y++)D.pts([[4,y],[5,y],[16,y],[17,y]],'M');
+  for(let y=29;y<=30;y++)D.pts([[7,y],[8,y],[13,y],[14,y]],'D');for(const x of[6,7,8,13,14,15])D.set(x,31,'M')}),
+ zaehli:pix(24,24,D=>{for(let y=9;y<=15;y++)for(let x=0;x<=4;x++)D.set(x,y,(x+y)%2?'M':'D');for(let y=9;y<=15;y++)for(let x=19;x<=23;x++)D.set(x,y,(x+y)%2?'M':'D');
+  D.pts([[5,12],[6,12],[17,12],[18,12]],'L');D.ell(11.5,12,6.8,7.2,'L');D.ell(11.5,13,5,4.6,'W');
+  for(let y=1;y<=4;y++)D.set(12,y,'M');D.ell(12,1,1.3,1,'Y');eyes(D,[9.5,14.5],10);D.pts([[11,16],[12,16]],'K');D.pts([[7,15],[16,15]],'M');
+  D.pts([[10,20],[11,20],[12,20],[13,20]],'D');D.pts([[11,21],[12,21]],'Y')})
+};
+
+/* ================= Spielablauf & Oberfläche ================= */
+const $=s=>document.querySelector(s);
+const LS='mcode-v1';
+const S={mode:null,done:{},crowns:{},seen:{},custom:[],daily:{}};
+try{const o=JSON.parse(localStorage.getItem(LS)||'{}');Object.assign(S,o);
+ if(o.stars){for(const k in o.stars)if(/^\d+$/.test(k))S.done['m1-'+(+k+1)]=o.stars[k];delete S.stars}
+ if(o.crowns)for(const k in o.crowns)if(/^\d+$/.test(k)){S.crowns['m1-'+(+k+1)]=true;delete S.crowns[k]}
+ if(o.seenCut){S.seen.c1=true;delete S.seenCut}}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const M=()=>S.mode||'kid',N=()=>NAMES[M()],kid=()=>M()==='kid';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ---------- Texte ---------- */
+const MSG={
+ kid:{wall:'Autsch – ein Asteroid!',edge:'Hoppla, da endet die Plattform!',enemy:'Zusammenstoß mit einer Drohne!',hole:'Plumps – in den Krater gefallen!',jumpwall:'Über Asteroiden kann man nicht springen.',
+  nostar:'Hier liegt kein Stern.',needstars:'Fast! Du hast nicht alle Sterne eingesammelt.',genau:'Am Ziel – aber nicht genau die richtige Anzahl Sterne.',notsaid:'Am Ziel – aber du hast nicht die richtige Zahl gesagt.',
+  notyet:'Zu wenige Befehle – die Kapsel ist nicht am Planeten angekommen.',over:'Zu viele Befehle – die Kapsel war schon fertig! Die rote Zeile ist zu viel.',
+  empty:'Plane zuerst deine Befehle, dann drück ▶ Play.',running:'Los geht’s …',win:'Geschafft!',shape:'Das Bild passt noch nicht genau zur Vorlage.',vorhersage:'Leider falsch geraten – schau, wo die Kapsel wirklich gelandet ist.',
+  pickfirst:'Wähle zuerst deine Antwort.',unknown:'„{n}“ kenne ich nicht.',undef:'„{n}“ hat noch keinen Wert. Erst zuweisen, z. B. {n} = 0',
+  syntax:'Diese Zeile verstehe ich nicht.',forsyntax:'So geht die Schleife: for i in range(3):',defsyntax:'So geht eine Funktion: def name():',colon:'Am Ende dieser Zeile fehlt ein Doppelpunkt :',
+  indent:'Diese Zeile ist zu weit eingerückt.',emptyblock:'Unter dieser Zeile fehlen eingerückte Befehle.',else:'sonst (else) braucht davor ein if.',paren:'Hier fehlt eine Klammer ).',
+  parens:'Klammern vergessen? Schreib {n}()',string:'Text braucht gerade Anführungszeichen: "gelb"',luecke:'Fülle zuerst die Lücke ___.',args:'{n}() bekommt die falsche Anzahl Werte.',
+  type:'Hier passt der Wert nicht (Zahl erwartet).',zero:'Durch 0 teilen geht nicht.',endless:'Endlosschleife! Die Kapsel kommt nie an.',toolong:'Das sind zu viele Schritte!',
+  recursion:'Die Funktion ruft sich endlos selbst auf.',rangeonly:'range() gibt es nur in for-Schleifen.',color:'Die Farbe „{n}“ gibt es nicht. Probier gelb, blau, weiss, orange, rot.',colorarg:'farbe() braucht eine Farbe in Anführungszeichen.',
+  tapcell:'Tippe auf das Feld, auf dem die Kapsel landet.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
+ adult:{wall:'Fehler: Zielfeld durch Hindernis blockiert.',edge:'Fehler: Bewegung würde die Plattform verlassen.',enemy:'Fehler: Kollision mit einer Drohne.',hole:'Fehler: Bewegung in ein Loch.',jumpwall:'Fehler: jump() über ein Hindernis ist nicht möglich.',
+  nostar:'Fehler: Kein Objekt auf diesem Feld – pick_up() schlägt fehl.',needstars:'Programmende am Ziel, aber nicht alle Objekte gesammelt.',genau:'Am Ziel, aber nicht genau die geforderte Anzahl gesammelt.',notsaid:'Am Ziel, aber say() hat nicht die richtige Anzahl ausgegeben.',
+  notyet:'Programm beendet, bevor das Ziel erreicht wurde – es fehlen Anweisungen.',over:'Ziel wurde vor Programmende erreicht – überzählige Anweisung markiert.',
+  empty:'Erst Anweisungen planen, dann mit ▶ Play ausführen.',running:'Programm läuft …',win:'Level abgeschlossen.',shape:'Die Zeichnung weicht von der Vorlage ab.',vorhersage:'Vorhersage falsch – das tatsächliche Ergebnis ist jetzt sichtbar.',
+  pickfirst:'Bitte zuerst eine Antwort wählen.',unknown:'NameError: „{n}“ ist nicht definiert.',undef:'NameError: Variable „{n}“ hat noch keinen Wert.',
+  syntax:'SyntaxError: Zeile nicht lesbar.',forsyntax:'SyntaxError: erwartet for i in range(n):',defsyntax:'SyntaxError: erwartet def name(parameter):',colon:'SyntaxError: Doppelpunkt am Zeilenende fehlt.',
+  indent:'IndentationError: unerwartete Einrückung.',emptyblock:'IndentationError: Block ohne eingerückten Inhalt.',else:'SyntaxError: else/elif ohne vorheriges if.',paren:'SyntaxError: Klammer nicht geschlossen.',
+  parens:'Aufruf ohne Klammern – {n}() schreiben.',string:'SyntaxError: Zeichenkette mit "…" schreiben.',luecke:'Lücke ___ noch offen.',args:'TypeError: {n}() mit falscher Anzahl Argumente aufgerufen.',
+  type:'TypeError: unpassender Datentyp.',zero:'ZeroDivisionError.',endless:'Abbruch: Endlosschleife (Operationslimit erreicht).',toolong:'Abbruch: mehr als 500 Aktionen.',
+  recursion:'RecursionError: zu tiefe Rekursion.',rangeonly:'range() hier nur in for-Schleifen erlaubt.',color:'ValueError: unbekannte Farbe „{n}“ (yellow, blue, white, orange, red).',colorarg:'color() erwartet einen String, z. B. "blue".',
+  tapcell:'Endfeld der Kapsel vorhersagen und antippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
+const TYICON={vorhersage:'🔮',reparieren:'🔧',luecke:'✏️'};
+
+/* ---------- Bildschirme & Modus ---------- */
+let cur='sStart';
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));cur=id}
+const CROWN='<svg class="crown" viewBox="0 0 24 18"><path d="M2 15 0 3l7 5 5-8 5 8 7-5-2 12z" fill="#FFD166"/><rect x="2" y="15.5" width="20" height="2.5" rx="1" fill="#FFD166"/><circle cx="12" cy="10" r="1.8" fill="#0B1026"/></svg>';
+function starsHTML(n,c){return[0,1,2].map(i=>`<span class="${i<n?'':'off'}">★</span>`).join('')+(c?CROWN:'')}
+function setMode(m){S.mode=m;save();refreshMode()}
+function refreshMode(){
+ document.querySelectorAll('.modeBtn').forEach(b=>b.textContent=kid()?'Kinder':'Erwachsene');
+ document.querySelectorAll('.modeCard').forEach(b=>b.classList.toggle('sel',b.dataset.mode===S.mode));
+ if(cur==='sMap')renderMap();
+ if(cur==='sGame'&&L){if(editing)setEdit(false);translateSrc();if(L.code!=null)origCode=fillT(L.code,M());buildCmds();renderCode();showHint(hintKey,hintType,hintArg)}
+ if(cur==='sCut')showPage(true);
+ if(cur==='sEdit')renderTools();
+}
+document.querySelectorAll('.modeBtn').forEach(b=>b.onclick=e=>{e.stopPropagation();setMode(kid()?'adult':'kid')});
+document.querySelectorAll('.modeCard').forEach(b=>b.onclick=()=>{setMode(b.dataset.mode);renderMap();show('sMap')});
+$('#mapBack').onclick=()=>{show('sStart');refreshMode()};
+if(!/\/code\/?/.test(location.pathname))$('#homeLink').hidden=true;
+
+/* ---------- Übersicht ---------- */
+const misDone=m=>!!S.done[m.levels[m.levels.length-1].id];
+const misBadge=m=>m.levels.every(l=>S.done[l.id]===3);
+function misOpen(i){if(i===0)return true;const m=MISSIONS[i];if(m.id==='m6'||m.id==='m7')return misDone(MISSIONS[4]);return misDone(MISSIONS[i-1])}
+const lvOpen=(m,i)=>i===0||!!S.done[m.levels[i-1].id];
+const wsOpen=()=>misDone(MISSIONS[6]);
+function renderMap(){
+ let h='',tot=0,cr=0;
+ MISSIONS.forEach((m,mi)=>{const open=misOpen(mi);
+  h+=`<section class="mis ${open?'':'lock'} ${misDone(m)?'done':''} ${misBadge(m)?'badge':''}"><div class="misHead"><div class="misNum">${misBadge(m)?'★':mi+1}</div><div><h2>${m.title[M()]}${m.bonus?'<span class="bonus">Bonus</span>':''}</h2><p>${m.sub[M()]}</p></div></div><div class="lvRow">`;
+  m.levels.forEach((l,i)=>{
+   m.cuts.filter(c=>c.at===i).forEach(c=>{const ok=open&&lvOpen(m,i);const ch=CUTS[c.id].pages[0].s;
+    h+=`<button class="lv cutn ${ok?'':'lock'}" data-cut="${c.id}" ${ok?'':'disabled'}>${FIG[ch]()}<span>${CHARS[ch].name}</span></button>`});
+   const st=S.done[l.id]||0,ok=open&&lvOpen(m,i);tot+=st;if(S.crowns[l.id])cr++;
+   h+=`<button class="lv ${st?'done':''} ${ok?'':'lock'}" data-m="${mi}" data-l="${i}" ${ok?'':'disabled'}><small>${l.turtle?'🎨':TYICON[l.typ]||'Level'}</small><b>${i+1}</b><span class="hstars">${starsHTML(st,S.crowns[l.id])}</span></button>`});
+  m.cuts.filter(c=>c.at===m.levels.length).forEach(c=>{const ok=misDone(m);h+=`<button class="lv cutn ${ok?'':'lock'}" data-cut="${c.id}" ${ok?'':'disabled'}>${FIG[CUTS[c.id].pages[0].s]()}<span>FINALE</span></button>`});
+  h+='</div></section>'});
+ const wo=wsOpen(),dk=dayKey();
+ h+=`<section class="mis ws ${wo?'':'lock'}"><div class="misHead"><div class="misNum">⚙</div><div><h2>Werkstatt</h2><p>${wo?(kid()?'Tagesrätsel und eigene Level':'Tagesrätsel, Level-Editor, eigene Level'):(kid()?'Nach Glibbers Station freigeschaltet':'Freischaltung nach Mission 7')}</p></div></div><div class="lvRow">`+
+  `<button class="lv" data-daily="1" ${wo?'':'disabled'}><small>Tagesrätsel ${dk.slice(8)}.${dk.slice(5,7)}.</small><span class="hstars">${starsHTML(S.daily[dk]||0)}</span></button>`+
+  `<button class="lv" data-editor="1" ${wo?'':'disabled'}><small>Neues Level</small><b>＋</b></button>`+
+  S.custom.map((c,i)=>`<button class="lv" data-custom="${i}" ${wo?'':'disabled'}><small>${esc(c.name)}</small><b>▶</b><span class="hstars" data-cedit="${i}">✎ bearbeiten</span></button>`).join('')+'</div></section>';
+ $('#missionList').innerHTML=h;$('#mapTotal').innerHTML=`★ ${tot}${cr?' · '+CROWN+' '+cr:''}`;
+}
+$('#missionList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+ if(b.dataset.cut){openCut(b.dataset.cut,()=>{renderMap();show('sMap')});return}
+ if(b.dataset.daily){startLevel(dailyLevel(dayKey()),{kind:'daily',key:dayKey()});return}
+ if(b.dataset.editor){openEditor(null);return}
+ if(b.dataset.custom!=null){const i=+b.dataset.custom;if(e.target.closest('[data-cedit]')){openEditor(i);return}startLevel(customLevel(S.custom[i].data),{kind:'custom',i});return}
+ enterLevel(+b.dataset.m,+b.dataset.l)};
+function enterLevel(mi,i){const m=MISSIONS[mi],c=m.cuts.find(c=>c.at===i&&!S.seen[c.id]);
+ if(c)openCut(c.id,()=>startLevel(m.levels[i],{kind:'mission',mi}));else startLevel(m.levels[i],{kind:'mission',mi})}
+
+/* ---------- Level-Zustand ---------- */
+let L=null,origin=null,src=[],origCode=null,bind=0,usedBtn=false,editing=false,running=false,stepI=null,stepRes=null,vi=0,vstat=[],view=null,
+ hintKey='intro',hintType='',hintArg='',errLine=-1,actLine=-1,pick=null,chips=null,TMPL=null;
+const V_=i=>{const v=L.varianten&&L.varianten[i]||{};return Object.assign({},L,v)};
+const nVar=()=>L.varianten?L.varianten.length:1;
+function startState(i){if(L.turtle)return turtleWorld(L.turtle).states[0];return gridWorld(V_(i)).states[0]}
+const setView=s=>{view={a:s,b:s,e:1,wob:null,id:null}};
+function startLevel(lv,org){
+ L=lv;origin=org;rotT=rotA=0;setBoard(L.n);vi=0;vstat=[];pick=null;chips=null;usedBtn=false;errLine=-1;actLine=-1;stepI=null;running=false;
+ if(editing){editing=false;$('#ta').style.display='none';$('#code').style.display=''}
+ origCode=L.code!=null?fillT(L.code,M()):null;src=origCode!=null?origCode.replace(/\s+$/,'').split('\n'):[];recalcBind();
+ TMPL=L.turtle&&L.turtle.vorlage?tmplSegs(L.turtle.vorlage):null;
+ setView(startState(0));
+ $('#gTitle').textContent=org.kind==='mission'?`Mission ${org.mi+1} · Level ${L.idx+1}`:org.kind==='daily'?'Tagesrätsel':'Eigenes Level';
+ updHeadStars();$('#win').classList.remove('on');$('#fail').classList.remove('on');show('sGame');
+ const ro=L.typ==='vorhersage';$('#bEdit').hidden=ro;$('#bUndo').hidden=ro;$('#bClear').hidden=ro;$('#bStep').hidden=ro;$('#bRun').textContent=ro?'▶ Prüfen':'▶ Play';
+ $('#rotHint').style.display=L.turtle?'none':'';$('#rotHint').style.opacity=1;
+ buildCmds();renderTabs();renderCode();showHint('intro');active='game';ratio=null;layout();
+}
+function tmplSegs(code){const c=compile(code.split('\n')),W=turtleWorld(L.turtle);execute(c.tree,W);return W.st.segs}
+function updHeadStars(){const id=L.id||(origin.kind==='daily'?'daily':null);$('#gStars').innerHTML=origin.kind==='mission'?starsHTML(S.done[L.id]||0,S.crowns[L.id]):origin.kind==='daily'?starsHTML(S.daily[origin.key]||0):''}
+function showHint(k,type='',arg=''){hintKey=k;hintType=type;hintArg=arg;
+ const t=k==='intro'?(L.hint?L.hint[M()]:(kid()?'Bring die Kapsel zum Planeten und sammle alle Sterne.':'Ziel erreichen, alle Sterne sammeln.')):(MSG[M()][k]||k).replace(/\{n\}/g,arg);
+ $('#hint').textContent=t;$('#hint').className='hint '+type}
+function renderTabs(){const el=$('#vtabs');if(!L.varianten){el.innerHTML='';return}
+ el.innerHTML=L.varianten.map((v,i)=>`<button data-v="${i}" class="${i===vi?'on':''} ${vstat[i]===true?'ok':vstat[i]===false?'bad':''}">${'ABCDE'[i]}</button>`).join('')}
+$('#vtabs').onclick=e=>{const b=e.target.closest('button');if(!b||running)return;vi=+b.dataset.v;setView(startState(vi));renderTabs()};
+
+/* ---------- Knöpfe & Chips ---------- */
+function btnLabel(id){const n=N(),k=kid();
+ switch(id){case 'loop':return k?'Wiederhole':'for';case 'if':return k?'wenn':'if';case 'else':return k?'sonst':'else';case 'while':return k?'solange':'while';case 'def':return k?'Funktion':'def';
+  case 'var0':return n.v+' = 0';case 'inc':return n.v+' + 1';case 'say':return n.say+'('+n.v+')';case 'tvor':return n.move+'(…)';case 'tdreh':return n.turn+'(…)';case 'farbe':return n.color+'(…)';case 'stift':return k?'Stift':'pen';
+  default:return n[id]+'()'}}
+const BLOCK=['loop','if','else','while','def'];
+function userFns(){const r=[];src.forEach(t=>{const m=t.match(/^def\s+([\p{L}_][\p{L}\p{N}_]*)\s*\(\s*\)\s*:/u);if(m)r.push(m[1])});return r}
+function buildCmds(){
+ const row=$('#cmdRow');
+ if(L.typ==='vorhersage'){
+  if(L.frage==='wert')row.innerHTML=`<span class="lbl">${kid()?'Deine Antwort:':'Antwort:'}</span>`+L.optionen.map(o=>`<button class="chip ${pick===o?'sel':''}" data-pick="${o}">${o}</button>`).join('')+`<button class="play" id="bPlay">▶ Prüfen</button>`;
+  else row.innerHTML=`<span class="lbl">${pick?(kid()?'Feld gewählt ✓':'Feld gewählt ✓'):(kid()?'Feld antippen':'Feld antippen')}</span><button class="play" id="bPlay">▶ Prüfen</button>`;
+  return}
+ if(chips){row.innerHTML=chips.items.map((c,i)=>`<button class="chip" data-chip="${i}">${esc(c.l)}</button>`).join('')+'<button class="chip x" data-chipx="1">✕</button>';return}
+ let h=L.knoepfe.map(id=>`<button class="cmd ${BLOCK.includes(id)?'blk':''}" data-id="${id}"><span class="ic">${ICON[id]||''}</span>${esc(btnLabel(id))}</button>`).join('');
+ h+=userFns().map(f=>`<button class="cmd fn" data-fn="${f}"><span class="ic">ƒ</span>${f}()</button>`).join('');
+ if(bind>0&&!editing)h+=`<button class="cmd end" data-end="1"><span class="ic">⇤</span>${kid()?'Block Ende':'dedent'}</button>`;
+ row.innerHTML=h+`<button class="play" id="bPlay">▶ Play</button>`;
+}
+function conds(kind){const n=N(),r=[];
+ if(kind==='while')(L.sens||[]).forEach(s=>{r.push(s==='goal'||s==='wall'?'not '+n[s]+'()':n[s]+'()')});
+ (L.sens||[]).forEach(s=>{const a=n[s]+'()',b='not '+n[s]+'()';if(!r.includes(a))r.push(a);if(!r.includes(b))r.push(b)});
+ (L.bed||[]).forEach(b=>r.push(fillT(b,M())));return r}
+function openChips(id){const n=N(),k=kid();let items=[];
+ switch(id){
+  case 'loop':items=[2,3,4,5,6].map(v=>({l:(k?v+'×':`range(${v})`),t:`for i in range(${v}):`,o:1}));break;
+  case 'if':items=conds('if').map(c=>({l:c,t:`if ${c}:`,o:1}));break;
+  case 'while':items=conds('while').map(c=>({l:c,t:`while ${c}:`,o:1}));break;
+  case 'def':items=DEFNAMES[M()].filter(f=>!userFns().includes(f)).map(f=>({l:f+'()',t:`def ${f}():`,o:1,top:1}));break;
+  case 'tvor':items=[1,2,3,4,5].map(v=>({l:`${n.move}(${v})`,t:`${n.move}(${v})`,id:'tvor'}));break;
+  case 'tdreh':items=[90,-90,120,144,60,72,45].map(v=>({l:`${n.turn}(${v})`,t:`${n.turn}(${v})`,id:'tdreh'}));break;
+  case 'farbe':items=(k?['gelb','blau','weiss','orange','rot']:['yellow','blue','white','orange','red']).map(v=>({l:v,t:`${n.color}("${v}")`,id:'farbe'}));break;
+  case 'stift':items=[{l:n.penup+'()',t:n.penup+'()',id:'stift'},{l:n.pendown+'()',t:n.pendown+'()',id:'stift'}];break;
+ }
+ if(!items.length)return;chips={id,items};buildCmds()}
+const SIMPLE={move:1,left:1,right:1,pick:1,jump:1,wait:1};
+function lineFor(id){const n=N();if(SIMPLE[id])return n[id]+'()';if(id==='var0')return n.v+' = 0';if(id==='inc')return n.v+' = '+n.v+' + 1';if(id==='say')return n.say+'('+n.v+')';return null}
+$('#cmdRow').onpointerdown=e=>{if(editing&&e.target.closest('button'))e.preventDefault()};
+$('#cmdRow').onclick=e=>{const b=e.target.closest('button');if(!b||running)return;
+ if(b.id==='bPlay'){run();return}
+ if(b.dataset.pick!=null){pick=+b.dataset.pick;buildCmds();showHint('chosen');return}
+ if(b.dataset.chipx){chips=null;buildCmds();return}
+ if(b.dataset.chip!=null){const c=chips.items[+b.dataset.chip];chips=null;insert(c.t,c.o,c.top,c.id||'x');buildCmds();return}
+ if(b.dataset.end){bind=Math.max(0,bind-1);buildCmds();return}
+ if(b.dataset.fn){insert(b.dataset.fn+'()',0,0,'fn');return}
+ const id=b.dataset.id;
+ if(id==='else'){insert('else:',1,0,'else',true);return}
+ const ln=lineFor(id);if(ln){insert(ln,0,0,id);return}
+ openChips(id)};
+function insert(text,opens,top,id,isElse){usedBtn=true;
+ if(editing){insertAtCursor(text,opens,isElse);flash(id);return}
+ let lv=top?0:bind;if(isElse)lv=Math.max(0,bind-1);
+ src.push('    '.repeat(lv)+text);if(opens)bind=lv+1;else if(top)bind=0;
+ changed();flash(id)}
+function flash(id){const b=$(`.cmd[data-id="${id}"]`);if(b){b.classList.add('lit');setTimeout(()=>b.classList.remove('lit'),220)}}
+function recalcBind(){for(let i=src.length-1;i>=0;i--){const t=src[i];if(!t.replace(/#.*/,'').trim())continue;const ind=Math.floor(t.match(/^ */)[0].length/4);bind=ind+(/:\s*$/.test(t.replace(/#.*/,''))?1:0);return}bind=0}
+function lit(id,on){const b=$(`.cmd[data-id="${id}"]`)||$(`.cmd[data-fn="${id}"]`);b&&b.classList.toggle('lit',on)}
+const STEP2BTN={move:'move',left:'left',right:'right',pick:'pick',jump:'jump',wait:'wait',say:'say',turn:'tdreh',color:'farbe',pen:'stift'};
+
+/* ---------- Code-Anzeige & Editor ---------- */
+function hl(t){const ci=t.search(/#(?=(?:[^"]*"[^"]*")*[^"]*$)/),code=ci>=0?t.slice(0,ci):t,ind=code.match(/^ */)[0].length,body=code.slice(ind);
+ const re=/("[^"]*"?|'[^']*'?)|\b(for|in|range|def|if|elif|else|while|not|and|or|return|True|False|pass)\b|([\p{L}_][\p{L}\p{N}_]*)(?=\s*\()|(\d+)/gu;
+ let out='',last=0,m;while((m=re.exec(body))){out+=esc(body.slice(last,m.index));
+  out+=m[1]?`<span class="d">${esc(m[1])}</span>`:m[2]?`<span class="k">${m[2]}</span>`:m[3]?`<span class="c">${esc(m[3])}</span>`:`<span class="d">${m[4]}</span>`;last=re.lastIndex}
+ out+=esc(body.slice(last));
+ return '<i class="ig"></i>'.repeat(Math.floor(ind/4))+' '.repeat(ind%4)+out+(ci>=0?`<span class="cm">${esc(t.slice(ci))}</span>`:'')}
+const lineCount=(a=src)=>a.filter(l=>l.replace(/#.*/,'').trim()).length;
+function changes(){const A=origCode.replace(/\s+$/,'').split('\n').map(s=>s.replace(/\s+$/,'')).filter(s=>s.trim()),B=src.map(s=>s.replace(/\s+$/,'')).filter(s=>s.trim());
+ const d=[...Array(A.length+1)].map((_,i)=>[i,...Array(B.length).fill(0)]);for(let j=1;j<=B.length;j++)d[0][j]=j;
+ for(let i=1;i<=A.length;i++)for(let j=1;j<=B.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));return d[A.length][B.length]}
+function renderCode(){let h='';const ro=L.typ==='vorhersage';
+ if(!src.length)h=`<li class="ph"><span class="n">1</span><span># ${kid()?'Tippe auf einen Befehl – oder auf ✎ und schreib selbst':'Befehlsknopf wählen oder mit ✎ selbst schreiben'}</span></li>`;
+ src.forEach((t,i)=>h+=`<li data-i="${i}" class="${i===actLine?'act':''} ${i===errLine?'err':''} ${ro?'ro':''}"><span class="n">${i+1}</span><span class="t">${hl(t)||' '}</span></li>`);
+ $('#code').innerHTML=h;updInfo();
+ const a=$('#code li.act')||$('#code li.err');a&&a.scrollIntoView({block:'nearest'});
+}
+function updInfo(){const s=editing?$('#ta').value.split('\n'):src;let t;
+ if(L.typ==='vorhersage')t=kid()?'Code lesen – nicht ändern':'Nur lesen';
+ else if(L.typ==='reparieren'){const old=src;if(editing)src=s;const c=changes();src=old;t=`${c} Änderung${c===1?'':'en'} · 3★ bei ≤ ${L.max}`}
+ else if(L.turtle&&L.turtle.frei)t=`${lineCount(s)} Zeilen`;
+ else{const n=lineCount(s);t=`${n} Zeile${n===1?'':'n'} · 3★ bei ≤ ${L.max}`}
+ $('#lineInfo').textContent=t}
+function setEdit(on){if(on===editing||running||L.typ==='vorhersage')return;editing=on;const ta=$('#ta');
+ if(on){ta.value=src.join('\n')+(src.length?'\n':'');$('#code').style.display='none';ta.style.display='block';$('#bEdit').textContent='✓ Fertig';
+  active='code';ratio=null;layout();ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+ else{ta.style.display='none';$('#code').style.display='';$('#bEdit').textContent='✎ Tippen';ta.blur();
+  src=ta.value.replace(/\s+$/,'').split('\n');if(src.length===1&&!src[0])src=[];recalcBind();changed()}
+ buildCmds();updInfo()}
+function changed(){errLine=-1;stepI=null;vstat=[];renderTabs();setView(startState(vi));buildCmds();renderCode();const c=compile(src);if(c.err&&src.length)showErr(c.err);else if(hintType)showHint('intro')}
+function showErr(e){errLine=e.line;renderCode();showHint(e.k,'err',e.n||'')}
+function insertAtCursor(text,opens,isElse){const ta=$('#ta'),v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);let ind=cur.match(/^\s*/)[0];
+ if(isElse)ind=ind.slice(4);const tail=opens?'\n'+ind+'    ':'\n'+ind;
+ const ins=cur.trim()?'\n'+ind+text+tail:(isElse?'':'')+text+tail;
+ if(!cur.trim()&&isElse){ta.setRangeText(ind+text+tail,ls,ta.selectionEnd,'end')}else ta.setRangeText(ins,p,ta.selectionEnd,'end');ta.focus();updInfo()}
+$('#ta').addEventListener('input',updInfo);
+$('#ta').addEventListener('keydown',e=>{const ta=$('#ta');if(e.key==='Tab'){e.preventDefault();ta.setRangeText('    ',ta.selectionStart,ta.selectionEnd,'end')}
+ else if(e.key==='Enter'){e.preventDefault();const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);
+  let ind=cur.match(/^\s*/)[0];if(/:\s*$/.test(cur.replace(/#.*/,'')))ind+='    ';ta.setRangeText('\n'+ind,p,ta.selectionEnd,'end');updInfo()}});
+function translateSrc(){const from=kid()?'adult':'kid',to=M(),map={};
+ for(const k in NAMES[from])map[NAMES[from][k]]=NAMES[to][k];DEFNAMES[from].forEach((f,i)=>map[f]=DEFNAMES[to][i]);
+ for(const c in COLORS){}
+ src=src.map(t=>{const ci=t.indexOf('#'),a=ci>=0?t.slice(0,ci):t,b=ci>=0?t.slice(ci):'';return a.replace(/[\p{L}_][\p{L}\p{N}_]*/gu,m=>map[m]||m)+b});recalcBind()}
+
+/* ---------- Ausführen ---------- */
+let anim=null;
+function tween(a,b,ms,wob,id){return new Promise(res=>{const t0=performance.now();view={a,b,e:0,wob,id};
+ (function f(t){const k=Math.min(1,(t-t0)/ms);view.e=wob?k:(k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2);k<1?requestAnimationFrame(f):res()})(t0)})}
+const dur=()=>[750,520,360,240,150][$('#speed').value-1];
+function simulate(i){const c=compile(src);if(c.err)return{perr:c.err};const V=V_(i);
+ const W=L.turtle?turtleWorld(L.turtle):gridWorld(V,{noOver:L.typ==='vorhersage'});let err=null;
+ try{execute(c.tree,W)}catch(e){if(e&&e.k)err=e;else throw e}
+ let fail=null;const s=W.st;
+ if(err)fail=err.k;
+ else if(L.typ==='vorhersage'){if(L.frage==='wert'?s.said!==pick:(s.x!==pick[0]||s.y!==pick[1]))fail='vorhersage'}
+ else if(L.turtle){if(!L.turtle.frei&&!(covers(TMPL,s.segs)&&covers(s.segs,TMPL)))fail='shape'}
+ else if(!goalOK(V,s))fail=V.ziel&&s.x===V.ziel[0]&&s.y===V.ziel[1]?(V.zielTyp==='genau'?'genau':V.zielTyp==='ansage'&&s.got.length===V.sterne.length?'notsaid':'needstars'):'notyet';
+ return{W,err,fail}}
+async function playStep(r,k,ms){const s=r.W.steps[k],a=r.W.states[k];actLine=s.line;renderCode();const bid=STEP2BTN[s.id];bid&&lit(bid,true);
+ if(s.err){errLine=s.line;actLine=-1;renderCode();
+  if(s.err==='enemy'&&r.W.states[k+1])await tween(a,r.W.states[k+1],ms,null,s.id);
+  if(s.err!=='over')await tween(view.b,view.b,450,s.err==='nostar'?'shake':(view.b.d||'N'));bid&&lit(bid,false);return false}
+ await tween(a,r.W.states[k+1],ms,null,s.id);bid&&lit(bid,false);return true}
+function prep(){if(editing)setEdit(false);chips=null;
+ if(L.typ==='vorhersage'&&pick==null){showHint(L.frage==='wert'?'pickfirst':'tapcell','err');return false}
+ const c=compile(src);if(c.err){showErr(c.err);return false}
+ if(!src.length||!lineCount()){showHint('empty','err');return false}return true}
+async function run(){
+ if(running||!prep())return;running=true;stepI=null;errLine=-1;$('#codeHead').classList.add('busy');showHint('running');vstat=[];
+ let fail=null,line=-1;
+ for(let i=0;i<nVar();i++){vi=i;renderTabs();const r=simulate(i);setView(r.W.states[0]);await sleep(250);const ms=dur();
+  for(let k=0;k<r.W.steps.length;k++){const ok=await playStep(r,k,ms);if(!ok)break;await sleep(ms*.3)}
+  if(r.fail){fail=r.fail;line=r.err?r.err.line:-1;if(r.err&&!r.err.world){errLine=line;actLine=-1;renderCode()}vstat[i]=false;renderTabs();break}
+  vstat[i]=true;renderTabs();actLine=-1;renderCode();if(i<nVar()-1)await sleep(500)}
+ running=false;$('#codeHead').classList.remove('busy');
+ if(fail)lose(fail,(r=>r)(line));else win();
+}
+async function step(){
+ if(running)return;if(stepI===null){if(!prep())return;stepRes=simulate(vi);stepI=0;errLine=-1;setView(stepRes.W.states[0]);showHint('running')}
+ running=true;const r=stepRes;
+ if(stepI<r.W.steps.length){const ok=await playStep(r,stepI,dur());stepI++;if(!ok){stepI=null;running=false;lose(r.fail);return}}
+ if(stepI>=r.W.steps.length){stepI=null;running=false;actLine=-1;
+  if(r.fail){if(r.err&&!r.err.world){errLine=r.err.line;renderCode()}lose(r.fail);return}
+  if(nVar()>1){vstat[vi]=true;renderTabs();showHint('intro');return}win();return}
+ running=false}
+function undo(){if(running)return;if(editing)setEdit(false);while(src.length&&!src[src.length-1].replace(/#.*/,'').trim())src.pop();src.pop();recalcBind();changed()}
+function clearAll(){if(running)return;if(editing){$('#ta').value='';setEdit(false)}src=origCode!=null?origCode.replace(/\s+$/,'').split('\n'):[];usedBtn=false;recalcBind();changed()}
+function lose(k,line){showHint(k,'err',hintArg);$('#failT').textContent=kid()?'Nicht ganz!':'Nicht gelöst';
+ const vt=nVar()>1?(kid()?` (Variante ${'ABCDE'[vi]})`:` – Variante ${'ABCDE'[vi]}`):'';
+ $('#failS').textContent=(MSG[M()][k]||k).replace(/\{n\}/g,hintArg)+vt;
+ $('#failClear').textContent=L.code!=null?(kid()?'Original-Code':'Original wiederherstellen'):'Code löschen';
+ $('#failClear').hidden=L.typ==='vorhersage';$('#failRestart').textContent=L.typ==='vorhersage'?(kid()?'Nochmal raten':'Neu versuchen'):'Neu starten';
+ setTimeout(()=>$('#fail').classList.add('on'),450)}
+$('#failRestart').onclick=()=>{$('#fail').classList.remove('on');if(L.typ==='vorhersage'){pick=null;buildCmds()}vstat=[];renderTabs();setView(startState(vi));renderCode();showHint('intro')};
+$('#failClear').onclick=()=>{$('#fail').classList.remove('on');clearAll()};
+function score(){if(L.typ==='vorhersage'||L.turtle&&L.turtle.frei)return 3;const v=L.typ==='reparieren'?changes():lineCount();return v<=L.max?3:v<=L.max+(L.typ==='reparieren'?1:2)?2:1}
+function win(){const st=score(),k=kid(),crown=!usedBtn&&L.typ!=='vorhersage'&&lineCount()>0;
+ if(origin.kind==='mission'){if(st>(S.done[L.id]||0))S.done[L.id]=st;if(crown)S.crowns[L.id]=true}
+ else if(origin.kind==='daily'){if(st>(S.daily[origin.key]||0))S.daily[origin.key]=st}save();updHeadStars();showHint('win','ok');
+ $('#winT').textContent=k?'Super gemacht!':'Gelöst';$('#winStars').innerHTML=starsHTML(st,crown);
+ const n=L.typ==='reparieren'?changes():lineCount();
+ $('#winS').textContent=L.typ==='vorhersage'?(k?'Richtig vorhergesagt!':'Vorhersage korrekt.'):L.turtle&&L.turtle.frei?(k?'Was für ein Sternbild!':'Freie Zeichnung.'):
+  st===3?(L.typ==='reparieren'?(k?`Repariert mit nur ${n} Änderung${n===1?'':'en'}!`:`${n} Änderung(en) – optimal.`):(k?`Perfekt – nur ${n} Zeilen!`:`Sehr gut: ${n} Zeilen.`))
+  :(L.typ==='reparieren'?(k?`Schaffst du es mit ${L.max} Änderung? Dann 3 Sterne.`:`${n} Änderungen – für 3 Sterne höchstens ${L.max}.`):(k?`Schaffst du es mit ${L.max} Zeilen? Dann gibt es 3 Sterne.`:`${n} Zeilen – für 3 Sterne höchstens ${L.max}.`));
+ $('#winC').textContent=L.typ==='vorhersage'?'':crown?(k?'Krone: komplett selbst geschrieben!':'Krone: Lösung vollständig getippt.'):(k?'Tipp: Schreib den Code selbst mit ✎ – dann gibt es eine Krone!':'Bonus: Code ohne Befehlsknöpfe tippen ergibt eine Krone.');
+ $('#winSave').hidden=!(L.turtle&&L.turtle.frei);
+ $('#winNext').textContent=origin.kind!=='mission'?(origin.kind==='custom'&&origin.edit!=null?'Zum Editor':'Zur Übersicht'):'Weiter';
+ setTimeout(()=>$('#win').classList.add('on'),380)}
+$('#winAgain').onclick=()=>startLevel(L,origin);
+$('#winNext').onclick=()=>{
+ if(origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}
+ if(origin.kind!=='mission'){renderMap();show('sMap');return}
+ const m=MISSIONS[origin.mi],ni=L.idx+1,c=m.cuts.find(c=>c.at===ni&&!S.seen[c.id]);
+ const go=()=>{if(ni<m.levels.length)startLevel(m.levels[ni],origin);else{renderMap();show('sMap')}};
+ if(c)openCut(c.id,go);else go()};
+$('#winSave').onclick=()=>{try{const svg=$('#world').outerHTML.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"'),img=new Image(),cv=document.createElement('canvas');cv.width=792;cv.height=516;
+ img.onload=()=>{const c=cv.getContext('2d');c.fillStyle='#0B1026';c.fillRect(0,0,792,516);c.drawImage(img,0,0,792,516);const a=document.createElement('a');a.download='sternbild.png';a.href=cv.toDataURL('image/png');a.click()};
+ img.src='data:image/svg+xml,'+encodeURIComponent(svg)}catch(e){}};
+$('#bRun').onclick=run;$('#bStep').onclick=step;$('#bUndo').onclick=undo;$('#bClear').onclick=clearAll;$('#bEdit').onclick=()=>setEdit(!editing);
+$('#gBack').onclick=()=>{if(editing)setEdit(false);if(origin&&origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}renderMap();show('sMap')};
+$('#code').onclick=e=>{if(running||L.typ==='vorhersage')return;const li=e.target.closest('li[data-i]');if(!li){setEdit(true);return}
+ const i=+li.dataset.i,t=src[i].trim(),m=t.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*\(/u);if(!m){setEdit(true);return}
+ const id=NAME2ID[m[1]];const bid=id?(L.turtle?STEP2BTN[id==='move'?'move':id]||id:id):m[1];actLine=i;renderCode();lit(bid,true);
+ setTimeout(()=>{lit(bid,false);if(actLine===i&&!running){actLine=-1;renderCode()}},800)};
+$('#code').ondblclick=()=>setEdit(true);
+
+/* ---------- Geteilter Bildschirm ---------- */
+let active='game',ratio=null,rowH=0;
+function layout(){const pg=$('#paneGame'),row=$('#cmdRow'),sp=$('#split'),land=matchMedia('(orientation:landscape)').matches;
+ if(row.offsetHeight)rowH=row.offsetHeight;
+ const base=ratio!=null?ratio:2/3,hide=active==='code',avail=(land?sp.clientWidth:sp.clientHeight)-18;
+ pg.classList.toggle('nobtn',hide);const g=Math.max(80,base*avail-(hide&&!land?rowH:0));
+ pg.style.flexGrow=g;$('#paneCode').style.flexGrow=Math.max(1,avail-g)}
+addEventListener('resize',()=>cur==='sGame'&&layout());
+['paneGame','paneCode'].forEach(id=>$('#'+id).addEventListener('pointerdown',e=>{const a=id==='paneGame'?'game':'code';if(active!==a){active=a;ratio=null;layout()}}));
+(function(){const dv=$('#divider'),sp=$('#split');let drag=false,moved=0,p0;
+ dv.addEventListener('pointerdown',e=>{drag=true;moved=0;p0=[e.clientX,e.clientY];dv.setPointerCapture(e.pointerId);sp.classList.add('drag')});
+ dv.addEventListener('pointermove',e=>{if(!drag)return;moved=Math.max(moved,Math.hypot(e.clientX-p0[0],e.clientY-p0[1]));if(moved<6)return;
+  const r=sp.getBoundingClientRect(),land=matchMedia('(orientation:landscape)').matches;ratio=Math.min(.8,Math.max(.2,land?(e.clientX-r.left)/r.width:(e.clientY-r.top)/r.height));layout()});
+ const up=()=>{if(!drag)return;drag=false;sp.classList.remove('drag');if(moved<6){active=active==='game'?'code':'game';ratio=null;layout()}};
+ dv.addEventListener('pointerup',up);dv.addEventListener('pointercancel',up)})();
+
+/* ---------- Spielfeld: Zeichnen, Wischen, Antippen ---------- */
+function cellAt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+ const u=(q.x-OX)/(TW/2),v=(q.y-OY)/(TH/2),[x,y]=Rinv((u+v)/2,(v-u)/2),cx=Math.floor(x),cy=Math.floor(y);return cx>=0&&cy>=0&&cx<RN&&cy<RN?[cx,cy]:null}
+function swipeTap(el,onTap){let p0=null;
+ el.addEventListener('pointerdown',e=>{p0=[e.clientX,e.clientY]});
+ el.addEventListener('pointerup',e=>{if(!p0)return;const dx=e.clientX-p0[0],dy=e.clientY-p0[1];p0=null;
+  if(Math.abs(dx)>40&&Math.abs(dx)>1.4*Math.abs(dy)){rotT+=dx>0?-Math.PI/2:Math.PI/2;$('#rotHint').style.opacity=0;return}
+  if(Math.hypot(dx,dy)<10)onTap(e)});
+ el.addEventListener('pointercancel',()=>p0=null)}
+swipeTap($('#world'),e=>{if(!L||L.turtle||L.typ!=='vorhersage'||L.frage!=='feld'||running)return;const c=cellAt($('#world'),e);if(!c)return;pick=c;buildCmds();showHint('chosen')});
+(function loop(t){
+ if(cur==='sGame'&&L&&view){if(L.turtle)$('#world').innerHTML=renderTurtle(view,TMPL,t);
+  else{const V=V_(vi),r=renderGrid(V,view,t||0,{mark:L.typ==='vorhersage'&&L.frage==='feld'?pick:null,noGoal:L.typ==='vorhersage'});$('#world').innerHTML=r.svg;
+   const sv=V.sterne.length;$('#hud').textContent=sv?`★ ${r.got.length}/${V.zielTyp==='genau'?V.anzahl:sv}`:''}}
+ if(cur==='sEdit')renderEditor(t||0);
+ requestAnimationFrame(loop)})();
+
+/* ---------- Zwischensequenzen ---------- */
+let cutId=null,cutP=0,cutDone=null,typing=null;
+function openCut(id,after){cutId=id;cutDone=after;cutP=0;show('sCut');showPage()}
+function showPage(instant){const pages=CUTS[cutId].pages,pg=pages[cutP],ch=CHARS[pg.s];
+ $('#figWrap').innerHTML=FIG[pg.s]('figBig');$('#cutName').textContent=ch.name;$('#cutRole').textContent=ch.role;$('#cutBar').textContent=ch.bar;$('#cutSpk').textContent=ch.name;
+ const fill=Math.round((cutP+1)/pages.length*5);$('#segs').innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<fill?'on':''}"></i>`).join('');
+ const code=fillT(pg.c,M());$('#cutCode').textContent=code;$('#cutCode').style.display=code?'':'none';
+ const el=$('#cutTxt'),t=pg[M()];clearInterval(typing);typing=null;if(instant){el.textContent=t;return}
+ let k=0;el.textContent='';typing=setInterval(()=>{k+=2;el.textContent=t.slice(0,k);if(k>=t.length){clearInterval(typing);typing=null}},26)}
+$('#sCut').onclick=e=>{if(e.target.closest('.modeBtn'))return;if(typing){clearInterval(typing);typing=null;showPage(true);return}
+ cutP++;if(cutP>=CUTS[cutId].pages.length){S.seen[cutId]=true;save();cutDone?cutDone():(renderMap(),show('sMap'))}else showPage()};
+
+/* ---------- Löser (Breitensuche) für Editor & Tagesrätsel ---------- */
+function solve(V){const n=V.n,k=V.sterne.length,full=(1<<k)-1,wall=(x,y)=>has(V.waende,x,y)>=0||V.gegner.some(b=>b[0][0]===x&&b[0][1]===y),hole=(x,y)=>has(V.loecher,x,y)>=0,inB=(x,y)=>x>=0&&y>=0&&x<n&&y<n;
+ const key=(x,y,d,m)=>((x*n+y)*4+ORD.indexOf(d))*(1<<k)+m,seen=new Set();let q=[[V.start[0],V.start[1],V.start[2],0]],dist=0;seen.add(key(...q[0]));
+ while(q.length&&dist<60){const nq=[];for(const[x,y,d,m]of q){if(x===V.ziel[0]&&y===V.ziel[1]&&m===full)return dist;
+   const[dx,dy]=DIRS[d],nx=[];const add=s=>{const kk=key(...s);if(!seen.has(kk)){seen.add(kk);nq.push(s)}};
+   if(inB(x+dx,y+dy)&&!wall(x+dx,y+dy)&&!hole(x+dx,y+dy))add([x+dx,y+dy,d,m]);
+   if(inB(x+2*dx,y+2*dy)&&!(inB(x+dx,y+dy)&&wall(x+dx,y+dy))&&!wall(x+2*dx,y+2*dy)&&!hole(x+2*dx,y+2*dy)&&V.loecher.length)add([x+2*dx,y+2*dy,d,m]);
+   add([x,y,ORD[(ORD.indexOf(d)+3)%4],m]);add([x,y,ORD[(ORD.indexOf(d)+1)%4],m]);
+   const si=has(V.sterne,x,y);if(si>=0&&!(m>>si&1))add([x,y,d,m|1<<si])}q=nq;dist++}
+ return-1}
+const ALLK=['move','left','right','pick','jump','loop','if','else','while','def'];
+function customLevel(d){const l=Object.assign({n:6,waende:[],sterne:[],loecher:[],gegner:[]},JSON.parse(JSON.stringify(d)));l.typ='bauen';l.gegner=l.gegner.map(g=>Array.isArray(g[0])?g:[g]);
+ const o=solve(l);l.max=o>0?o:20;l.knoepfe=l.loecher.length?ALLK:ALLK.filter(k=>k!=='jump');l.sens=['wall','star','hole','goal'];return l}
+function dayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function dailyLevel(key){let seed=0;for(const c of key)seed=seed*31+c.charCodeAt(0)|0;const r=rng(seed),ri=n=>Math.floor(r()*n);
+ for(let tries=0;tries<800;tries++){const used=new Set(),cell=()=>{for(;;){const x=ri(6),y=ri(6);if(!used.has(x+','+y)){used.add(x+','+y);return[x,y]}}};
+  const s=cell(),z=cell(),l={n:6,start:[s[0],s[1],'NESW'[ri(4)]],ziel:z,waende:[],sterne:[],loecher:[],gegner:[]};
+  for(let i=0,w=6+ri(4);i<w;i++)l.waende.push(cell());for(let i=0,w=1+ri(2);i<w;i++)l.sterne.push(cell());for(let i=0,w=ri(3);i<w;i++)l.loecher.push(cell());if(r()<.5)l.gegner.push([cell()]);
+  const o=solve(l);if(o>=8&&o<=16){const c=customLevel(l);c.hint={kid:`Tagesrätsel! Kürzester Weg ohne Schleifen: ${o} Zeilen.`,adult:`Tagesrätsel. Optimum ohne Schleifen: ${o} Anweisungen.`};return c}}
+ return customLevel({start:[0,5,'N'],ziel:[5,0],sterne:[[0,0]]})}
+
+/* ---------- Level-Editor ---------- */
+let E=null,eIdx=null,tool='wall';
+const TOOLS=[['wall','Asteroid'],['star','Stern'],['hole','Krater'],['drone','Drohne'],['start','Start ↻'],['goal','Planet'],['erase','Radierer']];
+function openEditor(i,keep){eIdx=i;if(!keep||!E)E=i!=null?JSON.parse(JSON.stringify(S.custom[i].data)):{n:6,start:[0,5,'N'],ziel:[5,0],waende:[],sterne:[],loecher:[],gegner:[]};
+ rotT=rotA=0;setBoard(E.n);renderTools();edInfo();show('sEdit')}
+function renderTools(){$('#tools').innerHTML=TOOLS.map(([k,l])=>`<button class="tool ${tool===k?'on':''}" data-t="${k}">${l}</button>`).join('');$('#eSize').textContent=E?E.n+'×'+E.n:'6×6'}
+$('#tools').onclick=e=>{const b=e.target.closest('button');if(!b)return;tool=b.dataset.t;renderTools()};
+function edLevel(){const l=Object.assign({waende:[],sterne:[],loecher:[],gegner:[]},E);l.gegner=(E.gegner||[]).map(g=>[g]);return l}
+function edInfo(){const o=solve(edLevel());$('#edInfo').textContent=o<0?(kid()?'⚠ So ist das Level nicht lösbar.':'⚠ Nicht lösbar.'):(kid()?`Lösbar! Kürzester Weg: ${o} Zeilen (= 3 Sterne).`:`Lösbar. Optimum ohne Schleifen: ${o} Anweisungen.`)}
+function renderEditor(t){setBoard(E.n);const l=edLevel();const st={x:E.start[0],y:E.start[1],d:E.start[2],got:[],path:[[E.start[0],E.start[1]]],t:0,said:null};
+ $('#eworld').innerHTML=renderGrid(l,{a:st,b:st,e:1},t).svg}
+swipeTap($('#eworld'),e=>{const c=cellAt($('#eworld'),e);if(!c)return;const[x,y]=c,same=p=>p[0]===x&&p[1]===y,rm=()=>{for(const k of['waende','sterne','loecher','gegner'])E[k]=(E[k]||[]).filter(p=>!same(p))};
+ const isS=same(E.start),isZ=same(E.ziel);
+ if(tool==='start'){if(isS)E.start[2]=ORD[(ORD.indexOf(E.start[2])+1)%4];else if(!isZ){rm();E.start=[x,y,E.start[2]]}}
+ else if(tool==='goal'){if(!isS){rm();E.ziel=[x,y]}}
+ else if(tool==='erase')rm();
+ else if(!isS&&!(isZ&&tool!=='star')){const k={wall:'waende',star:'sterne',hole:'loecher',drone:'gegner'}[tool],had=(E[k]||[]).some(same);rm();if(!had)E[k].push([x,y])}
+ edInfo()});
+$('#eBack').onclick=()=>{renderMap();show('sMap')};
+$('#eNew').onclick=()=>{E=null;openEditor(null)};
+$('#eSize').onclick=()=>{const n=E.n===6?8:6,cl=p=>p[0]<n&&p[1]<n;E.n=n;for(const k of['waende','sterne','loecher','gegner'])E[k]=E[k].filter(cl);if(!cl(E.start))E.start=[0,n-1,'N'];if(!cl(E.ziel))E.ziel=[n-1,0];setBoard(n);renderTools();edInfo()};
+$('#eTest').onclick=()=>{if(solve(edLevel())<0){edInfo();return}const l=customLevel(E);startLevel(l,{kind:'custom',edit:eIdx==null?'new':eIdx})};
+$('#eSave').onclick=()=>{if(eIdx==null||eIdx==='new'){S.custom.push({name:(kid()?'Mein Level ':'Level ')+(S.custom.length+1),data:JSON.parse(JSON.stringify(E))});eIdx=S.custom.length-1}else S.custom[eIdx].data=JSON.parse(JSON.stringify(E));save();
+ $('#edInfo').textContent=kid()?'Gespeichert! Du findest es in der Werkstatt.':'Gespeichert (Werkstatt).'};
+function modal(title,text,val,ok){$('#mT').textContent=title;$('#mS').textContent=text;const ta=$('#mTa');ta.hidden=val==null;ta.value=val||'';$('#modal').classList.add('on');
+ $('#mOk').onclick=()=>{$('#modal').classList.remove('on');ok&&ok(ta.value)};$('#mNo').onclick=()=>$('#modal').classList.remove('on');if(val!=null)setTimeout(()=>{ta.focus();ta.select()},50)}
+$('#eCopy').onclick=()=>{const j=JSON.stringify(E);try{navigator.clipboard.writeText(j).then(()=>$('#edInfo').textContent=kid()?'Kopiert! Schick es jemandem.':'In die Zwischenablage kopiert.',()=>modal('Level-Code',kid()?'Markieren und kopieren:':'Code kopieren:',j))}catch(e){modal('Level-Code','',j)}};
+$('#ePaste').onclick=()=>modal(kid()?'Level einfügen':'Level importieren',kid()?'Füge hier einen Level-Code ein.':'JSON einfügen:','',v=>{try{const d=JSON.parse(v);if(!d.start||!d.ziel)throw 0;d.n=d.n===8?8:6;
+ for(const k of['waende','sterne','loecher','gegner'])d[k]=(d[k]||[]).map(p=>Array.isArray(p[0])?p[0]:p);E=d;eIdx=null;openEditor(null,true)}catch(e){$('#edInfo').textContent=kid()?'Das war kein gültiger Level-Code.':'Ungültiges Format.'}});
+
+/* ---------- Start ---------- */
+refreshMode();
+if(S.mode){renderMap();show('sMap')}else show('sStart');
+if('serviceWorker' in navigator&&/\/code\/?/.test(location.pathname))navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(()=>{});
+
+</script>
+</body>
+</html>
