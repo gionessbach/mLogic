@@ -1014,9 +1014,9 @@ function updInfo(){const s=editing?$('#ta').value.split('\n'):src;let t;
  $('#lineInfo').textContent=t}
 function setEdit(on){if(on===editing||running||L.typ==='vorhersage')return;editing=on;const ta=$('#ta');
  if(on){ta.value=src.join('\n')+(src.length?'\n':'');$('#code').style.display='none';ta.style.display='block';$('#bEdit').textContent='✓ Fertig';
-  active='code';ratio=null;layout();ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+  active='code';ratio=null;layout();ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);setTimeout(fitVV,300)}
  else{ta.style.display='none';$('#code').style.display='';$('#bEdit').textContent='✎ Tippen';ta.blur();
-  src=ta.value.replace(/\s+$/,'').split('\n');if(src.length===1&&!src[0])src=[];recalcBind();changed()}
+  src=ta.value.replace(/\s+$/,'').split('\n');if(src.length===1&&!src[0])src=[];recalcBind();changed();fitVV()}
  buildCmds();updInfo()}
 function changed(){errLine=-1;stepI=null;vstat=[];renderTabs();setView(startState(vi));buildCmds();renderCode();const c=compile(src);if(c.err&&src.length)showErr(c.err);else if(hintType)showHint('intro')}
 function showErr(e){errLine=e.line;renderCode();showHint(e.k,'err',e.n||'')}
@@ -1024,7 +1024,7 @@ function insertAtCursor(text,opens,isElse){const ta=$('#ta'),v=ta.value,p=ta.sel
  if(isElse)ind=ind.slice(4);const tail=opens?'\n'+ind+'    ':'\n'+ind;
  const ins=cur.trim()?'\n'+ind+text+tail:(isElse?'':'')+text+tail;
  if(!cur.trim()&&isElse){ta.setRangeText(ind+text+tail,ls,ta.selectionEnd,'end')}else ta.setRangeText(ins,p,ta.selectionEnd,'end');ta.focus();updInfo()}
-$('#ta').addEventListener('input',updInfo);
+$('#ta').addEventListener('input',updInfo);$('#ta').addEventListener('focus',()=>setTimeout(fitVV,300));
 $('#ta').addEventListener('keydown',e=>{const ta=$('#ta');if(e.key==='Backspace'&&ta.selectionStart===ta.selectionEnd){const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);if(cur.length>=4&&/^ +$/.test(cur)){e.preventDefault();const k=cur.length%4||4;ta.setRangeText('',p-k,p,'end');updInfo();return}}
  if(e.key==='Tab'){e.preventDefault();ta.setRangeText('    ',ta.selectionStart,ta.selectionEnd,'end')}
  else if(e.key==='Enter'){e.preventDefault();const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,cur=v.slice(ls,p);
@@ -1120,10 +1120,16 @@ $('#code').ondblclick=()=>setEdit(true);
 let active='game',ratio=null,rowH=0;
 function layout(){const pg=$('#paneGame'),row=$('#cmdRow'),sp=$('#split'),land=matchMedia('(orientation:landscape)').matches;
  if(row.offsetHeight)rowH=row.offsetHeight;
- const base=ratio!=null?ratio:2/3,hide=active==='code',avail=(land?sp.clientWidth:sp.clientHeight)-18;
+ const avail=(land?sp.clientWidth:sp.clientHeight)-18,base=editing?(land?.45:avail<500?.22:.32):ratio!=null?ratio:2/3,hide=active==='code'||editing;
  pg.classList.toggle('nobtn',hide);const g=Math.max(80,base*avail-(hide&&!land?rowH:0));
  pg.style.flexGrow=g;$('#paneCode').style.flexGrow=Math.max(1,avail-g)}
 addEventListener('resize',()=>cur==='sGame'&&layout());
+/* Bildschirmtastatur: Spielansicht auf den sichtbaren Bereich begrenzen, damit das Codefeld frei bleibt */
+function fitVV(){const vv=window.visualViewport,g=$('#sGame');
+ if(editing&&vv&&vv.height<innerHeight-60){g.style.height=vv.height+'px';g.style.top=vv.offsetTop+'px';g.style.bottom='auto'}else{g.style.height='';g.style.top='';g.style.bottom=''}
+ if(cur==='sGame'){layout();if(editing){const ta=$('#ta');setTimeout(()=>{const p=ta.selectionStart,lh=parseFloat(getComputedStyle(ta).lineHeight)||30,ln=ta.value.slice(0,p).split('\n').length;
+  const y=(ln-1)*lh;if(y<ta.scrollTop||y>ta.scrollTop+ta.clientHeight-lh)ta.scrollTop=Math.max(0,y-ta.clientHeight/2)},30)}}}
+if(window.visualViewport){visualViewport.addEventListener('resize',fitVV);visualViewport.addEventListener('scroll',fitVV)}
 ['paneGame','paneCode'].forEach(id=>$('#'+id).addEventListener('pointerdown',e=>{const a=id==='paneGame'?'game':'code';if(active!==a){active=a;ratio=null;layout()}}));
 (function(){const dv=$('#divider'),sp=$('#split');let drag=false,moved=0,p0;
  dv.addEventListener('pointerdown',e=>{drag=true;moved=0;p0=[e.clientX,e.clientY];dv.setPointerCapture(e.pointerId);sp.classList.add('drag')});
