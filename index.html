@@ -102,6 +102,11 @@ footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
       <div class="t"><strong>mCode</strong><span>Spielerisch Python lernen: Kapsel steuern, Code planen, Missionen meistern.</span><span class="st" id="codeStatus"></span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
+    <a class="game" href="atom/">
+      <div class="ic"><img src="atom/icon-192.png" alt=""></div>
+      <div class="t"><strong>mAtom</strong><span>Vom Atom zur Zelle: Moleküle bauen, bevor sie zerfallen. Roguelike mit XP.</span><span class="st" id="atomStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
   </nav>
   <footer>Dein Spielstand bleibt auf diesem Gerät gespeichert.</footer>
 </div>
@@ -120,6 +125,7 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   try{const rb=JSON.parse(localStorage.getItem('mrise.board')||'[]');document.getElementById('riseStatus').textContent=rb.length?'Rekord: '+rb[0].pts.toLocaleString('de-DE')+' Punkte · '+rb[0].h.toFixed(1).replace('.',',')+' m':'Neu: einfach loslegen';}catch(e){}
   try{const gr=parseInt(localStorage.getItem('mgrow.record')||'0',10)||0;document.getElementById('growStatus').textContent=gr?'Rekord: '+gr+' Jahreszeiten':'Neu: einfach loslegen';}catch(e){}
   try{const mc=JSON.parse(localStorage.getItem('mcode-v1')||'{}'),dn=Object.keys(mc.done||{}).length,cr=Object.keys(mc.crowns||{}).length;document.getElementById('codeStatus').textContent=dn?dn+' von 47 Leveln'+(cr?' · '+cr+' Kronen':''):'Neu: einfach loslegen';}catch(e){}
+  try{const ax=parseInt(localStorage.getItem('matom_xp')||'0',10)||0;document.getElementById('atomStatus').textContent=ax?ax+' XP':'Neu: einfach loslegen';}catch(e){}
   document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}

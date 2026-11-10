@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>mAtom</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mAtom">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#262625">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#262625;--s1:#31312F;--s2:#1D1D1C;--l1:#3A3A38;--l2:#5A5955;--y:#FDD602;--fg:#F2F1EC;--mut:#B9B8B2;--warn:#FF7A6B;--warn2:#FF9B8F}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:"Space Grotesk",system-ui,sans-serif;overflow:hidden;touch-action:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.scr{position:fixed;inset:0;display:none;padding:max(16px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+.scr.on{display:flex}
+.logo{width:52px;height:52px;border-radius:14px;background:var(--y);display:grid;place-items:center;flex:none}
+.btn{min-height:52px;padding:12px 26px;border-radius:999px;border:2px solid var(--l2);background:transparent;font-size:18px;font-weight:700}
+.btn.pri{background:var(--y);border-color:var(--y);color:var(--bg)}
+.btn:active{transform:scale(.97)}
+/* Start */
+#start{flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+#start .back{position:absolute;top:max(16px,env(safe-area-inset-top));left:max(20px,env(safe-area-inset-left));color:var(--mut);text-decoration:none;font-size:17px;padding:10px 4px}
+#start .logo{width:104px;height:104px;border-radius:28px}
+#start h1{margin:0;font-size:46px}
+#start .sub{color:var(--mut);font-size:18px;margin-top:-10px}
+.xp{border:2px solid var(--y);color:var(--y);border-radius:999px;padding:6px 16px;font-weight:700}
+#start .col{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
+/* Dialog / Ende */
+#dialog,#ende{align-items:center;justify-content:center}
+.card{background:var(--s1);border-radius:22px;padding:28px;width:min(560px,100%);display:flex;flex-direction:column;gap:14px}
+.card h2{margin:0;font-size:28px}
+.card p{margin:0;font-size:18px;line-height:1.45;color:#DAD9D3}
+.card .sk{display:flex;justify-content:center;background:var(--s2);border-radius:16px;padding:12px}
+.card .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.dots{display:flex;gap:7px}.dots i{width:9px;height:9px;border-radius:50%;background:var(--l2)}.dots i.on{background:var(--y)}
+.kl{color:var(--mut);font-size:14px;text-transform:uppercase;letter-spacing:.08em}
+.xpl{display:flex;flex-direction:column;gap:8px;font-size:18px}
+.xpl div{display:flex;justify-content:space-between;border-bottom:1px solid var(--l1);padding-bottom:8px}
+.xpl .sum{color:var(--y);font-weight:700;border:0}
+/* Merge */
+#merge{flex-direction:column;gap:14px}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header .tt{display:flex;flex-direction:column}
+header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
+.sp{flex:1}
+.stab{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--mut)}
+.stab .pp{display:flex;gap:5px}.stab i{width:16px;height:16px;border-radius:50%;background:var(--fg);transition:background .3s}.stab i.off{background:transparent;border:2px solid var(--l2)}
+.mass{display:flex;flex-direction:column;gap:6px;width:220px}
+.mass .lb{display:flex;justify-content:space-between;font-size:14px;color:var(--mut)}.mass .lb b{color:var(--fg)}
+.bar{height:10px;background:var(--l1);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--y);border-radius:5px;transition:width .4s}
+.time{border:2px solid var(--y);color:var(--y);padding:8px 16px;border-radius:999px;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.time.over{border-color:var(--l2);color:var(--mut)}
+.ib{width:48px;height:48px;border-radius:12px;border:2px solid var(--l2);background:transparent;display:grid;place-items:center}
+.reactors{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.re{position:relative;background:var(--s1);border-radius:22px;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;padding:14px 10px 12px;min-height:0;transition:border-color .2s}
+.re .h{font-size:15px;color:var(--mut);text-align:center}
+.re .nm{font-size:13px;color:var(--mut);opacity:.8}
+.re svg{flex:1;width:100%;min-height:0}
+.re .need{font-size:14px;color:var(--mut);min-height:20px}
+.re .cd{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:#3a2a28;color:var(--warn2);font-weight:700;padding:8px 18px;border-radius:999px;font-size:16px;display:none;white-space:nowrap}
+.re.inst{border:2px dashed var(--warn)}.re.inst .h{color:var(--warn2)}.re.inst .cd{display:block}
+.re.ok{border:2px solid rgba(253,214,2,.45)}.re.hov{border:2px solid var(--y)}
+.re.done{animation:done .5s}.re.dec{animation:dec .45s}
+@keyframes done{0%{box-shadow:0 0 0 0 rgba(253,214,2,.7)}100%{box-shadow:0 0 0 18px rgba(253,214,2,0)}}
+@keyframes dec{0%,100%{transform:none}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pop{position:absolute;left:50%;top:40%;transform:translate(-50%,0);font-weight:700;font-size:22px;pointer-events:none;animation:pop 1s forwards}
+@keyframes pop{to{transform:translate(-50%,-50px);opacity:0}}
+.belt{position:relative;height:118px;flex:none;background:var(--s2);border-radius:22px;overflow:hidden;
+ background-image:repeating-linear-gradient(100deg,transparent 0 117px,var(--l1) 117px 120px)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mut);justify-content:center}
+.legend span{display:flex;align-items:center;gap:6px}.legend i{width:14px;height:14px;border-radius:50%}
+.at{position:absolute;top:50%;left:0;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--bg);touch-action:none;cursor:grab}
+.at.drag{position:fixed;top:0;z-index:50;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);transition:none}
+.at.back{transition:transform .25s ease-in}
+.hint{color:var(--mut);font-size:14px;text-align:center;margin-top:-6px}
+/* Lexikon */
+#lex{position:fixed;inset:0;background:rgba(20,20,19,.85);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+#lex.on{display:flex}
+#lex .card{max-height:90vh;overflow:auto}
+.lx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.lx div{background:var(--s2);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:15px}
+.lx small{color:var(--mut)}
+@media (orientation:portrait){
+ .reactors{grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}
+ .re{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:0 10px}
+ .re .h{width:100%}.re svg{height:100%;width:auto;flex:1}
+ .mass{width:160px}
+}
+</style>
+</head>
+<body>
+
+<section id="start" class="scr on">
+  <a class="back" href="../" aria-label="Zurück zu mLogic">← mLogic</a>
+  <div class="logo" id="bigLogo"></div>
+  <h1>mAtom</h1>
+  <div class="sub">Vom Atom zur Zelle</div>
+  <div class="xp" id="xpStand">0 XP</div>
+  <div class="col">
+    <button class="btn pri" id="bWeiter" style="display:none">Lauf fortsetzen</button>
+    <button class="btn" id="bNeu">Neuer Lauf</button>
+    <button class="btn" id="bLex">Lexikon</button>
+  </div>
+</section>
+
+<section id="dialog" class="scr">
+  <div class="card">
+    <div class="kl" id="dKl"></div>
+    <h2 id="dT"></h2>
+    <div class="sk" id="dSk"></div>
+    <p id="dP"></p>
+    <div class="row"><div class="dots" id="dDots"></div><button class="btn pri" id="dW">Weiter</button></div>
+  </div>
+</section>
+
+<section id="merge" class="scr">
+  <header>
+    <div class="logo" id="hLogo"></div>
+    <div class="tt"><b>mAtom</b><span id="eTitel">Ebene 1 · Atom → Molekül</span></div>
+    <div class="sp"></div>
+    <div class="stab"><span>Stabilität</span><div class="pp" id="stab"></div></div>
+    <div class="mass"><div class="lb"><span>Kritische Masse</span><b id="massT">0 / 30</b></div><div class="bar"><i id="massB"></i></div></div>
+    <span class="time" id="zeit">00:00 / Ziel 05:00</span>
+    <button class="ib" id="bPause" aria-label="Pause und speichern"><svg width="20" height="20" viewBox="0 0 20 20"><rect x="4" y="3" width="4" height="14" fill="#F2F1EC"/><rect x="12" y="3" width="4" height="14" fill="#F2F1EC"/></svg></button>
+  </header>
+  <div class="reactors" id="reactors"></div>
+  <div class="belt" id="belt"></div>
+  <div class="hint">Atome laufen vorbei · in einen Reaktor ziehen, bevor sie verschwinden</div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section id="ende" class="scr">
+  <div class="card">
+    <div class="kl" id="eKl">Lauf-Ende</div>
+    <h2 id="eT"></h2>
+    <p id="eP"></p>
+    <div class="xpl" id="eXp"></div>
+    <div class="row"><button class="btn" id="eStart">Zum Start</button><button class="btn pri" id="eNeu">Neuer Lauf</button></div>
+  </div>
+</section>
+
+<div id="lex"><div class="card"><h2>Lexikon</h2><p>Geschöpfe, die du am Ende eines Laufs freischaltest.</p><div class="lx" id="lxList"></div><div class="row"><span></span><button class="btn pri" id="lexZu">Schließen</button></div></div></div>
+
+<script>
+'use strict';
+// ---------- Daten ----------
+const EL={H:{c:'#6EC1F0',n:'Wasserstoff',r:24},C:{c:'#A98BF0',n:'Kohlenstoff',r:28},N:{c:'#5DD39E',n:'Stickstoff',r:28},O:{c:'#FF7A6B',n:'Sauerstoff',r:28},P:{c:'#FFA552',n:'Phosphor',r:30},S:{c:'#F2E36B',n:'Schwefel',r:30}};
+// Baupläne: Atome mit Position im Feld 300×230, Bindungen [a,b,Ordnung]
+const REZEPTE={E1:[
+ {id:'h2',name:'Wasserstoff',formel:'H₂',teile:{H:2},a:[['H',112,115],['H',188,115]],b:[[0,1,1]]},
+ {id:'h2o',name:'Wasser',formel:'H₂O',teile:{H:2,O:1},a:[['O',150,92],['H',92,140],['H',208,140]],b:[[0,1,1],[0,2,1]],w:'104,5°'},
+ {id:'ch4',name:'Methan',formel:'CH₄',teile:{C:1,H:4},a:[['C',150,115],['H',150,42],['H',225,115],['H',150,188],['H',75,115]],b:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]},
+ {id:'nh3',name:'Ammoniak',formel:'NH₃',teile:{N:1,H:3},a:[['N',150,90],['H',84,150],['H',150,175],['H',216,150]],b:[[0,1,1],[0,2,1],[0,3,1]],w:'107°'},
+ {id:'co2',name:'Kohlendioxid',formel:'CO₂',teile:{C:1,O:2},a:[['C',150,115],['O',68,115],['O',232,115]],b:[[0,1,2],[0,2,2]]},
+ {id:'ch2o',name:'Formaldehyd',formel:'CH₂O',teile:{C:1,H:2,O:1},a:[['C',150,128],['O',150,50],['H',84,172],['H',216,172]],b:[[0,1,2],[0,2,1],[0,3,1]]},
+ {id:'hcn',name:'Blausäure',formel:'HCN',teile:{H:1,C:1,N:1},a:[['H',62,115],['C',150,115],['N',238,115]],b:[[0,1,1],[1,2,3]]},
+ {id:'po4',name:'Phosphat',formel:'PO₄',teile:{P:1,O:4},a:[['P',150,115],['O',150,40],['O',226,115],['O',150,190],['O',74,115]],b:[[0,1,2],[0,2,1],[0,3,1],[0,4,1]]}
+]};
+const EBENEN={1:{titel:'Atom → Molekül',pool:'E1',masse:30,ziel:300,tempo:60,xp:10,bandMix:['H','H','H','C','N','O','O','P']}};
+const GESCHOEPFE=[
+ {id:'bakterium',name:'Bakterium',xp:0},{id:'cyano',name:'Cyanobakterium',xp:0},
+ {id:'amoebe',name:'Amöbe',xp:100},{id:'pantoffel',name:'Pantoffeltierchen',xp:100},
+ {id:'hefe',name:'Hefe',xp:100},{id:'gruenalge',name:'Grünalge',xp:100}];
+const ZERFALL=20, WARN=10;
+
+// ---------- Speicher (Präfix matom_) ----------
+function lade(k,d){try{const v=localStorage.getItem('matom_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function sichere(k,v){try{v==null?localStorage.removeItem('matom_'+k):localStorage.setItem('matom_'+k,JSON.stringify(v))}catch(e){}}
+
+// ---------- Hilfen ----------
+const $=id=>document.getElementById(id);
+function rngAus(seed){let a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const mmss=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const ATOM_SVG='<svg width="%" height="%" viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="#262625" stroke-width="2.5"><ellipse cx="20" cy="20" rx="17" ry="7"/><ellipse cx="20" cy="20" rx="17" ry="7" transform="rotate(60 20 20)"/><ellipse cx="20" cy="20" rx="17" ry="7" transform="rotate(120 20 20)"/></g><circle cx="20" cy="20" r="4" fill="#262625"/></svg>';
+$('bigLogo').innerHTML=ATOM_SVG.replace(/%/g,72);$('hLogo').innerHTML=ATOM_SVG.replace(/%/g,36);
+function zeige(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id))}
+function atomEl(el,size){const d=document.createElement('div');d.className='at';const s=size||(el==='H'?52:60);
+ d.style.width=d.style.height=s+'px';d.style.marginTop=(-s/2)+'px';d.style.background=EL[el].c;d.style.fontSize=Math.round(s*.45)+'px';d.textContent=el;return d}
+$('legend').innerHTML=Object.keys(EL).map(k=>`<span><i style="background:${EL[k].c}"></i>${k} ${EL[k].n}</span>`).join('');
+
+// ---------- Startbildschirm ----------
+function startScreen(){
+  $('xpStand').textContent=lade('xp',0)+' XP';
+  $('bWeiter').style.display=lade('run',null)?'':'none';
+  zeige('start');
+}
+$('bNeu').onclick=()=>{const run={seed:(Math.random()*2**31)|0,ebene:1,bonusStab:0,xpLauf:[]};sichere('run',run);zeigeDialog(1,()=>starteEbene(1))};
+$('bWeiter').onclick=()=>{const r=lade('run',null);if(r)starteEbene(r.ebene)};
+$('bLex').onclick=()=>{const xp=lade('xp',0),lx=lade('lexikon',{});
+  $('lxList').innerHTML=GESCHOEPFE.map(g=>{const f=lx[g.id];
+   return `<div><svg width="56" height="56" viewBox="0 0 56 56"><ellipse cx="28" cy="28" rx="24" ry="18" fill="${f?'#5DD39E':'#3A3A38'}"/></svg><b>${f?g.name:'???'}</b><small>${f?'entdeckt am '+f:(xp>=g.xp?'noch nicht entdeckt':'ab '+g.xp+' XP')}</small></div>`}).join('');
+  $('lex').classList.add('on')};
+$('lexZu').onclick=()=>$('lex').classList.remove('on');
+
+// ---------- Pflicht-Dialog ----------
+const sk=(inner,w=260,h=110)=>`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="Space Grotesk, sans-serif" font-weight="700" text-anchor="middle">${inner}</svg>`;
+const kugel=(el,x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${EL[el].c}"/><text x="${x}" y="${y+r*.38}" font-size="${r}" fill="#262625">${el}</text>`;
+const DIALOGE={1:[
+ {t:'Die Bausteine des Lebens',p:'Alles Leben besteht vor allem aus sechs Elementen: Kohlenstoff (C), Wasserstoff (H), Stickstoff (N), Sauerstoff (O), Phosphor (P) und Schwefel (S).',s:sk(['C','H','N','O','P','S'].map((e,i)=>kugel(e,25+i*42,55,18)).join(''))},
+ {t:'Atome verbinden sich',p:'Atome teilen sich Elektronen und halten so zusammen. Was dabei entsteht, heißt Molekül. Zwei Wasserstoff-Atome ergeben H₂.',s:sk(`<line x1="100" y1="55" x2="160" y2="55" stroke="#5A5955" stroke-width="8" stroke-linecap="round"/>${kugel('H',100,55,24)}${kugel('H',160,55,24)}`)},
+ {t:'Wasser ist H₂O',p:'Ein Sauerstoff-Atom bindet zwei Wasserstoff-Atome. Sie stehen nicht in einer Linie, sondern im Winkel von 104,5°.',s:sk(`<line x1="130" y1="42" x2="88" y2="78" stroke="#5A5955" stroke-width="8"/><line x1="130" y1="42" x2="172" y2="78" stroke="#5A5955" stroke-width="8"/>${kugel('O',130,42,26)}${kugel('H',88,80,19)}${kugel('H',172,80,19)}<text x="130" y="106" font-size="13" font-weight="400" fill="#B9B8B2">104,5°</text>`)},
+ {t:'So spielst du',p:'Zieh Atome vom Fließband in die Reaktoren. Ein angefangenes Molekül zerfällt nach 20 Sekunden, dann sinkt die Stabilität. Bei 30 Molekülen ist die kritische Masse erreicht. Schaffst du es unter 5:00, gibt es den Tempobonus.',s:sk(`<rect x="10" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="95" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="180" y="10" width="70" height="56" rx="10" fill="#31312F" stroke="#FF7A6B" stroke-dasharray="5 4"/><rect x="10" y="76" width="240" height="28" rx="10" fill="#262625"/>${kugel('H',60,90,10)}${kugel('O',130,90,11)}${kugel('C',200,90,11)}<path d="M130 80 Q 128 60 130 44" stroke="#FDD602" stroke-width="2" fill="none" stroke-dasharray="3 3"/>`)},
+ {t:'Echt, aber vereinfacht',p:'Die Rezepte stammen aus der echten Chemie. Manches ist vereinfacht: Phosphat (PO₄) ist eigentlich ein geladenes Ion, und Doppel- oder Dreifachbindungen musst du nicht selbst bauen.',s:sk(`<line x1="130" y1="55" x2="130" y2="15" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="185" y2="55" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="130" y2="95" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="75" y2="55" stroke="#5A5955" stroke-width="6"/>${kugel('P',130,55,22)}${kugel('O',130,15,13)}${kugel('O',185,55,13)}${kugel('O',130,95,13)}${kugel('O',75,55,13)}`)}
+]};
+let dlg=null;
+function zeigeDialog(e,weiter){dlg={karten:DIALOGE[e],i:0,weiter,e};maleDialog();zeige('dialog')}
+function maleDialog(){const k=dlg.karten[dlg.i];$('dKl').textContent='Vor Ebene '+dlg.e+' · '+(dlg.i+1)+' / '+dlg.karten.length;
+  $('dT').textContent=k.t;$('dP').textContent=k.p;$('dSk').innerHTML=k.s;
+  $('dDots').innerHTML=dlg.karten.map((_,j)=>`<i class="${j===dlg.i?'on':''}"></i>`).join('');
+  $('dW').textContent=dlg.i===dlg.karten.length-1?'Los geht’s':'Weiter'}
+$('dW').onclick=()=>{if(dlg.i<dlg.karten.length-1){dlg.i++;maleDialog()}else{const w=dlg.weiter;dlg=null;w()}};
+
+// ---------- Merge-Ebene ----------
+let G=null; // laufender Spielzustand der Ebene
+function starteEbene(e){
+  const run=lade('run',null)||{seed:1,ebene:e,bonusStab:0,xpLauf:[]};
+  run.ebene=e;sichere('run',run); // Autospeichern beim Start der Ebene
+  const cfg=EBENEN[e];
+  G={e,cfg,run,rng:rngAus(run.seed+e*977),masse:0,stab:5+(run.bonusStab||0),stabMax:5+(run.bonusStab||0),zeit:0,
+     band:[],spawnT:0,bandOff:0,uid:0,re:[],laeuft:true,drag:null};
+  $('eTitel').textContent='Ebene '+e+' · '+cfg.titel;
+  const box=$('reactors');box.innerHTML='';$('belt').innerHTML='';
+  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='re';
+    d.innerHTML='<div class="h"></div><svg viewBox="0 0 300 230"></svg><div class="nm"></div><div class="need"></div><div class="cd"></div>';
+    box.appendChild(d);G.re.push({dom:d,rez:null,voll:[],t:null,cdS:-1});neuerBauplan(i)}
+  zeige('merge');malKopf();letzt=performance.now();
+}
+function neuerBauplan(i){const pool=REZEPTE[G.cfg.pool];let r;
+  for(let k=0;k<6;k++){r=pool[Math.floor(G.rng()*pool.length)];if(!G.re.some((x,j)=>j!==i&&x.rez&&x.rez.id===r.id))break}
+  const R=G.re[i];R.rez=r;R.voll=r.a.map(()=>false);R.t=null;R.cdS=-1;malReaktor(i)}
+function malReaktor(i){const R=G.re[i],r=R.rez,d=R.dom,n=R.voll.filter(Boolean).length;
+  d.querySelector('.h').textContent='Reaktor '+(i+1)+' · '+r.formel+' · '+(d.classList.contains('inst')?'instabil':n+'/'+r.a.length);
+  d.querySelector('.nm').textContent=r.name;
+  let s='';
+  for(const[a,b,o] of r.b){const A=r.a[a],B=r.a[b],ok=R.voll[a]&&R.voll[b];
+    const dx=B[1]-A[1],dy=B[2]-A[2],L=Math.hypot(dx,dy),px=-dy/L,py=dx/L;
+    for(let k=0;k<o;k++){const off=(k-(o-1)/2)*(ok?9:8);
+      s+=`<line x1="${A[1]+px*off}" y1="${A[2]+py*off}" x2="${B[1]+px*off}" y2="${B[2]+py*off}" stroke="#5A5955" stroke-width="${ok?(o>1?5:8):4}" ${ok?'':'stroke-dasharray="3 9"'} stroke-linecap="round"/>`}}
+  r.a.forEach(([el,x,y],j)=>{const rr=EL[el].r;
+    s+=R.voll[j]?`<circle cx="${x}" cy="${y}" r="${rr}" fill="${EL[el].c}"/><text x="${x}" y="${y+rr*.36}" font-size="${rr}" font-weight="700" text-anchor="middle" fill="#262625" font-family="Space Grotesk, sans-serif">${el}</text>`
+      :`<circle cx="${x}" cy="${y}" r="${rr}" fill="none" stroke="${EL[el].c}" stroke-width="3" stroke-dasharray="6 6"/><text x="${x}" y="${y+rr*.36}" font-size="${rr*.8}" text-anchor="middle" fill="${EL[el].c}" opacity=".45" font-family="Space Grotesk, sans-serif">${el}</text>`});
+  if(r.w)s+=`<text x="150" y="222" font-size="14" text-anchor="middle" fill="#B9B8B2" font-family="Space Grotesk, sans-serif">${r.w}</text>`;
+  d.querySelector('svg').innerHTML=s;
+  const fehlt={};r.a.forEach(([el],j)=>{if(!R.voll[j])fehlt[el]=(fehlt[el]||0)+1});
+  d.querySelector('.need').textContent=R.t===null?'':'braucht noch '+Object.entries(fehlt).map(([k,v])=>v+' × '+k).join(', ');
+}
+function malKopf(){
+  $('stab').innerHTML=Array.from({length:G.stabMax},(_,i)=>`<i class="${i<G.stab?'':'off'}"></i>`).join('');
+  $('massT').textContent=G.masse+' / '+G.cfg.masse;$('massB').style.width=Math.min(100,G.masse/G.cfg.masse*100)+'%';
+}
+// Atom in Reaktor i setzen – true, wenn ein passender freier Platz da war
+function setze(i,el){const R=G.re[i];const j=R.rez.a.findIndex((a,k)=>a[0]===el&&!R.voll[k]);if(j<0)return false;
+  R.voll[j]=true;if(R.t===null)R.t=0;
+  if(R.voll.every(Boolean)){fertig(i)}else malReaktor(i);return true}
+function passt(i,el){const R=G.re[i];return R.rez.a.some((a,k)=>a[0]===el&&!R.voll[k])}
+function fertig(i){const R=G.re[i],d=R.dom;G.masse++;
+  const p=document.createElement('div');p.className='pop';p.style.color='#FDD602';p.textContent='+1 '+R.rez.formel;d.appendChild(p);setTimeout(()=>p.remove(),1000);
+  d.classList.remove('inst','done');void d.offsetWidth;d.classList.add('done');
+  neuerBauplan(i);malKopf();if(G.masse>=G.cfg.masse)ebeneGeschafft()}
+function zerfall(i){const R=G.re[i],d=R.dom;R.voll=R.voll.map(()=>false);R.t=null;R.cdS=-1;G.stab--;
+  d.classList.remove('inst','dec');void d.offsetWidth;d.classList.add('dec');
+  const p=document.createElement('div');p.className='pop';p.style.color='#FF9B8F';p.textContent='zerfallen · −1 Stabilität';d.appendChild(p);setTimeout(()=>p.remove(),1000);
+  malReaktor(i);malKopf();if(G.stab<=0)gescheitert()}
+
+// Fließband
+function bandBreite(){return $('belt').clientWidth||1000}
+function spawne(){const b=bandBreite();let el;
+  const fehlt=[];G.re.forEach(R=>R.rez.a.forEach((a,k)=>{if(!R.voll[k])fehlt.push(a[0])}));
+  if(fehlt.length&&G.rng()<0.6)el=fehlt[Math.floor(G.rng()*fehlt.length)];
+  else{const m=G.cfg.bandMix;el=m[Math.floor(G.rng()*m.length)]}
+  const dom=atomEl(el);const it={id:++G.uid,el,x:b+10,dom,held:false};
+  dom.addEventListener('pointerdown',ev=>greife(ev,it));$('belt').appendChild(dom);G.band.push(it);posAtom(it)}
+function posAtom(it){it.dom.style.transform=`translateX(${it.x}px)`}
+
+// Drag & Drop
+function greife(ev,it){if(!G||!G.laeuft||it.held||G.drag)return;ev.preventDefault();
+  it.held=true;it.dom.style.visibility='hidden';
+  const s=parseFloat(it.dom.style.width);const g=atomEl(it.el,s*1.1);g.classList.add('drag');g.style.marginTop='0';document.body.appendChild(g);
+  G.drag={it,g,s:s*1.1,pid:ev.pointerId};zieh(ev.clientX,ev.clientY);
+  G.re.forEach((R,i)=>R.dom.classList.toggle('ok',passt(i,it.el)))}
+function reaktorUnter(x,y){return G.re.findIndex(R=>{const r=R.dom.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom})}
+function zieh(x,y){const D=G.drag;D.g.style.transform=`translate(${x-D.s/2}px,${y-D.s/2}px)`;
+  const h=reaktorUnter(x,y);G.re.forEach((R,i)=>R.dom.classList.toggle('hov',i===h&&passt(i,D.it.el)))}
+window.addEventListener('pointermove',ev=>{if(G&&G.drag&&ev.pointerId===G.drag.pid)zieh(ev.clientX,ev.clientY)});
+function loslassen(ev){if(!G||!G.drag||ev.pointerId!==G.drag.pid)return;const D=G.drag;G.drag=null;
+  G.re.forEach(R=>R.dom.classList.remove('ok','hov'));
+  const i=ev.type==='pointerup'?reaktorUnter(ev.clientX,ev.clientY):-1;
+  if(i>=0&&G.laeuft&&setze(i,D.it.el)){D.g.remove();entferne(D.it);return}
+  // falsches Teilchen: springt zurück aufs Band
+  const it=D.it;if(it.x<-60||!it.dom.isConnected){D.g.remove();entferne(it);return}
+  const r=it.dom.getBoundingClientRect();D.g.classList.add('back');
+  D.g.style.transform=`translate(${r.left-(D.s-r.width)/2}px,${r.top-(D.s-r.height)/2}px)`;
+  setTimeout(()=>{D.g.remove();it.held=false;it.dom.style.visibility=''},250)}
+window.addEventListener('pointerup',loslassen);window.addEventListener('pointercancel',loslassen);
+function entferne(it){const k=G.band.indexOf(it);if(k>=0)G.band.splice(k,1);it.dom.remove()}
+
+// Spielschleife
+function schritt(dt){if(!G||!G.laeuft)return;
+  G.zeit+=dt;const b=bandBreite();
+  G.spawnT-=dt;const last=G.band[G.band.length-1];
+  if(G.spawnT<=0&&(!last||last.x<b-80)){spawne();G.spawnT=1.1}
+  G.bandOff+=G.cfg.tempo*dt;
+  for(let k=G.band.length-1;k>=0;k--){const it=G.band[k];it.x-=G.cfg.tempo*dt;posAtom(it);if(it.x<-70&&!it.held)entferne(it)}
+  for(let i=0;i<3&&G&&G.laeuft;i++){const R=G.re[i];if(R.t===null)continue;R.t+=dt;const rest=ZERFALL-R.t;
+    if(rest<=0){zerfall(i);continue}
+    const inst=rest<=WARN;if(inst!==R.dom.classList.contains('inst')){R.dom.classList.toggle('inst',inst);malReaktor(i)}
+    const s=Math.ceil(rest);if(inst&&s!==R.cdS){R.cdS=s;R.dom.querySelector('.cd').textContent='Zerfall in '+mmss(s)}}
+}
+function malZeit(){if(!G)return;$('belt').style.backgroundPosition=(-G.bandOff)+'px 0';
+  const z=$('zeit');z.textContent=mmss(G.zeit)+' / Ziel '+mmss(G.cfg.ziel);z.classList.toggle('over',G.zeit>G.cfg.ziel)}
+let letzt=performance.now();
+function loop(t){const dt=Math.min(0.1,(t-letzt)/1000);letzt=t;
+  if(G&&G.laeuft&&$('merge').classList.contains('on')){schritt(dt);malZeit()}requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+$('bPause').onclick=()=>{if(!G)return;G.laeuft=false;if(G.drag){G.drag.g.remove();G.drag=null}G=null;startScreen()};
+
+// ---------- Lauf-Ende ----------
+function ebeneGeschafft(){G.laeuft=false;
+  const cfg=G.cfg,tempo=G.zeit<cfg.ziel,bonus=tempo?Math.round(cfg.xp*0.5):0,run=G.run;
+  run.xpLauf.push({e:G.e,xp:cfg.xp,bonus,zeit:G.zeit});run.bonusStab=tempo?1:0;
+  sichere('xp',lade('xp',0)+cfg.xp+bonus);
+  // Prototyp: nach E1 endet der Lauf (E2/E3 folgen im nächsten Bauschritt)
+  sichere('run',null);
+  endeZeigen(true,run,'Ebene '+G.e+' geschafft!','Die kritische Masse ist erreicht. In diesem Prototyp endet der Lauf hier – Ebene 2 (Molekül → Baustein) folgt im nächsten Bauschritt.')}
+function gescheitert(){G.laeuft=false;const run=G.run;sichere('run',null);
+  endeZeigen(false,run,'Lauf gescheitert','Die Stabilität ist auf 0 gefallen – deine Moleküle sind zerfallen. Die XP der geschafften Ebenen bleiben dir erhalten.')}
+function endeZeigen(ok,run,titel,text){
+  if(G&&G.drag){G.drag.g.remove();G.drag=null}
+  $('eT').textContent=titel;$('eT').style.color=ok?'#FDD602':'#FF9B8F';$('eP').textContent=text;
+  let sum=0,h='';
+  for(const x of run.xpLauf){sum+=x.xp+x.bonus;h+=`<div><span>Ebene ${x.e} geschafft</span><b>+${x.xp} XP</b></div>`;
+    if(x.bonus)h+=`<div><span>Tempobonus (${mmss(x.zeit)} unter Ziel)</span><b>+${x.bonus} XP</b></div>`}
+  if(!run.xpLauf.length)h+='<div><span>Keine Ebene geschafft</span><b>+0 XP</b></div>';
+  h+=`<div class="sum"><span>Dieser Lauf</span><span>+${sum} XP</span></div><div class="sum" style="color:var(--mut)"><span>XP gesamt</span><span>${lade('xp',0)} XP</span></div>`;
+  $('eXp').innerHTML=h;setTimeout(()=>{zeige('ende');G=null},ok?600:450)}
+$('eStart').onclick=startScreen;$('eNeu').onclick=()=>$('bNeu').onclick();
+
+// ---------- Test-Hook ----------
+window.matomTest={
+  skipTo(e){if(!lade('run',null))sichere('run',{seed:12345,ebene:e,bonusStab:0,xpLauf:[]});starteEbene(e);return 'Ebene '+e},
+  autoMerge(n){let c=0;while(G&&G.laeuft&&c<n){const i=c%3,R=G.re[i];for(const[el] of R.rez.a)setze(i,el);c++}return this.state()},
+  tick(sek){for(let t=0;t<sek;t+=0.05)schritt(0.05);return this.state()},
+  setze(i,el){return setze(i,el)},
+  state(){const s=document.querySelector('.scr.on').id;return G?{screen:s,masse:G.masse,stab:G.stab,zeit:+G.zeit.toFixed(1),band:G.band.length,reaktoren:G.re.map(R=>R.rez.id+':'+R.voll.filter(Boolean).length+(R.t!==null?' t='+R.t.toFixed(1):''))}:{screen:s,xp:lade('xp',0)}},
+  simArena(){return 'Arena (E4/E5) ist noch nicht gebaut'}
+};
+startScreen();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(()=>{}))}
+</script>
+</body>
+</html>

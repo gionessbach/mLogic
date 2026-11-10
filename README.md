@@ -10,6 +10,7 @@ Rätsel-Sammlung als Web-App (GitHub Pages), gebaut fürs iPad und Handy.
 | mRise | `rise/` | Physik-Turmbau (Matter.js eingebettet): hoher Turm auf kleiner Stellfläche, Verbinder, Vorbereitungsmodus, Sturmtest, Zerstörmodus, Kindermodus, lokale Bestenliste. |
 | mGrow | `grow/` | Ruhiges Ökosystem-Spiel auf Hex-Raster: Pflanzen, Tiere und Ereignisse, Vielfalt statt Monokultur, Rundenbericht, Legende, Feld per Wisch drehen, reduzierter Ton. |
 | mCode | `code/` | Spielerisch Python lernen: 7 Missionen (Abfolge, Schleifen, Funktionen, Bedingungen, while/Variablen, Turtle-Bonus, Finale), Kinder-/Erwachsenen-Modus, eigener Mini-Interpreter, Level-Editor und Tagesrätsel. |
+| mAtom | `atom/` | Vom Atom zur Zelle als Roguelike: Merge-Ebene E1 (Atome vom Fließband in Reaktoren ziehen, Zerfall, Stabilität, kritische Masse, Tempobonus), XP über alle Läufe. Speicher-Schlüssel `matom_*`. E2–E5 folgen. |
 | mZip | `zip/` | Zahlen der Reihe nach verbinden, jedes Feld füllen. |
 | mFlow | `flow/` | Farben im Kreislauf sortieren. |
 
