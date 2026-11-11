@@ -218,6 +218,9 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 .kidHello .fun{width:40px;height:40px;animation:flt 3s ease-in-out infinite}
 .kidHello .f2{animation-delay:-1s}.kidHello .f3{width:28px;height:28px;animation-delay:-2s}
 @media (prefers-reduced-motion:reduce){.fun{animation:none!important}}
+.code li.sel{background:#2A3470;outline:2px solid #FFD166;outline-offset:-2px}
+.cmdRow .brk{flex-basis:100%;height:0}
+.chip.x.sel{color:#0B1026}
 </style>
 </head>
 <body>
@@ -352,7 +355,7 @@ const MISSIONS=[
   hint:{kid:'Eine Runde um den Asteroiden – vier gleiche Seiten.',adult:'Quadrat: vier identische Seiten.'}},
  {typ:'vorhersage',frage:'feld',start:[0,5,'N'],code:'for i in range(2):\n    {move}()\n    {move}()\n{right}()\n{move}()',antwort:[1,1],waende:[[3,3],[4,1]],
   hint:{kid:'👆 Lies den Code. Wo landet die Kapsel? Tippe direkt auf das Feld auf der Plattform – dann ▶ Prüfen.',adult:'Code lesen, dann das Endfeld direkt auf der Plattform antippen und ▶ Prüfen.'}},
- {typ:'reparieren',start:[0,5,'E'],ziel:[4,5],code:'for i in range(5):\n    {move}()',max:1,waende:[[1,4],[3,4]],
+ {typ:'reparieren',start:[0,5,'E'],ziel:[4,5],code:'for i in range(5):\n    {move}()',max:1,bausteine:['for i in range(3):','for i in range(4):','for i in range(5):','for i in range(6):','{move}()','{right}()'],waende:[[1,4],[3,4]],
   hint:{kid:'Der Code ist kaputt! Ändere so wenig wie möglich.',adult:'Fehler finden: so wenige Änderungen wie möglich.'}},
  {start:[0,5,'E'],ziel:[4,1],sterne:[[0,4],[1,3],[2,2],[3,1]],knoepfe:['move','left','right','pick','loop'],max:6,
   ref:'for i in range(4):\n    links()\n    vor()\n    nimm()\n    rechts()\n    vor()',
@@ -370,11 +373,11 @@ const MISSIONS=[
  {start:[2,2,'E'],ziel:[2,2],sterne:[[5,2],[0,2]],waende:[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]],knoepfe:['move','left','right','pick','loop','def'],max:13,
   ref:'def drehe_um():\n    links()\n    links()\nfor i in range(3):\n    vor()\nnimm()\ndrehe_um()\nfor i in range(5):\n    vor()\nnimm()\ndrehe_um()\nvor()\nvor()',
   hint:{kid:'Baue dir selbst drehe_um() mit ƒ – und nutze es zweimal.',adult:'Definiere eine Funktion zum Umdrehen und rufe sie zweimal auf.'}},
- {typ:'luecke',start:[0,5,'E'],ziel:[3,2],loecher:[[2,5],[3,3]],waende:[[0,4],[1,4],[4,4]],code:'def ___():\n    {move}()\n    {jump}()\n\nhopser()\n{left}()\nhopser()',max:7,
+ {typ:'luecke',start:[0,5,'E'],ziel:[3,2],loecher:[[2,5],[3,3]],waende:[[0,4],[1,4],[4,4]],code:'def ___():\n    {move}()\n    {jump}()\n\nhopser()\n{left}()\nhopser()',max:7,bausteine:['def hopser():','def springer():','def hopser:','hopser()','{jump}()'],
   hint:{kid:'Fülle die Lücke ___ mit dem richtigen Namen.',adult:'Ergänze den Funktionsnamen an der Lücke ___.'}},
  {typ:'vorhersage',frage:'feld',start:[1,5,'N'],code:'def zacke():\n    {move}()\n    {right}()\n    {move}()\n    {left}()\n\nfor i in range(2):\n    zacke()\n{move}()',antwort:[3,2],
   hint:{kid:'Wohin führt die Zacke zweimal? Tippe das Feld an.',adult:'Funktion und Schleife: Endfeld vorhersagen.'}},
- {typ:'reparieren',start:[1,3,'E'],ziel:[0,3],sterne:[[2,3]],waende:[[0,2],[1,2],[2,2],[0,4],[1,4],[2,4]],code:'def {du}():\n    {left}()\n    {left}()\n\n{move}()\n{pick}()\n{move}()\n{move}()',max:1,
+ {typ:'reparieren',start:[1,3,'E'],ziel:[0,3],sterne:[[2,3]],waende:[[0,2],[1,2],[2,2],[0,4],[1,4],[2,4]],code:'def {du}():\n    {left}()\n    {left}()\n\n{move}()\n{pick}()\n{move}()\n{move}()',max:1,bausteine:['{du}()','{left}()','{right}()','{move}()','{pick}()'],
   hint:{kid:'Die Funktion ist da – aber wird sie benutzt?',adult:'Eine Funktion wirkt erst, wenn sie aufgerufen wird.'}},
  {start:[0,1,'E'],ziel:[5,5],loecher:[[2,1],[3,3],[2,5]],sterne:[[3,1],[2,3],[3,5]],waende:[[0,2],[1,2],[2,2],[3,2],[4,2],[1,4],[2,4],[3,4],[4,4],[5,4]],
   knoepfe:['move','left','right','pick','jump','loop','def'],max:21,
@@ -400,7 +403,7 @@ const MISSIONS=[
  {typ:'vorhersage',frage:'feld',start:[0,3,'E'],waende:[[2,3]],code:'for i in range(3):\n    if {wall}():\n        {right}()\n    {move}()',antwort:[1,5],
   hint:{kid:'Wo landet die Kapsel? Achte auf die Wand.',adult:'Bedingung im Kopf ausführen, Endfeld antippen.'}},
  {typ:'reparieren',start:[0,3,'E'],ziel:[3,3],varianten:[{sterne:[[1,3]]},{sterne:[[2,3]]}],waende:[[4,3],[0,2],[1,2],[2,2],[3,2]],
-  code:'for i in range(3):\n    {move}()\n    if {wall}():\n        {pick}()',max:1,
+  code:'for i in range(3):\n    {move}()\n    if {wall}():\n        {pick}()',max:1,bausteine:['if {star}():','if {wall}():','if {hole}():','if not {star}():','{pick}()'],
   hint:{kid:'Hier wird nach dem falschen Ding gefragt.',adult:'Die Bedingung prüft das Falsche.'}},
  {start:[0,2,'E'],ziel:[5,2],varianten:[{loecher:[[2,2]],sterne:[[1,2],[4,2]]},{loecher:[[3,2]],sterne:[[2,2]]},{loecher:[[4,2]],sterne:[[1,2],[3,2]]}],
   waende:[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]],knoepfe:['move','pick','jump','loop','if','else'],sens:['hole','star'],max:7,
@@ -430,7 +433,7 @@ const MISSIONS=[
  {typ:'vorhersage',frage:'wert',optionen:[1,2,3,4],start:[0,3,'E'],sterne:[[1,3],[3,3],[5,3]],
   code:'{v} = 0\nfor i in range(4):\n    {move}()\n    if {star}():\n        {pick}()\n        {v} = {v} + 1\n{say}({v})',
   hint:{kid:'Welche Zahl sagt die Kapsel am Ende?',adult:'Welchen Wert gibt say() aus?'}},
- {typ:'reparieren',start:[0,3,'E'],ziel:[4,3],sterne:[[2,3]],code:'while not {goal}():\n    if {star}():\n        {pick}()',max:1,
+ {typ:'reparieren',start:[0,3,'E'],ziel:[4,3],sterne:[[2,3]],code:'while not {goal}():\n    if {star}():\n        {pick}()',max:1,bausteine:['{move}()','{pick}()','{left}()','{right}()','while not {goal}():'],
   hint:{kid:'Die Kapsel kommt nie an. Was fehlt?',adult:'Endlosschleife: Was fehlt im Schleifenkörper?'}},
  {start:[0,5,'N'],ziel:[5,0],zielTyp:'ansage',knoepfe:[],max:10,sterne:[[1,3],[2,1],[4,4]],
   waende:[[0,0],[1,2],[2,2],[2,3],[2,4],[2,5],[4,0],[4,1],[5,3],[5,4],[5,5]],
@@ -476,6 +479,19 @@ const MISSIONS=[
 ];
 MISSIONS.forEach(m=>m.levels.forEach((l,i)=>{l.id=m.id+'-'+(i+1);l.mi=m.id;l.idx=i;l.typ=l.typ||'bauen';l.n=l.n||6;
  for(const k of ['waende','sterne','loecher','gegner'])l[k]=l[k]||[];l.knoepfe=l.knoepfe||[];}));
+/* Kinder-Modus: jedes Einsteigerlevel bekommt zwei Übungsvarianten (gedreht bzw. gedreht+gespiegelt) */
+const swapLR=s=>s.replace(/\b(links|rechts)\b/g,m=>m==='links'?'rechts':'links');
+function xfLevel(l,rot,mir,suf){const n=l.n;
+ const pt=p=>{let[a,b]=p;for(let i=0;i<rot;i++)[a,b]=[n-1-b,a];if(mir)a=n-1-a;return[a,b]};
+ const dir=d0=>{let r='NESW'['NESW'.indexOf(d0)+rot&3];if(mir)r={E:'W',W:'E',N:'N',S:'S'}[r];return r};
+ const tf=o=>{const x={};if(o.start)x.start=[...pt(o.start),dir(o.start[2])];if(o.ziel)x.ziel=pt(o.ziel);
+  for(const k of['waende','sterne','loecher'])if(o[k])x[k]=o[k].map(pt);if(o.gegner)x.gegner=o.gegner.map(b=>b.map(pt));return x};
+ const e=Object.assign(JSON.parse(JSON.stringify(l)),tf(l));
+ if(l.varianten)e.varianten=l.varianten.map(v=>Object.assign({},v,tf(v)));
+ e.id=l.id+suf;e.extra=true;e.ref=mir?swapLR(l.ref):l.ref;
+ e.hint={kid:'Übung: '+(mir?swapLR(l.hint.kid):l.hint.kid),adult:l.hint.adult};return e}
+MISSIONS.forEach((m,mi)=>{m.kidLevels=[];m.levels.forEach((l,i)=>{m.kidLevels.push(l);
+ if(mi<5&&l.typ==='bauen'&&i<m.levels.length-1&&(mi===0||i>0)&&l.knoepfe.length){m.kidLevels.push(xfLevel(l,1,false,'b'),xfLevel(l,3,true,'c'))}})});
 
 /* Zwischensequenzen: s = Sprecher */
 const CUTS={
@@ -857,7 +873,7 @@ const MSG={
   parens:'Klammern vergessen? Schreib {n}()',string:'Text braucht gerade Anführungszeichen: "gelb"',luecke:'Fülle zuerst die Lücke ___.',args:'{n}() bekommt die falsche Anzahl Werte.',
   type:'Hier passt der Wert nicht (Zahl erwartet).',zero:'Durch 0 teilen geht nicht.',endless:'Endlosschleife! Die Kapsel kommt nie an.',toolong:'Das sind zu viele Schritte!',
   recursion:'Die Funktion ruft sich endlos selbst auf.',rangeonly:'range() gibt es nur in for-Schleifen.',color:'Die Farbe „{n}“ gibt es nicht. Probier gelb, blau, weiss, orange, rot.',colorarg:'farbe() braucht eine Farbe in Anführungszeichen.',
-  tapcell:'👆 Lies den Code und tippe auf das Feld der Plattform, auf dem die Kapsel am Ende steht.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
+  selfirst:'Tippe zuerst im Code auf die Zeile, die du ändern willst.',tapcell:'👆 Lies den Code und tippe auf das Feld der Plattform, auf dem die Kapsel am Ende steht.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
  adult:{wall:'Fehler: Zielfeld durch Hindernis blockiert.',edge:'Fehler: Bewegung würde die Plattform verlassen.',enemy:'Fehler: Kollision mit einer Drohne.',hole:'Fehler: Bewegung in ein Loch.',jumpwall:'Fehler: jump() über ein Hindernis ist nicht möglich.',
   nostar:'Fehler: Kein Objekt auf diesem Feld – pick_up() schlägt fehl.',needstars:'Programmende am Ziel, aber nicht alle Objekte gesammelt.',genau:'Am Ziel, aber nicht genau die geforderte Anzahl gesammelt.',notsaid:'Am Ziel, aber say() hat nicht die richtige Anzahl ausgegeben.',
   notyet:'Programm beendet, bevor das Ziel erreicht wurde – es fehlen Anweisungen.',over:'Ziel wurde vor Programmende erreicht – überzählige Anweisung markiert.',
@@ -868,7 +884,7 @@ const MSG={
   parens:'Aufruf ohne Klammern – {n}() schreiben.',string:'SyntaxError: Zeichenkette mit "…" schreiben.',luecke:'Lücke ___ noch offen.',args:'TypeError: {n}() mit falscher Anzahl Argumente aufgerufen.',
   type:'TypeError: unpassender Datentyp.',zero:'ZeroDivisionError.',endless:'Abbruch: Endlosschleife (Operationslimit erreicht).',toolong:'Abbruch: mehr als 500 Aktionen.',
   recursion:'RecursionError: zu tiefe Rekursion.',rangeonly:'range() hier nur in for-Schleifen erlaubt.',color:'ValueError: unbekannte Farbe „{n}“ (yellow, blue, white, orange, red).',colorarg:'color() erwartet einen String, z. B. "blue".',
-  tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
+  selfirst:'Zuerst eine Codezeile antippen.',tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
 const TYICON={vorhersage:'🔮',reparieren:'🔧',luecke:'✏️'};
 
 /* ---------- Sprecher (nur Kinder-Modus): Systemstimme, hochgepitcht wie ein kleiner Roboter ---------- */
@@ -922,19 +938,20 @@ if(!/\/code\/?/.test(location.pathname))$('#homeLink').hidden=true;
 
 /* ---------- Übersicht ---------- */
 const misDone=m=>!!S.done[m.levels[m.levels.length-1].id];
-const misBadge=m=>m.levels.every(l=>S.done[l.id]===3);
+const LV=m=>kid()?m.kidLevels:m.levels;
+const misBadge=m=>LV(m).every(l=>S.done[l.id]===3);
 function misOpen(i){if(i===0)return true;const m=MISSIONS[i];if(m.id==='m6'||m.id==='m7')return misDone(MISSIONS[4]);return misDone(MISSIONS[i-1])}
-const lvOpen=(m,i)=>i===0||!!S.done[m.levels[i-1].id];
+const lvOpen=(m,i)=>i===0||!!S.done[LV(m)[i-1].id];
 const wsOpen=()=>misDone(MISSIONS[6]);
 function renderMap(){
  let h='',tot=0,cr=0;
  MISSIONS.forEach((m,mi)=>{const open=misOpen(mi);
   h+=`<section class="mis ${open?'':'lock'} ${misDone(m)?'done':''} ${misBadge(m)?'badge':''}"><div class="misHead"><div class="misNum">${misBadge(m)?'★':mi+1}</div><div><h2>${kid()?fun(MISFUN[mi],'misfun'):''}${m.title[M()]}${m.bonus?'<span class="bonus">Bonus</span>':''}</h2><p>${m.sub[M()]}</p></div></div><div class="lvRow">`;
-  m.levels.forEach((l,i)=>{
-   m.cuts.filter(c=>c.at===i).forEach(c=>{const ok=open&&lvOpen(m,i);const ch=CUTS[c.id].pages[0].s;
+  LV(m).forEach((l,i)=>{
+   m.cuts.filter(c=>!l.extra&&c.at===l.idx).forEach(c=>{const ok=open&&lvOpen(m,i);const ch=CUTS[c.id].pages[0].s;
     h+=`<button class="lv cutn ${ok?'':'lock'}" data-cut="${c.id}" ${ok?'':'disabled'}>${FIG[ch]()}<span>${CHARS[ch].name}</span></button>`});
    const st=S.done[l.id]||0,ok=open&&lvOpen(m,i);tot+=st;if(S.crowns[l.id])cr++;
-   h+=`<button class="lv ${st?'done':''} ${ok?'':'lock'}" data-m="${mi}" data-l="${i}" ${ok?'':'disabled'}><small>${l.turtle?'🎨':TYICON[l.typ]||'Level'}</small><b>${i+1}</b><span class="hstars">${starsHTML(st,S.crowns[l.id])}</span></button>`});
+   h+=`<button class="lv ${st?'done':''} ${ok?'':'lock'}" data-m="${mi}" data-l="${i}" ${ok?'':'disabled'}><small>${l.turtle?'🎨':TYICON[l.typ]||(l.extra?'Übung':'Level')}</small><b>${i+1}</b><span class="hstars">${starsHTML(st,S.crowns[l.id])}</span></button>`});
   m.cuts.filter(c=>c.at===m.levels.length).forEach(c=>{const ok=misDone(m);h+=`<button class="lv cutn ${ok?'':'lock'}" data-cut="${c.id}" ${ok?'':'disabled'}>${FIG[CUTS[c.id].pages[0].s]()}<span>FINALE</span></button>`});
   h+='</div></section>'});
  const wo=wsOpen(),dk=dayKey();
@@ -951,23 +968,23 @@ $('#missionList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabl
  if(b.dataset.editor){openEditor(null);return}
  if(b.dataset.custom!=null){const i=+b.dataset.custom;if(e.target.closest('[data-cedit]')){openEditor(i);return}startLevel(customLevel(S.custom[i].data),{kind:'custom',i});return}
  enterLevel(+b.dataset.m,+b.dataset.l)};
-function enterLevel(mi,i){const m=MISSIONS[mi],c=m.cuts.find(c=>c.at===i&&!S.seen[c.id]);
- if(c)openCut(c.id,()=>startLevel(m.levels[i],{kind:'mission',mi}));else startLevel(m.levels[i],{kind:'mission',mi})}
+function enterLevel(mi,i){const m=MISSIONS[mi],l=LV(m)[i],c=!l.extra&&m.cuts.find(c=>c.at===l.idx&&!S.seen[c.id]);
+ if(c)openCut(c.id,()=>startLevel(l,{kind:'mission',mi}));else startLevel(l,{kind:'mission',mi})}
 
 /* ---------- Level-Zustand ---------- */
 let L=null,origin=null,src=[],origCode=null,bind=0,usedBtn=false,editing=false,running=false,stepI=null,stepRes=null,vi=0,vstat=[],view=null,
- hintKey='intro',hintType='',hintArg='',errLine=-1,actLine=-1,pick=null,chips=null,TMPL=null;
+ hintKey='intro',hintType='',hintArg='',selLine=null,bmode='rep',errLine=-1,actLine=-1,pick=null,chips=null,TMPL=null;
 const V_=i=>{const v=L.varianten&&L.varianten[i]||{};return Object.assign({},L,v)};
 const nVar=()=>L.varianten?L.varianten.length:1;
 function startState(i){if(L.turtle)return turtleWorld(L.turtle).states[0];return gridWorld(V_(i)).states[0]}
 const setView=s=>{view={a:s,b:s,e:1,wob:null,id:null}};
 function startLevel(lv,org){
- L=lv;origin=org;rotT=rotA=0;setBoard(L.n);vi=0;vstat=[];pick=null;chips=null;usedBtn=false;errLine=-1;actLine=-1;stepI=null;running=false;
+ L=lv;origin=org;rotT=rotA=0;selLine=null;bmode='rep';setBoard(L.n);vi=0;vstat=[];pick=null;chips=null;usedBtn=false;errLine=-1;actLine=-1;stepI=null;running=false;
  if(editing){editing=false;$('#ta').style.display='none';$('#code').style.display=''}
  origCode=L.code!=null?fillT(L.code,M()):null;src=origCode!=null?origCode.replace(/\s+$/,'').split('\n'):[];recalcBind();
  TMPL=L.turtle&&L.turtle.vorlage?tmplSegs(L.turtle.vorlage):null;
  setView(startState(0));
- $('#gTitle').textContent=org.kind==='mission'?`Mission ${org.mi+1} · Level ${L.idx+1}`:org.kind==='daily'?'Tagesrätsel':'Eigenes Level';
+ $('#gTitle').textContent=org.kind==='mission'?`Mission ${org.mi+1} · Level ${LV(MISSIONS[org.mi]).indexOf(L)+1||L.idx+1}`:org.kind==='daily'?'Tagesrätsel':'Eigenes Level';
  updHeadStars();$('#win').classList.remove('on');$('#fail').classList.remove('on');show('sGame');
  const ro=L.typ==='vorhersage';$('#bEdit').hidden=ro;$('#bUndo').hidden=ro;$('#bClear').hidden=ro;$('#bStep').hidden=ro;$('#bRun').textContent=ro?'▶ Prüfen':'▶ Play';
  $('#rotHint').style.display=L.turtle?'none':'';$('#rotHint').style.opacity=1;
@@ -975,9 +992,9 @@ function startLevel(lv,org){
 }
 function tmplSegs(code){const c=compile(code.split('\n')),W=turtleWorld(L.turtle);execute(c.tree,W);return W.st.segs}
 function updHeadStars(){const id=L.id||(origin.kind==='daily'?'daily':null);$('#gStars').innerHTML=origin.kind==='mission'?starsHTML(S.done[L.id]||0,S.crowns[L.id]):origin.kind==='daily'?starsHTML(S.daily[origin.key]||0):''}
-function showHint(k,type='',arg=''){hintKey=k;hintType=type;hintArg=arg;
+function showHint(k,type='',arg='',silent=false){hintKey=k;hintType=type;hintArg=arg;
  const t=k==='intro'?(L.hint?L.hint[M()]:(kid()?'Bring die Kapsel zum Planeten und sammle alle Sterne.':'Ziel erreichen, alle Sterne sammeln.')):(MSG[M()][k]||k).replace(/\{n\}/g,arg);
- $('#hint').textContent=t;$('#hint').className='hint '+type+(voiceOn()?' talk':'');if(type==='err')speak(t)}
+ $('#hint').textContent=t;$('#hint').className='hint '+type+(voiceOn()?' talk':'');if(type==='err'&&!silent)speak(t)}
 function renderTabs(){const el=$('#vtabs');if(!L.varianten){el.innerHTML='';return}
  el.innerHTML=L.varianten.map((v,i)=>`<button data-v="${i}" class="${i===vi?'on':''} ${vstat[i]===true?'ok':vstat[i]===false?'bad':''}">${'ABCDE'[i]}</button>`).join('')}
 $('#vtabs').onclick=e=>{const b=e.target.closest('button');if(!b||running)return;vi=+b.dataset.v;setView(startState(vi));renderTabs()};
@@ -988,6 +1005,7 @@ function btnLabel(id){const n=N(),k=kid();
   case 'var0':return n.v+' = 0';case 'inc':return n.v+' + 1';case 'say':return n.say+'('+n.v+')';case 'tvor':return n.move+'(…)';case 'tdreh':return n.turn+'(…)';case 'farbe':return n.color+'(…)';case 'stift':return k?'Stift':'pen';
   default:return n[id]+'()'}}
 const BLOCK=['loop','if','else','while','def'];
+const hasB=()=>!!(L&&L.bausteine&&L.bausteine.length);
 function userFns(){const r=[];src.forEach(t=>{const m=t.match(/^def\s+([\p{L}_][\p{L}\p{N}_]*)\s*\(\s*\)\s*:/u);if(m)r.push(m[1])});return r}
 function buildCmds(){
  const row=$('#cmdRow');
@@ -995,6 +1013,11 @@ function buildCmds(){
   if(L.frage==='wert')row.innerHTML=`<span class="lbl">${kid()?'Deine Antwort:':'Antwort:'}</span>`+L.optionen.map(o=>`<button class="chip ${pick===o?'sel':''}" data-pick="${o}">${o}</button>`).join('')+`<button class="play" id="bPlay">▶ Prüfen</button>`;
   else row.innerHTML=`<span class="lbl" style="color:#FFD166">${pick?(kid()?'Feld gewählt ✓ – anderes Feld? Einfach antippen':'Feld gewählt ✓'):(kid()?'👆 Tippe oben auf ein Feld der Plattform':'👆 Feld auf der Plattform antippen')}</span><button class="play" id="bPlay">▶ Prüfen</button>`;
   return}
+ if(hasB()&&!chips){const k=kid();
+  row.innerHTML=`<span class="lbl">${selLine==null?(k?'👆 Zeile im Code antippen, dann:':'Zeile wählen, dann:'):(k?`Zeile ${selLine+1}:`:`Zeile ${selLine+1}:`)}</span>`+
+   [['rep',k?'↔ ersetzen':'ersetzen'],['ins',k?'＋ darunter':'einfügen darunter']].map(([m,l])=>`<button class="chip x ${bmode===m?'sel':''}" data-bm="${m}">${l}</button>`).join('')+
+   `<button class="chip x" data-bdel="1">🗑</button><span class="brk"></span>`+
+   L.bausteine.map((b,i)=>`<button class="chip" data-bs="${i}">${esc(fillT(b,M()))}</button>`).join('')+`<button class="play" id="bPlay">▶ Play</button>`;return}
  if(chips){row.innerHTML=chips.items.map((c,i)=>`<button class="chip" data-chip="${i}">${esc(c.l)}</button>`).join('')+'<button class="chip x" data-chipx="1">✕</button>';return}
  let h=L.knoepfe.map(id=>`<button class="cmd ${BLOCK.includes(id)?'blk':''}" data-id="${id}"><span class="ic">${ICON[id]||''}</span>${esc(btnLabel(id))}</button>`).join('');
  h+=userFns().map(f=>`<button class="cmd fn" data-fn="${f}"><span class="ic">ƒ</span>${f}()</button>`).join('');
@@ -1026,6 +1049,12 @@ $('#cmdRow').onclick=e=>{const b=e.target.closest('button');if(!b||running)retur
  if(b.id==='bPlay'){run();return}
  if(b.dataset.pick!=null){pick=+b.dataset.pick;buildCmds();showHint('chosen');return}
  if(b.dataset.chipx){chips=null;buildCmds();return}
+ if(b.dataset.bm){bmode=b.dataset.bm;buildCmds();return}
+ if(b.dataset.bdel||b.dataset.bs!=null){if(editing)setEdit(false);if(selLine==null||selLine>=src.length){showHint('selfirst','err');return}usedBtn=true;
+  if(b.dataset.bdel){src.splice(selLine,1);selLine=src.length?Math.min(selLine,src.length-1):null}
+  else{const t=fillT(L.bausteine[+b.dataset.bs],M()),cur=src[selLine],ind=cur.match(/^ */)[0];
+   if(bmode==='rep')src[selLine]=ind+t;else{const ni=ind+(/:\s*$/.test(cur.replace(/#.*/,''))?'    ':'');src.splice(selLine+1,0,ni+t);selLine++}}
+  recalcBind();changed();return}
  if(b.dataset.chip!=null){const c=chips.items[+b.dataset.chip];chips=null;insert(c.t,c.o,c.top,c.id||'x');buildCmds();return}
  if(b.dataset.end){bind=Math.max(0,bind-1);buildCmds();renderCode();return}
  if(b.dataset.fn){insert(b.dataset.fn+'()',0,0,'fn');return}
@@ -1056,7 +1085,7 @@ function changes(){const A=origCode.replace(/\s+$/,'').split('\n').map(s=>s.repl
  for(let i=1;i<=A.length;i++)for(let j=1;j<=B.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));return d[A.length][B.length]}
 function renderCode(){let h='';const ro=L.typ==='vorhersage';
  if(!src.length)h=`<li class="ph"><span class="n">1</span><span># ${kid()?'Tippe auf einen Befehl – oder auf ✎ und schreib selbst':'Befehlsknopf wählen oder mit ✎ selbst schreiben'}</span></li>`;
- src.forEach((t,i)=>h+=`<li data-i="${i}" class="${i===actLine?'act':''} ${i===errLine?'err':''} ${ro?'ro':''}"><span class="n">${i+1}</span><span class="t">${hl(t)||' '}</span></li>`);
+ src.forEach((t,i)=>h+=`<li data-i="${i}" class="${i===actLine?'act':''} ${i===errLine?'err':''} ${ro?'ro':''} ${i===selLine&&hasB()?'sel':''}"><span class="n">${i+1}</span><span class="t">${hl(t)||' '}</span></li>`);
  if(src.length&&!ro&&!running&&L.knoepfe.length)h+=`<li class="ghost"><span class="n"></span><span class="t">${'<i class="ig"></i>'.repeat(bind)}<span class="gc">▸ ${bind?(kid()?`nächster Befehl: in Block ${bind}`:`Einrückung ${bind}`):(kid()?'nächster Befehl: ganz außen':'Einrückung 0')}</span></span></li>`;
  $('#code').innerHTML=h;updInfo();
  const a=$('#code li.act')||$('#code li.err');a&&a.scrollIntoView({block:'nearest'});
@@ -1133,7 +1162,7 @@ async function step(){
  running=false}
 function undo(){if(running)return;if(editing)setEdit(false);while(src.length&&!src[src.length-1].replace(/#.*/,'').trim())src.pop();src.pop();recalcBind();changed()}
 function clearAll(){if(running)return;if(editing){$('#ta').value='';setEdit(false)}src=origCode!=null?origCode.replace(/\s+$/,'').split('\n'):[];usedBtn=false;recalcBind();changed()}
-function lose(k,line){showHint(k,'err',hintArg);$('#failT').textContent=kid()?'Nicht ganz!':'Nicht gelöst';
+function lose(k,line){showHint(k,'err',hintArg,true);$('#failT').textContent=kid()?'Nicht ganz!':'Nicht gelöst';
  const vt=nVar()>1?(kid()?` (Variante ${'ABCDE'[vi]})`:` – Variante ${'ABCDE'[vi]}`):'';
  $('#failS').textContent=(MSG[M()][k]||k).replace(/\{n\}/g,hintArg)+vt;speak($('#failT').textContent+' '+$('#failS').textContent);
  $('#failClear').textContent=L.code!=null?(kid()?'Original-Code':'Original wiederherstellen'):'Code löschen';
@@ -1158,8 +1187,8 @@ $('#winAgain').onclick=()=>startLevel(L,origin);
 $('#winNext').onclick=()=>{
  if(origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}
  if(origin.kind!=='mission'){renderMap();show('sMap');return}
- const m=MISSIONS[origin.mi],ni=L.idx+1,c=m.cuts.find(c=>c.at===ni&&!S.seen[c.id]);
- const go=()=>{if(ni<m.levels.length)startLevel(m.levels[ni],origin);else{renderMap();show('sMap')}};
+ const m=MISSIONS[origin.mi],list=LV(m),ni=list.indexOf(L)+1,nx=list[ni],c=nx?(!nx.extra&&m.cuts.find(c=>c.at===nx.idx&&!S.seen[c.id])):m.cuts.find(c=>c.at===m.levels.length&&!S.seen[c.id]);
+ const go=()=>{if(nx)startLevel(nx,origin);else{renderMap();show('sMap')}};
  if(c)openCut(c.id,go);else go()};
 $('#winSave').onclick=()=>{try{const svg=$('#world').outerHTML.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"'),img=new Image(),cv=document.createElement('canvas');cv.width=792;cv.height=516;
  img.onload=()=>{const c=cv.getContext('2d');c.fillStyle='#0B1026';c.fillRect(0,0,792,516);c.drawImage(img,0,0,792,516);const a=document.createElement('a');a.download='sternbild.png';a.href=cv.toDataURL('image/png');a.click()};
@@ -1167,6 +1196,7 @@ $('#winSave').onclick=()=>{try{const svg=$('#world').outerHTML.replace('<svg','<
 $('#bRun').onclick=run;$('#bStep').onclick=step;$('#bUndo').onclick=undo;$('#bClear').onclick=clearAll;$('#bEdit').onclick=()=>setEdit(!editing);
 $('#gBack').onclick=()=>{if(editing)setEdit(false);if(origin&&origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}renderMap();show('sMap')};
 $('#code').onclick=e=>{if(running||L.typ==='vorhersage')return;const li=e.target.closest('li[data-i]');if(!li){setEdit(true);return}
+ if(hasB()){selLine=+li.dataset.i;renderCode();buildCmds();return}
  const i=+li.dataset.i,t=src[i].trim(),m=t.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*\(/u);if(!m){setEdit(true);return}
  const id=NAME2ID[m[1]];const bid=id?(L.turtle?STEP2BTN[id==='move'?'move':id]||id:id):m[1];actLine=i;renderCode();lit(bid,true);
  setTimeout(()=>{lit(bid,false);if(actLine===i&&!running){actLine=-1;renderCode()}},800)};
@@ -1176,7 +1206,7 @@ $('#code').ondblclick=()=>setEdit(true);
 let active='game',ratio=null,rowH=0;
 function layout(){const pg=$('#paneGame'),row=$('#cmdRow'),sp=$('#split'),land=matchMedia('(orientation:landscape)').matches;
  if(row.offsetHeight)rowH=row.offsetHeight;
- const avail=(land?sp.clientWidth:sp.clientHeight)-18,roomy=land||avail>=560,base=editing?(land?.45:roomy?.42:avail<500?.22:.32):ratio!=null?ratio:2/3,hide=editing?!roomy:active==='code';
+ const avail=(land?sp.clientWidth:sp.clientHeight)-18,roomy=land||avail>=560,base=editing?(land?.45:roomy?.42:avail<500?.22:.32):ratio!=null?ratio:2/3,hide=editing?!roomy:active==='code'&&!hasB();
  pg.classList.toggle('nobtn',hide);const g=Math.max(80,base*avail-(hide&&!land?rowH:0));
  pg.style.flexGrow=g;$('#paneCode').style.flexGrow=Math.max(1,avail-g)}
 addEventListener('resize',()=>cur==='sGame'&&layout());
