@@ -71,6 +71,18 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
 .tpl i{font-style:normal;font-size:34px;display:block;margin-bottom:4px}
 .tpl small{display:block;font-size:14px;color:#8a836a;font-weight:700}
 .close{margin-top:14px;background:var(--d);color:#fff;border-radius:12px;padding:10px 18px;font-weight:800}
+.proj{display:flex;flex-direction:column;align-items:flex-start;background:#3a3a38;border-radius:12px;padding:5px 12px;max-width:220px;text-align:left}
+.proj b{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:196px}
+.proj small{font-size:11px;font-weight:700;color:#cfc8ad}.proj small.dirty{color:var(--y)}
+.newp{display:flex;gap:8px;margin-bottom:14px}
+.newp input{flex:1;font:800 18px Nunito,sans-serif;border:2px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0;user-select:text;-webkit-user-select:text}
+.newp button,.pl button{background:var(--y);border-radius:12px;padding:10px 14px;font-weight:900}
+.pl{display:flex;flex-direction:column;gap:8px}
+.pl div{display:flex;align-items:center;gap:8px;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:8px 8px 8px 14px}
+.pl div.cur{border-color:var(--d)}
+.pl span{flex:1;font-weight:800;font-size:17px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl span small{display:block;font-size:12px;color:#8a836a}
+.pl button.del{background:#fff;border:2px solid var(--line)}.pl button.del.sure{background:#c0392b;color:#fff;border-color:#c0392b}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--d);color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;z-index:10}
 .toast.on{opacity:1}
 @media (orientation:portrait),(max-width:820px),(max-height:600px){
@@ -86,6 +98,9 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
 @media (max-width:520px){
   header{padding:8px 10px;gap:6px}
   .brand{font-size:20px}.logo{width:34px;height:34px}
+  .brand,.logo{display:none}.proj{margin-right:auto}
+  .hb{padding:7px 8px;font-size:15px}
+  .proj{max-width:110px;padding:4px 8px}.proj b{font-size:13px;max-width:104px}.proj small{font-size:10px}
   .hb{padding:8px 10px}
   .fbar{padding:6px 8px}.ref{font-size:16px;min-width:48px;padding:6px 8px}#inp{font-size:18px;padding:6px 10px}
   .hint{font-size:13px;padding:4px 10px}
@@ -101,6 +116,8 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
   <a class="hb" href="../" aria-label="Zurück zu mLogic" style="text-decoration:none;padding:9px 10px">‹</a>
   <div class="logo"><svg width="26" height="26" viewBox="0 0 26 26"><g fill="#262625"><rect x="2" y="2" width="10" height="10" rx="2.5"/><rect x="14" y="2" width="10" height="10" rx="2.5" opacity=".45"/><rect x="2" y="14" width="10" height="10" rx="2.5" opacity=".45"/><rect x="14" y="14" width="10" height="10" rx="2.5"/></g></svg></div>
   <div class="brand">m<b>Calc</b></div>
+  <button class="proj" id="bProj" title="Projekte"><b id="pName">–</b><small id="pState">gespeichert</small></button>
+  <button class="hb y" id="bSave" title="Speichern">💾<span class="t">Speichern</span></button>
   <button class="hb" id="bUndo" title="Rückgängig">↶<span class="t">Zurück</span></button>
   <button class="hb" id="bTpl">📋<span class="t">Vorlagen</span></button>
   <button class="hb" id="bChart">📊<span class="t">Diagramm</span></button>
@@ -120,6 +137,9 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
     </div><h3 style="margin-top:14px">Farbe &amp; Fett</h3><div class="sws" id="sws"></div></div>
   </aside>
 </main>
+<div class="modal" id="mProj"><div class="box"><h2>📁 Meine Projekte</h2>
+<div class="newp"><input id="newName" placeholder="Name für neues Projekt" maxlength="40" autocomplete="off"><button id="bNew">＋ Neu</button></div>
+<div class="pl" id="plist"></div><button class="close" data-close>Schließen</button></div></div>
 <div class="modal" id="mTpl"><div class="box"><h2>Womit willst du anfangen?</h2><div class="tpls" id="tpls"></div><button class="close" data-close>Schließen</button></div></div>
 <div class="modal" id="mChart"><div class="box"><h2 id="chTitle">Diagramm</h2><div id="chart"></div><button class="close" data-close>Schließen</button></div></div>
 <div class="toast" id="toast"></div>
@@ -136,8 +156,34 @@ const key=(r,c)=>L[c]+(r+1);
 const cell=k=>cells[k]||(cells[k]={v:'',f:0,b:false});
 
 /* ---------- Speicher ---------- */
-function save(){try{localStorage.setItem('mcalc',JSON.stringify(cells))}catch(e){}}
-function load(){try{const s=localStorage.getItem('mcalc');if(s)cells=JSON.parse(s)}catch(e){}}
+/* Projekte: Speichern per Knopf + automatisch alle 10 Minuten */
+const AUTOSAVE_MS=10*60*1000;
+let store={list:{},cur:null},dirty=false,lastSaved=null;
+function readStore(){try{const s=JSON.parse(localStorage.getItem('mcalc-projekte')||'null');if(s&&s.list)store=s}catch(e){}
+  if(!Object.keys(store.list).length){let old={};try{old=JSON.parse(localStorage.getItem('mcalc')||'{}')}catch(e){}
+    const id=newProject('Meine Tabelle',old);store.cur=id;writeStore()}}
+function writeStore(){try{localStorage.setItem('mcalc-projekte',JSON.stringify(store));return true}catch(e){return false}}
+function newProject(name,c){const id='p'+Date.now().toString(36);store.list[id]={name,cells:c||{},t:Date.now()};return id}
+const hm=t=>new Date(t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+function save(){dirty=true;showProj()} // jede Änderung: als „nicht gespeichert“ markieren
+function persist(auto){
+  const p=store.list[store.cur];if(!p)return;commit();
+  p.cells=JSON.parse(JSON.stringify(cells));p.t=Date.now();
+  if(writeStore()){dirty=false;lastSaved=p.t;showProj();toast(auto?'💾 Automatisch gespeichert':'💾 Gespeichert!')}
+  else toast('Speichern hat nicht geklappt.');
+}
+function showProj(){const p=store.list[store.cur];$('pName').textContent=p?p.name:'–';const st=$('pState');
+  st.textContent=dirty?'● nicht gespeichert':'✓ gespeichert'+(lastSaved?' '+hm(lastSaved):'');st.classList.toggle('dirty',dirty)}
+function openProject(id){
+  if(dirty)persist(true);
+  store.cur=id;writeStore();cells=JSON.parse(JSON.stringify(store.list[id].cells||{}));undo=[];dirty=false;lastSaved=store.list[id].t;
+  select(0,0);showProj();
+}
+function listProjects(){
+  const ids=Object.keys(store.list).sort((a,b)=>store.list[b].t-store.list[a].t);
+  $('plist').innerHTML=ids.map(id=>{const p=store.list[id];return `<div class="${id===store.cur?'cur':''}"><span>${p.name.replace(/[<&]/g,'')}<small>${id===store.cur?'offen · ':''}zuletzt ${new Date(p.t).toLocaleDateString('de-DE')} ${hm(p.t)}</small></span>${id===store.cur?'':`<button data-open="${id}">Öffnen</button>`}<button class="del" data-del="${id}">🗑</button></div>`}).join('');
+}
+function load(){readStore();cells=JSON.parse(JSON.stringify(store.list[store.cur].cells||{}));lastSaved=store.list[store.cur].t}
 function snap(){undo.push(JSON.stringify(cells));if(undo.length>60)undo.shift()}
 
 /* ---------- Formeln ---------- */
@@ -494,8 +540,32 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeAll()}));
 $('bTpl').onclick=()=>{commit();$('mTpl').classList.add('on')};
 $('bUndo').onclick=()=>{if(!undo.length){toast('Nichts mehr zum Zurücknehmen.');return}cells=JSON.parse(undo.pop());editing=false;save();select(act.r,act.c)};
-load();
+load();showProj();
 if(!Object.keys(cells).length)$('mTpl').classList.add('on');
+$('bSave').onclick=()=>persist(false);
+$('bProj').onclick=()=>{commit();listProjects();$('newName').value='';$('mProj').classList.add('on')};
+$('bNew').onclick=()=>{
+  const n=$('newName').value.trim()||('Projekt '+(Object.keys(store.list).length+1));
+  if(dirty)persist(true);
+  const id=newProject(n,{});store.cur=id;writeStore();cells={};undo=[];dirty=false;lastSaved=store.list[id].t;
+  closeAll();select(0,0);showProj();$('mTpl').classList.add('on');toast('📁 Projekt „'+n+'“ angelegt');
+};
+$('newName').addEventListener('keydown',e=>{if(e.key==='Enter')$('bNew').click()});
+$('plist').addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]'),d=e.target.closest('[data-del]');
+  if(o){openProject(o.dataset.open);closeAll();toast('📁 '+store.list[store.cur].name+' geöffnet');return}
+  if(d){ // zweimal tippen zum Löschen
+    if(!d.classList.contains('sure')){d.classList.add('sure');d.textContent='Wirklich?';return}
+    const id=d.dataset.del;delete store.list[id];
+    if(!Object.keys(store.list).length)newProject('Meine Tabelle',{});
+    if(id===store.cur){store.cur=Object.keys(store.list)[0];writeStore();openProject(store.cur)}else writeStore();
+    listProjects();
+  }
+});
+setInterval(()=>{if(dirty)persist(true)},AUTOSAVE_MS);
+// Beim Verlassen der App nichts verlieren
+addEventListener('pagehide',()=>{if(dirty)persist(true)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&dirty)persist(true)});
 select(0,0);
 </script>
 </body>
