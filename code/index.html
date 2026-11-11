@@ -195,6 +195,10 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 .cbtn{white-space:nowrap}
 @media (orientation:landscape){.codeHead #lineInfo{width:100%}input[type=range]{width:64px}}
 .code li.ghost{cursor:default}.code .gc{color:#FFD166;opacity:.75;font-size:14px;animation:blink 1.2s steps(1) infinite}
+.voiceBtn{font-size:20px;border-radius:22px;border:1.5px solid #2E3878;min-width:46px}
+.voiceBtn.off{opacity:.5}
+.cutVoice{position:absolute;top:calc(16px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));background:#0B1026;z-index:2}
+.hint.talk{cursor:pointer}
 </style>
 </head>
 <body>
@@ -212,12 +216,12 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 </section>
 
 <section id="sMap" class="screen">
-  <header class="top"><button class="back" id="mapBack" aria-label="Zurück">‹</button><div class="ttl">mCode</div><div class="hstars" id="mapTotal"></div><button class="modeBtn"></button></header>
+  <header class="top"><button class="back" id="mapBack" aria-label="Zurück">‹</button><div class="ttl">mCode</div><div class="hstars" id="mapTotal"></div><button class="voiceBtn" aria-label="Sprecher an/aus"></button><button class="modeBtn"></button></header>
   <div id="missionList" class="missionList"></div>
 </section>
 
 <section id="sGame" class="screen">
-  <header class="top"><button class="back" id="gBack" aria-label="Zurück">‹</button><div class="ttl" id="gTitle"></div><div id="gStars" class="hstars"></div><button class="modeBtn"></button></header>
+  <header class="top"><button class="back" id="gBack" aria-label="Zurück">‹</button><div class="ttl" id="gTitle"></div><div id="gStars" class="hstars"></div><button class="voiceBtn" aria-label="Sprecher an/aus"></button><button class="modeBtn"></button></header>
   <main id="split">
     <div id="paneGame" class="pane">
       <svg id="world" viewBox="14 32 396 258" preserveAspectRatio="xMidYMid meet"></svg>
@@ -254,6 +258,7 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 </section>
 
 <section id="sCut" class="screen cut">
+  <button class="voiceBtn cutVoice" aria-label="Sprecher an/aus"></button>
   <div class="infoBox"><div class="nm" id="cutName">BIT</div><div class="role" id="cutRole">:MENTOR</div><div class="bar"><span id="cutBar">WISSEN</span><div class="segs" id="segs"></div></div></div>
   <div class="stage"><div id="figWrap"></div><div class="plat"></div></div>
   <div class="chat"><div class="spk" id="cutSpk">BIT</div><div id="cutTxt"></div><pre id="cutCode"></pre><button id="cutNext" aria-label="Weiter">▼</button></div>
@@ -812,7 +817,7 @@ const FIG={
 /* ================= Spielablauf & Oberfläche ================= */
 const $=s=>document.querySelector(s);
 const LS='mcode-v1';
-const S={mode:null,done:{},crowns:{},seen:{},custom:[],daily:{}};
+const S={mode:null,done:{},crowns:{},seen:{},custom:[],daily:{},voice:true};
 try{const o=JSON.parse(localStorage.getItem(LS)||'{}');Object.assign(S,o);
  if(o.stars){for(const k in o.stars)if(/^\d+$/.test(k))S.done['m1-'+(+k+1)]=o.stars[k];delete S.stars}
  if(o.crowns)for(const k in o.crowns)if(/^\d+$/.test(k)){S.crowns['m1-'+(+k+1)]=true;delete S.crowns[k]}
@@ -847,14 +852,31 @@ const MSG={
   tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
 const TYICON={vorhersage:'🔮',reparieren:'🔧',luecke:'✏️'};
 
+/* ---------- Sprecher (nur Kinder-Modus): Systemstimme, hochgepitcht wie ein kleiner Roboter ---------- */
+const SYN=window.speechSynthesis||null,VOX={bit:[1.85,1.05],glibber:[1.35,.95],nova:[1.6,1.05],zaehli:[2,1.15],hint:[1.85,1.05]};
+let deVoice=null,unlocked=false;
+function pickVoice(){if(!SYN)return;const vs=SYN.getVoices().filter(v=>/^de(-|_|$)/i.test(v.lang));if(!vs.length)return;
+ const sc=v=>(/neural|natural|enhanced|premium|online|wavenet/i.test(v.name)?4:0)+(/google|microsoft|siri/i.test(v.name)?2:0)+(/de-DE/i.test(v.lang)?1:0);
+ deVoice=vs.sort((a,b)=>sc(b)-sc(a))[0]}
+if(SYN){pickVoice();SYN.addEventListener&&SYN.addEventListener('voiceschanged',pickVoice)}
+const voiceOn=()=>!!SYN&&S.voice!==false&&kid();
+function clean(t){return String(t).replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF▶⏭⇤↺✎✓▸★→←↔↪⟳]/gu,' ').replace(/\(\)/g,'').replace(/_/g,' ').replace(/\s*#\s*/g,' ').replace(/\s+/g,' ').trim()}
+function speak(t,who='hint'){if(!voiceOn()||!t)return;try{SYN.cancel();const u=new SpeechSynthesisUtterance(clean(t));u.lang='de-DE';if(deVoice)u.voice=deVoice;
+ const[p,r]=VOX[who]||VOX.hint;u.pitch=p;u.rate=r;SYN.speak(u)}catch(e){}}
+function hush(){try{SYN&&SYN.cancel()}catch(e){}}
+document.addEventListener('pointerdown',()=>{if(unlocked||!SYN)return;unlocked=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;SYN.speak(u)}catch(e){}},{capture:true});
+function voiceUI(){document.querySelectorAll('.voiceBtn').forEach(b=>{b.hidden=!SYN||!kid();b.textContent=S.voice!==false?'🔊':'🔇';b.classList.toggle('off',S.voice===false)});
+ $('#hint').classList.toggle('talk',voiceOn())}
+document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=e=>{e.stopPropagation();S.voice=S.voice===false;save();voiceUI();if(S.voice)speak('Hallo! Ich lese dir vor.');else hush()});
+
 /* ---------- Bildschirme & Modus ---------- */
 let cur='sStart';
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));cur=id}
+function show(id){if(id!==cur)hush();document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));cur=id}
 const CROWN='<svg class="crown" viewBox="0 0 24 18"><path d="M2 15 0 3l7 5 5-8 5 8 7-5-2 12z" fill="#FFD166"/><rect x="2" y="15.5" width="20" height="2.5" rx="1" fill="#FFD166"/><circle cx="12" cy="10" r="1.8" fill="#0B1026"/></svg>';
 function starsHTML(n,c){return[0,1,2].map(i=>`<span class="${i<n?'':'off'}">★</span>`).join('')+(c?CROWN:'')}
 function setMode(m){S.mode=m;save();refreshMode()}
 function refreshMode(){
- document.querySelectorAll('.modeBtn').forEach(b=>b.textContent=kid()?'Kinder':'Erwachsene');
+ document.querySelectorAll('.modeBtn').forEach(b=>b.textContent=kid()?'Kinder':'Erwachsene');voiceUI();if(!kid())hush();
  document.querySelectorAll('.modeCard').forEach(b=>b.classList.toggle('sel',b.dataset.mode===S.mode));
  if(cur==='sMap')renderMap();
  if(cur==='sGame'&&L){if(editing)setEdit(false);translateSrc();if(L.code!=null)origCode=fillT(L.code,M());buildCmds();renderCode();showHint(hintKey,hintType,hintArg)}
@@ -916,13 +938,13 @@ function startLevel(lv,org){
  updHeadStars();$('#win').classList.remove('on');$('#fail').classList.remove('on');show('sGame');
  const ro=L.typ==='vorhersage';$('#bEdit').hidden=ro;$('#bUndo').hidden=ro;$('#bClear').hidden=ro;$('#bStep').hidden=ro;$('#bRun').textContent=ro?'▶ Prüfen':'▶ Play';
  $('#rotHint').style.display=L.turtle?'none':'';$('#rotHint').style.opacity=1;
- buildCmds();renderTabs();renderCode();showHint('intro');active='game';ratio=null;layout();
+ buildCmds();renderTabs();renderCode();showHint('intro');speak($('#hint').textContent);active='game';ratio=null;layout();
 }
 function tmplSegs(code){const c=compile(code.split('\n')),W=turtleWorld(L.turtle);execute(c.tree,W);return W.st.segs}
 function updHeadStars(){const id=L.id||(origin.kind==='daily'?'daily':null);$('#gStars').innerHTML=origin.kind==='mission'?starsHTML(S.done[L.id]||0,S.crowns[L.id]):origin.kind==='daily'?starsHTML(S.daily[origin.key]||0):''}
 function showHint(k,type='',arg=''){hintKey=k;hintType=type;hintArg=arg;
  const t=k==='intro'?(L.hint?L.hint[M()]:(kid()?'Bring die Kapsel zum Planeten und sammle alle Sterne.':'Ziel erreichen, alle Sterne sammeln.')):(MSG[M()][k]||k).replace(/\{n\}/g,arg);
- $('#hint').textContent=t;$('#hint').className='hint '+type}
+ $('#hint').textContent=t;$('#hint').className='hint '+type+(voiceOn()?' talk':'');if(type==='err')speak(t)}
 function renderTabs(){const el=$('#vtabs');if(!L.varianten){el.innerHTML='';return}
  el.innerHTML=L.varianten.map((v,i)=>`<button data-v="${i}" class="${i===vi?'on':''} ${vstat[i]===true?'ok':vstat[i]===false?'bad':''}">${'ABCDE'[i]}</button>`).join('')}
 $('#vtabs').onclick=e=>{const b=e.target.closest('button');if(!b||running)return;vi=+b.dataset.v;setView(startState(vi));renderTabs()};
@@ -1034,6 +1056,7 @@ function translateSrc(){const from=kid()?'adult':'kid',to=M(),map={};
  for(const c in COLORS){}
  src=src.map(t=>{const ci=t.indexOf('#'),a=ci>=0?t.slice(0,ci):t,b=ci>=0?t.slice(ci):'';return a.replace(/[\p{L}_][\p{L}\p{N}_]*/gu,m=>map[m]||m)+b});recalcBind()}
 
+$('#hint').addEventListener('click',()=>speak($('#hint').textContent));
 /* ---------- Ausführen ---------- */
 let anim=null;
 function tween(a,b,ms,wob,id){return new Promise(res=>{const t0=performance.now();view={a,b,e:0,wob,id};
@@ -1079,7 +1102,7 @@ function undo(){if(running)return;if(editing)setEdit(false);while(src.length&&!s
 function clearAll(){if(running)return;if(editing){$('#ta').value='';setEdit(false)}src=origCode!=null?origCode.replace(/\s+$/,'').split('\n'):[];usedBtn=false;recalcBind();changed()}
 function lose(k,line){showHint(k,'err',hintArg);$('#failT').textContent=kid()?'Nicht ganz!':'Nicht gelöst';
  const vt=nVar()>1?(kid()?` (Variante ${'ABCDE'[vi]})`:` – Variante ${'ABCDE'[vi]}`):'';
- $('#failS').textContent=(MSG[M()][k]||k).replace(/\{n\}/g,hintArg)+vt;
+ $('#failS').textContent=(MSG[M()][k]||k).replace(/\{n\}/g,hintArg)+vt;speak($('#failT').textContent+' '+$('#failS').textContent);
  $('#failClear').textContent=L.code!=null?(kid()?'Original-Code':'Original wiederherstellen'):'Code löschen';
  $('#failClear').hidden=L.typ==='vorhersage';$('#failRestart').textContent=L.typ==='vorhersage'?(kid()?'Nochmal raten':'Neu versuchen'):'Neu starten';
  setTimeout(()=>$('#fail').classList.add('on'),450)}
@@ -1097,7 +1120,7 @@ function win(){const st=score(),k=kid(),crown=!usedBtn&&L.typ!=='vorhersage'&&li
  $('#winC').textContent=L.typ==='vorhersage'?'':crown?(k?'Krone: komplett selbst geschrieben!':'Krone: Lösung vollständig getippt.'):(k?'Tipp: Schreib den Code selbst mit ✎ – dann gibt es eine Krone!':'Bonus: Code ohne Befehlsknöpfe tippen ergibt eine Krone.');
  $('#winSave').hidden=!(L.turtle&&L.turtle.frei&&/\/code\/?/.test(location.pathname));
  $('#winNext').textContent=origin.kind!=='mission'?(origin.kind==='custom'&&origin.edit!=null?'Zum Editor':'Zur Übersicht'):'Weiter';
- setTimeout(()=>$('#win').classList.add('on'),380)}
+ setTimeout(()=>{$('#win').classList.add('on');speak($('#winT').textContent+' '+$('#winS').textContent+' '+(crown?$('#winC').textContent:''))},380)}
 $('#winAgain').onclick=()=>startLevel(L,origin);
 $('#winNext').onclick=()=>{
  if(origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}
@@ -1163,8 +1186,9 @@ function showPage(instant){const pages=CUTS[cutId].pages,pg=pages[cutP],ch=CHARS
  const fill=Math.round((cutP+1)/pages.length*5);$('#segs').innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<fill?'on':''}"></i>`).join('');
  const code=fillT(pg.c,M());$('#cutCode').textContent=code;$('#cutCode').style.display=code?'':'none';
  const el=$('#cutTxt'),t=pg[M()];clearInterval(typing);typing=null;if(instant){el.textContent=t;return}
+ speak(pg.kid,pg.s);
  let k=0;el.textContent='';typing=setInterval(()=>{k+=2;el.textContent=t.slice(0,k);if(k>=t.length){clearInterval(typing);typing=null}},26)}
-$('#sCut').onclick=e=>{if(e.target.closest('.modeBtn'))return;if(typing){clearInterval(typing);typing=null;showPage(true);return}
+$('#sCut').onclick=e=>{if(e.target.closest('.modeBtn')||e.target.closest('.voiceBtn'))return;if(typing){clearInterval(typing);typing=null;showPage(true);return}
  cutP++;if(cutP>=CUTS[cutId].pages.length){S.seen[cutId]=true;save();cutDone?cutDone():(renderMap(),show('sMap'))}else showPage()};
 
 /* ---------- Löser (Breitensuche) für Editor & Tagesrätsel ---------- */
