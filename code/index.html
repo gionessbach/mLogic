@@ -865,9 +865,9 @@ function speak(t,who='hint'){if(!voiceOn()||!t)return;try{SYN.cancel();const u=n
  const[p,r]=VOX[who]||VOX.hint;u.pitch=p;u.rate=r;SYN.speak(u)}catch(e){}}
 function hush(){try{SYN&&SYN.cancel()}catch(e){}}
 document.addEventListener('pointerdown',()=>{if(unlocked||!SYN)return;unlocked=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;SYN.speak(u)}catch(e){}},{capture:true});
-function voiceUI(){document.querySelectorAll('.voiceBtn').forEach(b=>{b.hidden=!SYN||!kid();b.textContent=S.voice!==false?'🔊':'🔇';b.classList.toggle('off',S.voice===false)});
+function voiceUI(){document.querySelectorAll('.voiceBtn').forEach(b=>{b.hidden=!kid();b.textContent=S.voice!==false?'🔊':'🔇';b.classList.toggle('off',S.voice===false)});
  $('#hint').classList.toggle('talk',voiceOn())}
-document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=e=>{e.stopPropagation();S.voice=S.voice===false;save();voiceUI();if(S.voice)speak('Hallo! Ich lese dir vor.');else hush()});
+document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=e=>{e.stopPropagation();if(!SYN){modal('Vorlesen nicht verfügbar','Dieser Browser kann leider nicht vorlesen (z. B. in manchen App-Vorschauen). Öffne mCode in Safari oder Chrome bzw. über mLogic – dort funktioniert der Sprecher.',null);return}S.voice=S.voice===false;save();voiceUI();if(S.voice)speak('Hallo! Ich lese dir vor.');else hush()});
 
 /* ---------- Bildschirme & Modus ---------- */
 let cur='sStart';
