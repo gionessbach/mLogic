@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>mCalc</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mCalc">
+<meta name="theme-color" content="#262625">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--y:#FDD602;--d:#262625;--bg:#FFFBEA;--line:#E7E1C8;--sel:#2E7DF6;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--d);font-family:Nunito,system-ui,sans-serif;overscroll-behavior:none}
+body{display:flex;flex-direction:column;height:100dvh;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--d);color:#fff}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--y);display:grid;place-items:center;flex:none}
+.brand{font-weight:900;font-size:24px;letter-spacing:-.5px;margin-right:auto}
+.brand b{color:var(--y)}
+.hb{background:#3a3a38;border-radius:12px;padding:9px 13px;font-weight:800;font-size:16px;display:flex;gap:6px;align-items:center}
+.hb.y{background:var(--y);color:var(--d)}
+.hb:active{transform:scale(.95)}
+.fbar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#fff;border-bottom:2px solid var(--line)}
+.ref{background:var(--y);font-weight:900;font-size:20px;border-radius:10px;padding:6px 12px;min-width:64px;text-align:center}
+#inp{flex:1;font:800 22px Nunito,sans-serif;border:2px solid var(--line);border-radius:12px;padding:8px 12px;color:var(--d);background:#fffef7;min-width:0;user-select:text;-webkit-user-select:text}
+#inp:focus{outline:none;border-color:var(--sel)}
+.hint{padding:6px 14px;font-size:15px;font-weight:700;min-height:30px;color:#6b6655}
+.hint.err{color:#c0392b}
+main{flex:1;display:flex;gap:12px;padding:0 12px 12px;min-height:0}
+.gridwrap{flex:1;overflow:auto;min-width:0;background:#fff;border-radius:16px;border:2px solid var(--line)}
+table{border-collapse:collapse;touch-action:none;width:100%;table-layout:fixed}
+th{background:#F6F0D6;font-weight:900;font-size:16px;color:#8a836a;height:34px;position:sticky;top:0;z-index:1}
+th.rh,col.rh{width:42px}th.rh{position:sticky;left:0}
+td{border:1.5px solid var(--line);height:52px;min-width:92px;font-weight:800;font-size:20px;padding:0 8px;white-space:nowrap;overflow:hidden;max-width:160px;text-overflow:ellipsis;position:relative}
+td.num{text-align:right}
+td.err{color:#c0392b;text-align:center}
+td.fx::after{content:"";position:absolute;left:3px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--sel);opacity:.5}
+td.in{background-image:linear-gradient(rgba(46,125,246,.13),rgba(46,125,246,.13))}
+td.act{outline:3px solid var(--sel);outline-offset:-3px}
+td.refd{outline:3px dashed #E67E22;outline-offset:-4px}
+td.b{font-weight:900}
+.thd.on{background:var(--y);color:var(--d)}
+aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow:auto}
+.card{background:#fff;border-radius:16px;border:2px solid var(--line);padding:10px}
+.card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#8a836a}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.k{background:#F6F0D6;border-radius:12px;height:50px;font-weight:900;font-size:22px}
+.k.op{background:#FFF2A8}
+.k.ok{background:var(--y);grid-column:span 2}
+.k.dark{background:var(--d);color:#fff;font-size:17px}
+.k:active,.fn:active,.sw:active{transform:scale(.93)}
+.fns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.fn{background:#EAF2FF;border-radius:12px;padding:8px;font-weight:900;font-size:16px;display:flex;align-items:center;gap:6px;justify-content:center}
+.fn span{font-size:22px}
+.sws{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.sw{width:40px;height:40px;border-radius:50%;border:2.5px solid var(--line)}
+.sw.bold{border-radius:10px;background:#fff;font-weight:900;font-size:20px;width:46px}
+.sw.bold.on{background:var(--d);color:#fff}
+.modal{position:fixed;inset:0;background:rgba(38,38,37,.55);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+.modal.on{display:flex}
+.box{background:#fff;border-radius:22px;padding:20px;max-width:640px;width:100%;max-height:90vh;overflow:auto}
+.box h2{margin:0 0 14px;font-size:24px}
+.tpls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tpl{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:16px;text-align:left;font-weight:800;font-size:18px}
+.tpl i{font-style:normal;font-size:34px;display:block;margin-bottom:4px}
+.tpl small{display:block;font-size:14px;color:#8a836a;font-weight:700}
+.close{margin-top:14px;background:var(--d);color:#fff;border-radius:12px;padding:10px 18px;font-weight:800}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--d);color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;z-index:10}
+.toast.on{opacity:1}
+@media (orientation:portrait),(max-width:820px),(max-height:600px){
+  body{height:auto;min-height:100dvh}
+  main{flex-direction:column;flex:none}
+  .gridwrap{flex:none;overflow-x:auto}
+  aside{width:auto;flex-direction:row;flex-wrap:wrap;overflow:visible}
+  aside .card{flex:1 1 280px}
+  .k{height:44px}
+  td{height:46px;min-width:70px;font-size:18px}
+  .hb .t{display:none}
+}
+@media (max-width:520px){
+  header{padding:8px 10px;gap:6px}
+  .brand{font-size:20px}.logo{width:34px;height:34px}
+  .hb{padding:8px 10px}
+  .fbar{padding:6px 8px}.ref{font-size:16px;min-width:48px;padding:6px 8px}#inp{font-size:18px;padding:6px 10px}
+  .hint{font-size:13px;padding:4px 10px}
+  main{padding:0 8px 8px;gap:8px}
+  th{font-size:13px;height:28px}th.rh,col.rh{width:28px}
+  td{height:40px;min-width:0;font-size:15px;padding:0 5px}
+  .k{height:42px;font-size:19px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="hb" href="../" aria-label="Zurück zu mLogic" style="text-decoration:none;padding:9px 10px">‹</a>
+  <div class="logo"><svg width="26" height="26" viewBox="0 0 26 26"><g fill="#262625"><rect x="2" y="2" width="10" height="10" rx="2.5"/><rect x="14" y="2" width="10" height="10" rx="2.5" opacity=".45"/><rect x="2" y="14" width="10" height="10" rx="2.5" opacity=".45"/><rect x="14" y="14" width="10" height="10" rx="2.5"/></g></svg></div>
+  <div class="brand">m<b>Calc</b></div>
+  <button class="hb" id="bUndo" title="Rückgängig">↶<span class="t">Zurück</span></button>
+  <button class="hb" id="bTpl">📋<span class="t">Vorlagen</span></button>
+  <button class="hb" id="bChart">📊<span class="t">Diagramm</span></button>
+  <button class="hb y" id="bExp">⬇<span class="t">Excel</span></button>
+</header>
+<div class="fbar"><div class="ref" id="ref">A1</div><input id="inp" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Tippe etwas …"></div>
+<div class="hint" id="hint">Tippe auf ein Kästchen und schreib eine Zahl oder ein Wort hinein.</div>
+<main>
+  <div class="gridwrap"><table id="grid"></table></div>
+  <aside>
+    <div class="card"><h3>Tasten</h3><div class="pad" id="pad"></div></div>
+    <div class="card"><h3>Rechnen</h3><div class="fns">
+      <button class="fn" data-fn="SUMME"><span>Σ</span>Summe</button>
+      <button class="fn" data-fn="MITTELWERT"><span>⌀</span>Mittelwert</button>
+      <button class="fn" data-fn="MAX"><span>⬆</span>Größte</button>
+      <button class="fn" data-fn="MIN"><span>⬇</span>Kleinste</button>
+    </div><h3 style="margin-top:14px">Farbe &amp; Fett</h3><div class="sws" id="sws"></div></div>
+  </aside>
+</main>
+<div class="modal" id="mTpl"><div class="box"><h2>Womit willst du anfangen?</h2><div class="tpls" id="tpls"></div><button class="close" data-close>Schließen</button></div></div>
+<div class="modal" id="mChart"><div class="box"><h2 id="chTitle">Diagramm</h2><div id="chart"></div><button class="close" data-close>Schließen</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const COLS=6, ROWS=10, L='ABCDEF';
+const FILLS=['','#FDD602','#FFB8B8','#B8DCFF','#BDF0C4','#E3CCFF'];
+const BARCOL=['#FDD602','#FF9F9F','#7FC3FF','#8FE0A0','#C9A6FF','#FFC27A'];
+let cells={}, undo=[];
+let act={r:0,c:0}, anchor={r:0,c:0}, sel={r1:0,c1:0,r2:0,c2:0};
+let editing=false, dragging=false, refIns=null;
+const $=id=>document.getElementById(id);
+const inp=$('inp');
+const key=(r,c)=>L[c]+(r+1);
+const cell=k=>cells[k]||(cells[k]={v:'',f:0,b:false});
+
+/* ---------- Speicher ---------- */
+function save(){try{localStorage.setItem('mcalc',JSON.stringify(cells))}catch(e){}}
+function load(){try{const s=localStorage.getItem('mcalc');if(s)cells=JSON.parse(s)}catch(e){}}
+function snap(){undo.push(JSON.stringify(cells));if(undo.length>60)undo.shift()}
+
+/* ---------- Formeln ---------- */
+const FN={SUMME:'SUM',SUM:'SUM',MITTELWERT:'AVERAGE',AVERAGE:'AVERAGE',MIN:'MIN',MAX:'MAX',ANZAHL:'COUNT',COUNT:'COUNT'};
+function tokenize(s){
+  const t=[];let i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(/\s/.test(ch)){i++;continue}
+    let m;
+    if(m=/^\d+(?:[.,]\d+)?/.exec(s.slice(i))){t.push({t:'n',v:parseFloat(m[0].replace(',','.')),s:m[0]});i+=m[0].length;continue}
+    if(m=/^[A-Za-zÄÖÜäöü]+(?=\s*\()/.exec(s.slice(i))){t.push({t:'f',v:m[0].toUpperCase()});i+=m[0].length;continue}
+    if(m=/^([A-Za-z])(\d+)/.exec(s.slice(i))){t.push({t:'r',v:m[1].toUpperCase()+m[2]});i+=m[0].length;continue}
+    if('+-−'.includes(ch)){t.push({t:'o',v:ch==='+'?'+':'-'});i++;continue}
+    if('*×xX·'.includes(ch)){t.push({t:'o',v:'*'});i++;continue}
+    if('/÷:'.includes(ch)&&!(ch===':'&&t.length&&t[t.length-1].t==='r')){t.push({t:'o',v:'/'});i++;continue}
+    if(ch===':'){t.push({t:':'});i++;continue}
+    if(ch==='('||ch===')'){t.push({t:ch});i++;continue}
+    if(ch===';'||ch===','){t.push({t:';'});i++;continue}
+    throw 'Das Zeichen „'+ch+'“ kenne ich nicht.';
+  }
+  return t;
+}
+function parse(tokens){
+  let p=0;const peek=()=>tokens[p],next=()=>tokens[p++];
+  function expr(){let n=term();while(peek()&&peek().t==='o'&&(peek().v==='+'||peek().v==='-')){const o=next().v;n={op:o,a:n,b:term()}}return n}
+  function term(){let n=unary();while(peek()&&peek().t==='o'&&(peek().v==='*'||peek().v==='/')){const o=next().v;n={op:o,a:n,b:unary()}}return n}
+  function unary(){if(peek()&&peek().t==='o'&&peek().v==='-'){next();return{op:'neg',a:unary()}}if(peek()&&peek().t==='o'&&peek().v==='+'){next();return unary()}return prim()}
+  function prim(){
+    const t=next();if(!t)throw 'Die Formel ist noch nicht fertig.';
+    if(t.t==='n')return{num:t.v};
+    if(t.t==='r'){if(peek()&&peek().t===':'){next();const e=next();if(!e||e.t!=='r')throw 'Nach „:“ fehlt ein Kästchen.';return{range:[t.v,e.v]}}return{ref:t.v}}
+    if(t.t==='f'){
+      if(!FN[t.v])throw 'Die Rechnung „'+t.v+'“ kenne ich nicht.';
+      next();const args=[];
+      if(peek()&&peek().t!==')'){args.push(expr());while(peek()&&peek().t===';'){next();args.push(expr())}}
+      if(!peek()||peek().t!==')')throw 'Es fehlt eine Klammer „)“.';next();
+      return{fn:FN[t.v],args};
+    }
+    if(t.t==='('){const n=expr();if(!peek()||peek().t!==')')throw 'Es fehlt eine Klammer „)“.';next();return n}
+    throw 'Da passt etwas nicht zusammen.';
+  }
+  const n=expr();if(p<tokens.length)throw 'Da passt etwas nicht zusammen.';return n;
+}
+function rc(ref){const c=L.indexOf(ref[0]),r=parseInt(ref.slice(1))-1;if(c<0||r<0||r>=ROWS)throw 'Das Kästchen '+ref+' gibt es nicht.';return{r,c}}
+function rangeKeys(a,b){const A=rc(a),B=rc(b),o=[];for(let r=Math.min(A.r,B.r);r<=Math.max(A.r,B.r);r++)for(let c=Math.min(A.c,B.c);c<=Math.max(A.c,B.c);c++)o.push(key(r,c));return o}
+let cache={},stack=new Set();
+function val(k){
+  if(k in cache)return cache[k];
+  if(stack.has(k))throw 'Die Formel zeigt auf sich selbst – das geht im Kreis.';
+  stack.add(k);let v;
+  try{v=computeRaw((cells[k]||{}).v||'')}catch(e){v={err:typeof e==='string'?e:'Fehler'}}
+  stack.delete(k);cache[k]=v;return v;
+}
+function computeRaw(raw){
+  raw=String(raw).trim();
+  if(raw==='')return null;
+  if(raw[0]==='='){const s=raw.slice(1);if(!s.trim())throw 'Die Formel ist noch leer.';return ev(parse(tokenize(s)))}
+  if(/^-?\d+(?:[.,]\d+)?$/.test(raw))return parseFloat(raw.replace(',','.'));
+  return raw;
+}
+function num(v,k){
+  if(v&&v.err)throw v.err;
+  if(v===null)return 0;
+  if(typeof v==='number')return v;
+  throw (k?'In '+k+' steht ein Wort – mit Wörtern kann man nicht rechnen.':'Mit Wörtern kann man nicht rechnen.');
+}
+function ev(n){
+  if('num' in n)return n.num;
+  if(n.ref){rc(n.ref);return num(val(n.ref),n.ref)}
+  if(n.range)throw 'Ein Bereich wie '+n.range.join(':')+' braucht eine Rechnung, z. B. SUMME.';
+  if(n.op==='neg')return -ev(n.a);
+  if(n.op){const a=ev(n.a),b=ev(n.b);
+    if(n.op==='+')return a+b;if(n.op==='-')return a-b;if(n.op==='*')return a*b;
+    if(b===0)throw 'Durch 0 teilen geht nicht.';return a/b}
+  if(n.fn){
+    const xs=[];
+    for(const a of n.args){
+      if(a.range){for(const k of rangeKeys(a.range[0],a.range[1])){const v=val(k);if(v&&v.err)throw v.err;if(typeof v==='number')xs.push(v)}}
+      else if(a.ref){rc(a.ref);const v=val(a.ref);if(v&&v.err)throw v.err;if(typeof v==='number')xs.push(v)}
+      else xs.push(ev(a));
+    }
+    if(n.fn==='SUM')return xs.reduce((s,x)=>s+x,0);
+    if(n.fn==='COUNT')return xs.length;
+    if(!xs.length)return 0;
+    if(n.fn==='AVERAGE')return xs.reduce((s,x)=>s+x,0)/xs.length;
+    if(n.fn==='MIN')return Math.min(...xs);
+    if(n.fn==='MAX')return Math.max(...xs);
+  }
+  throw 'Fehler';
+}
+function recalc(){cache={};stack=new Set();for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)val(key(r,c))}
+const fmt=n=>{const r=Math.round(n*100)/100;return r.toLocaleString('de-DE',{maximumFractionDigits:2})};
+
+/* ---------- Tabelle ---------- */
+const grid=$('grid');
+(function build(){
+  let h='<colgroup><col class="rh"><col style="width:26%">'+'<col>'.repeat(COLS-1)+'</colgroup><tr><th class="rh"></th>';for(let c=0;c<COLS;c++)h+=`<th class="thd" data-col="${c}">${L[c]}</th>`;h+='</tr>';
+  for(let r=0;r<ROWS;r++){h+=`<tr><th class="rh thd" data-row="${r}">${r+1}</th>`;for(let c=0;c<COLS;c++)h+=`<td data-r="${r}" data-c="${c}"></td>`;h+='</tr>'}
+  grid.innerHTML=h;
+})();
+const tdAt=(r,c)=>grid.rows[r+1].cells[c+1];
+function render(){
+  recalc();
+  const buf=inp.value, refs=new Set();
+  if(editing&&buf.startsWith('=')){
+    const re=/([A-Fa-f])(\d+)(?:\s*:\s*([A-Fa-f])(\d+))?/g;let m;
+    while(m=re.exec(buf)){try{if(m[3])rangeKeys(m[1].toUpperCase()+m[2],m[3].toUpperCase()+m[4]).forEach(k=>refs.add(k));else refs.add(m[1].toUpperCase()+m[2])}catch(e){}}
+  }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const k=key(r,c),td=tdAt(r,c),d=cells[k]||{},v=cache[k];
+    let txt='',cls=[];
+    if(v&&v.err){txt='🤔';cls.push('err')}
+    else if(typeof v==='number'){txt=fmt(v);cls.push('num')}
+    else if(v!==null)txt=v;
+    if(String(d.v||'').startsWith('='))cls.push('fx');
+    if(d.b)cls.push('b');
+    if(r>=sel.r1&&r<=sel.r2&&c>=sel.c1&&c<=sel.c2&&(sel.r1!==sel.r2||sel.c1!==sel.c2))cls.push('in');
+    if(r===act.r&&c===act.c)cls.push('act');
+    if(refs.has(k))cls.push('refd');
+    td.className=cls.join(' ');td.textContent=txt;td.style.background=FILLS[d.f||0]||'';
+  }
+  grid.querySelectorAll('.thd').forEach(th=>{
+    const c=th.dataset.col,r=th.dataset.row;
+    th.classList.toggle('on',c!==undefined?(+c>=sel.c1&&+c<=sel.c2):(+r>=sel.r1&&+r<=sel.r2));
+  });
+  $('ref').textContent=(sel.r1!==sel.r2||sel.c1!==sel.c2)?key(sel.r1,sel.c1)+':'+key(sel.r2,sel.c2):key(act.r,act.c);
+  $('bold').classList.toggle('on',!!(cells[key(act.r,act.c)]||{}).b);
+  showHint();
+}
+function showHint(){
+  const h=$('hint'),k=key(act.r,act.c),v=cache[k],raw=(cells[k]||{}).v||'';
+  h.classList.remove('err');
+  if(editing&&inp.value.startsWith('=')){h.textContent='👉 Tippe auf ein Kästchen, dann kommt es in die Rechnung. Fertig? Drück OK.';return}
+  if(v&&v.err){h.textContent='Hoppla in '+k+': '+v.err;h.classList.add('err');return}
+  if(raw.startsWith('=')&&typeof v==='number'){h.textContent='✨ '+k+' rechnet: '+raw.slice(1)+'  →  '+fmt(v);return}
+  if(sel.r1!==sel.r2||sel.c1!==sel.c2){h.textContent='Du hast mehrere Kästchen markiert. Drück Σ Summe, eine Farbe oder 📊 Diagramm.';return}
+  h.textContent='Tippe auf ein Kästchen und schreib eine Zahl oder ein Wort hinein. Rechnen beginnt mit „=“.';
+}
+function select(r,c,keepAnchor){
+  r=Math.max(0,Math.min(ROWS-1,r));c=Math.max(0,Math.min(COLS-1,c));
+  if(!keepAnchor){anchor={r,c};act={r,c}}
+  sel={r1:Math.min(anchor.r,r),c1:Math.min(anchor.c,c),r2:Math.max(anchor.r,r),c2:Math.max(anchor.c,c)};
+  if(!keepAnchor){inp.value=(cells[key(r,c)]||{}).v||'';editing=false}
+  render();
+}
+function commit(){
+  if(!editing)return;
+  let v=inp.value.trim();
+  if(v.startsWith('=')){const o=(v.match(/\(/g)||[]).length-(v.match(/\)/g)||[]).length;if(o>0)v+=')'.repeat(o)}
+  snap();cell(key(act.r,act.c)).v=v;editing=false;inp.value=v;save();
+}
+const wantsRef=()=>editing&&inp.value.startsWith('=')&&/[=+\-−*×÷\/(:;]$/.test(inp.value.trim());
+
+grid.addEventListener('pointerdown',e=>{
+  const td=e.target.closest('td');if(!td)return;e.preventDefault();
+  const r=+td.dataset.r,c=+td.dataset.c;
+  if(wantsRef()){refIns={base:inp.value.trim(),r,c};inp.value=refIns.base+key(r,c);dragging=true;render();return}
+  commit();dragging=true;select(r,c);inp.blur();
+});
+grid.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const el=document.elementFromPoint(e.clientX,e.clientY),td=el&&el.closest&&el.closest('td');if(!td)return;
+  const r=+td.dataset.r,c=+td.dataset.c;
+  if(refIns){inp.value=refIns.base+((r===refIns.r&&c===refIns.c)?key(r,c):key(Math.min(r,refIns.r),Math.min(c,refIns.c))+':'+key(Math.max(r,refIns.r),Math.max(c,refIns.c)));render();return}
+  select(r,c,true);
+});
+addEventListener('pointerup',()=>{dragging=false;refIns=null});
+grid.addEventListener('click',e=>{ // Spalten-/Zeilenkopf markiert ganze Spalte/Zeile
+  const th=e.target.closest('.thd');if(!th)return;commit();
+  if(th.dataset.col!==undefined){const c=+th.dataset.col;anchor={r:0,c};act={r:0,c};select(ROWS-1,c,true)}
+  else{const r=+th.dataset.row;anchor={r,c:0};act={r,c:0};select(r,COLS-1,true)}
+  inp.value=(cells[key(act.r,act.c)]||{}).v||'';
+});
+
+/* ---------- Eingabe ---------- */
+inp.addEventListener('input',()=>{editing=true;render()});
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();ok()}
+  else if(e.key==='Tab'){e.preventDefault();commit();select(act.r,act.c+1)}
+  else if(e.key==='Escape'){editing=false;select(act.r,act.c)}
+});
+document.addEventListener('keydown',e=>{
+  if(document.activeElement===inp||document.querySelector('.modal.on'))return;
+  const mv={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];
+  if(mv){e.preventDefault();select(act.r+mv[0],act.c+mv[1]);return}
+  if(e.key==='Backspace'||e.key==='Delete'){clearSel();return}
+  if(e.key.length===1&&!e.metaKey&&!e.ctrlKey){inp.value='';inp.focus()}
+});
+function ok(){commit();select(act.r+1,act.c);inp.blur()}
+function press(k){
+  if(k==='⌫'){if(!editing){inp.value=(cells[key(act.r,act.c)]||{}).v||''}editing=true;inp.value=inp.value.slice(0,-1);render();return}
+  if(k==='OK'){ok();return}
+  if(k==='Abc'){inp.focus();editing=true;return}
+  if(k==='🗑'){clearSel();return}
+  const add={'×':'*','÷':'/','−':'-'}[k]||k;
+  if(!editing){inp.value=''}
+  editing=true;inp.value+=add;render();
+}
+$('pad').innerHTML=['7','8','9','÷','4','5','6','×','1','2','3','−','0',',','=','+','(',')',':','⌫','Abc','🗑','OK'].map(k=>{
+  const cls=['÷','×','−','+','=','(',')',':'].includes(k)?'op':k==='OK'?'ok':['Abc','🗑','⌫'].includes(k)?'dark':'';
+  return `<button class="k ${cls}" data-k="${k}">${k}</button>`}).join('');
+$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k)});
+function clearSel(){snap();for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cells[key(r,c)];if(d)d.v=''}editing=false;inp.value='';save();render()}
+
+/* ---------- Rechen-Knöpfe ---------- */
+const isNum=k=>typeof cache[k]==='number';
+document.querySelectorAll('[data-fn]').forEach(b=>b.addEventListener('click',()=>{
+  const fn=b.dataset.fn;
+  if(sel.r1!==sel.r2||sel.c1!==sel.c2){
+    const range=key(sel.r1,sel.c1)+':'+key(sel.r2,sel.c2);
+    let tr,tc;if(sel.r2>sel.r1){tr=sel.r2+1;tc=sel.c1}else{tr=sel.r1;tc=sel.c2+1}
+    if(tr>=ROWS||tc>=COLS){toast('Unter der Markierung ist kein Platz mehr.');return}
+    snap();cell(key(tr,tc)).v='='+fn+'('+range+')';save();select(tr,tc);toast('✨ '+fn+' ausgerechnet!');return;
+  }
+  if(editing&&inp.value.startsWith('=')){inp.value+=fn+'(';render();return}
+  recalc();
+  let r=act.r-1;while(r>=0&&isNum(key(r,act.c)))r--;
+  if(r<act.r-1){inp.value='='+fn+'('+key(r+1,act.c)+':'+key(act.r-1,act.c)+')';editing=true;ok();toast('✨ '+fn+' von den Zahlen darüber!');return}
+  let c=act.c-1;while(c>=0&&isNum(key(act.r,c)))c--;
+  if(c<act.c-1){inp.value='='+fn+'('+key(act.r,c+1)+':'+key(act.r,act.c-1)+')';editing=true;commit();select(act.r,act.c);toast('✨ '+fn+' von den Zahlen links!');return}
+  inp.value='='+fn+'(';editing=true;render();
+}));
+
+/* ---------- Farben ---------- */
+$('sws').innerHTML=FILLS.map((f,i)=>`<button class="sw" data-f="${i}" style="background:${f||'#fff'}">${i?'':'✕'}</button>`).join('')+'<button class="sw bold" id="bold">F</button>';
+$('sws').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;commit();snap();
+  const k0=key(act.r,act.c),bold=b.id==='bold'?!(cells[k0]||{}).b:null;
+  for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cell(key(r,c));if(bold===null)d.f=+b.dataset.f;else d.b=bold}
+  save();render();
+});
+
+/* ---------- Vorlagen ---------- */
+const H={f:1,b:true};
+const TPL={
+ leer:{i:'⬜',n:'Leeres Blatt',d:'Alles selbst machen',rows:[]},
+ tiere:{i:'🐶',n:'Tiere zählen',d:'Summe & Diagramm',rows:[[['Tier',H],['Anzahl',H]],['🐶 Hunde',3],['🐱 Katzen',5],['🐦 Vögel',8],['🐟 Fische',2],[['Alle zusammen',{b:true}],['=SUMME(B2:B5)',{f:4,b:true}]]]},
+ einkauf:{i:'🛒',n:'Einkaufsliste',d:'Mal rechnen & Summe',rows:[[['Was?',H],['Wie viele?',H],['Preis €',H],['Zusammen €',H]],['🍎 Äpfel',4,'0,5','=B2*C2'],['🍞 Brot',1,'2,2','=B3*C3'],['🥛 Milch',2,'1,1','=B4*C4'],['🍌 Bananen',6,'0,3','=B5*C5'],[['Summe',{b:true}],'','',['=SUMME(D2:D5)',{f:4,b:true}]]]},
+ geld:{i:'🪙',n:'Taschengeld',d:'Minus & Mittelwert',rows:[[['Woche',H],['Bekommen',H],['Ausgegeben',H],['Übrig',H]],['Woche 1',3,1,'=B2-C2'],['Woche 2',3,2,'=B3-C3'],['Woche 3',3,0,'=B4-C4'],['Woche 4',3,'2,5','=B5-C5'],[['Summe',{b:true}],'=SUMME(B2:B5)','=SUMME(C2:C5)',['=SUMME(D2:D5)',{f:4,b:true}]],[['Mittelwert',{b:true}],'','',['=MITTELWERT(D2:D5)',{f:3}]]]},
+ wetter:{i:'🌡️',n:'Wetter',d:'Größte & kleinste Zahl',rows:[[['Tag',H],['Grad',H]],['Montag',8],['Dienstag',11],['Mittwoch',6],['Donnerstag',9],['Freitag',13],[['Wärmster',{b:true}],['=MAX(B2:B6)',{f:2}]],[['Kältester',{b:true}],['=MIN(B2:B6)',{f:3}]]]},
+ noten:{i:'⚽',n:'Tore zählen',d:'Spieler vergleichen',rows:[[['Spieler',H],['Spiel 1',H],['Spiel 2',H],['Spiel 3',H],['Tore',H]],['Mia',1,2,0,'=SUMME(B2:D2)'],['Ben',0,1,3,'=SUMME(B3:D3)'],['Ida',2,2,1,'=SUMME(B4:D4)']]}
+};
+$('tpls').innerHTML=Object.entries(TPL).map(([k,t])=>`<button class="tpl" data-t="${k}"><i>${t.i}</i>${t.n}<small>${t.d}</small></button>`).join('');
+$('tpls').addEventListener('click',e=>{
+  const b=e.target.closest('[data-t]');if(!b)return;snap();cells={};
+  TPL[b.dataset.t].rows.forEach((row,r)=>row.forEach((x,c)=>{
+    let v=x,o={};if(Array.isArray(x)){v=x[0];o=x[1]}
+    if(v===''&&!o.f)return;cells[key(r,c)]={v:String(v),f:o.f||0,b:!!o.b};
+  }));
+  save();closeAll();select(0,0);toast('📋 '+TPL[b.dataset.t].n+' geladen');
+});
+
+/* ---------- Diagramm ---------- */
+function chartData(){
+  recalc();let {r1,c1,r2,c2}=sel;
+  if(r1===r2&&c1===c2){ // eine Zelle: zusammenhängende Spalte nehmen
+    let a=r1,z=r1;while(a>0&&cache[key(a-1,c1)]!==null)a--;while(z<ROWS-1&&cache[key(z+1,c1)]!==null)z++;r1=a;r2=z;
+    c2=c1;
+  }
+  const agg=k=>/^=\s*(SUMME|SUM|MITTELWERT|AVERAGE|MIN|MAX|ANZAHL|COUNT)\(/i.test((cells[k]||{}).v||'');
+  const items=[];let vc=c2;
+  if(c2>c1){ // mehrere Spalten: links Namen, rechts Zahlen
+    for(let r=r1;r<=r2;r++){const v=cache[key(r,vc)],l=cache[key(r,c1)];if(typeof v==='number'&&!agg(key(r,vc)))items.push({l:l==null?String(r+1):(typeof l==='number'?fmt(l):l),v})}
+  }else{
+    for(let r=r1;r<=r2;r++){const v=cache[key(r,c1)];if(typeof v==='number'&&!agg(key(r,c1))){const l=c1>0?cache[key(r,c1-1)]:null;items.push({l:l==null?key(r,c1):(typeof l==='number'?fmt(l):l),v})}}
+  }
+  const head=r1>0?cache[key(r1-1,vc)]:cache[key(r1,vc)];
+  return{items,title:typeof head==='string'?head:'Diagramm'};
+}
+$('bChart').onclick=()=>{
+  commit();const {items,title}=chartData();
+  if(items.length<1){toast('Markiere erst ein paar Zahlen (oder Namen + Zahlen).');return}
+  $('chTitle').textContent='📊 '+title;
+  const W=600,Hh=320,pad=40,max=Math.max(...items.map(i=>i.v),0)||1,min=Math.min(0,...items.map(i=>i.v)),span=max-min||1;
+  const bw=(W-pad*2)/items.length,y=v=>36+(Hh-96)*(max-v)/span;
+  let s=`<svg viewBox="0 0 ${W} ${Hh}" width="100%" style="font-family:Nunito;font-weight:800">`;
+  s+=`<line x1="${pad}" x2="${W-pad}" y1="${y(0)}" y2="${y(0)}" stroke="#262625" stroke-width="2"/>`;
+  items.forEach((it,i)=>{const x=pad+i*bw+bw*.15,w=bw*.7,top=Math.min(y(it.v),y(0)),h=Math.max(2,Math.abs(y(it.v)-y(0)));
+    s+=`<rect x="${x}" y="${top}" width="${w}" height="${h}" rx="8" fill="${BARCOL[i%BARCOL.length]}" stroke="#262625" stroke-width="2"/>`;
+    s+=`<text x="${x+w/2}" y="${top-8}" text-anchor="middle" font-size="20" fill="#262625">${fmt(it.v)}</text>`;
+    s+=`<text x="${x+w/2}" y="${Hh-22}" text-anchor="middle" font-size="${items.length>5?13:16}" fill="#262625">${String(it.l).replace(/[<&]/g,'')}</text>`});
+  $('chart').innerHTML=s+'</svg>';$('mChart').classList.add('on');
+};
+
+/* ---------- Excel-Export (.xlsx, ohne Bibliothek) ---------- */
+function xlFormula(raw){
+  return tokenize(raw.slice(1)).map(t=>t.t==='n'?String(t.v):t.t==='f'?(FN[t.v]||t.v):t.t==='r'?t.v:t.t==='o'?t.v:t.t===':'?':':t.t===';'?',':t.t).join('');
+}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function buildXlsx(){
+  recalc();
+  const xf=['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'],xfMap={'0|0':0};
+  const st=d=>{const k=(d.f||0)+'|'+(d.b?1:0);if(!(k in xfMap)){xfMap[k]=xf.length;xf.push(`<xf numFmtId="0" fontId="${d.b?1:0}" fillId="${d.f?d.f+1:0}" borderId="0" xfId="0" applyFont="1" applyFill="1"/>`)}return xfMap[k]};
+  let rows='';
+  for(let r=0;r<ROWS;r++){let cs='';
+    for(let c=0;c<COLS;c++){const k=key(r,c),d=cells[k];if(!d||(!d.v&&!d.f&&!d.b))continue;
+      const s=st(d),raw=String(d.v||'').trim(),v=cache[k];
+      if(!raw){cs+=`<c r="${k}" s="${s}"/>`;continue}
+      if(raw[0]==='='){let f;try{f=xlFormula(raw)}catch(e){f=null}
+        if(f===null)cs+=`<c r="${k}" s="${s}" t="inlineStr"><is><t>${esc(raw)}</t></is></c>`;
+        else if(typeof v==='number')cs+=`<c r="${k}" s="${s}"><f>${esc(f)}</f><v>${v}</v></c>`;
+        else cs+=`<c r="${k}" s="${s}"><f>${esc(f)}</f></c>`;}
+      else if(typeof v==='number')cs+=`<c r="${k}" s="${s}"><v>${v}</v></c>`;
+      else cs+=`<c r="${k}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${esc(raw)}</t></is></c>`;
+    }
+    if(cs)rows+=`<row r="${r+1}">${cs}</row>`}
+  const fills=FILLS.slice(1).map(f=>`<fill><patternFill patternType="solid"><fgColor rgb="FF${f.slice(1)}"/><bgColor indexed="64"/></patternFill></fill>`).join('');
+  const files={
+   '[Content_Types].xml':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
+   '_rels/.rels':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+   'xl/workbook.xml':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="mCalc" sheetId="1" r:id="rId1"/></sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>',
+   'xl/_rels/workbook.xml.rels':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+   'xl/styles.xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="12"/><name val="Calibri"/></font><font><b/><sz val="12"/><name val="Calibri"/></font></fonts><fills count="${2+FILLS.length-1}"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fills}</fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xf.length}">${xf.join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`,
+   'xl/worksheets/sheet1.xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="${COLS}" width="16" customWidth="1"/></cols><sheetData>${rows}</sheetData></worksheet>`
+  };
+  return zip(files);
+}
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+function zip(files){
+  const enc=new TextEncoder(),parts=[],central=[];let off=0;
+  for(const [name,txt] of Object.entries(files)){
+    const nb=enc.encode(name),data=enc.encode(txt),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,0,true);h.setUint16(12,0x21,true);
+    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nb.length,true);h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),nb,data);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,0,true);c.setUint16(14,0x21,true);
+    c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nb.length,true);c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer),nb);
+    off+=30+nb.length+data.length;
+  }
+  const cdSize=central.reduce((s,a)=>s+a.length,0),n=Object.keys(files).length;
+  const e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,n,true);e.setUint16(10,n,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+  const all=[...parts,...central,new Uint8Array(e.buffer)],out=new Uint8Array(all.reduce((s,a)=>s+a.length,0));let p=0;for(const a of all){out.set(a,p);p+=a.length}
+  return out;
+}
+let dl=null;
+try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d}).catch(()=>{})}catch(e){}
+$('bExp').onclick=async()=>{
+  commit();const data=buildXlsx();
+  if(dl){try{await dl.save({filename:'mCalc.xlsx',data});toast('✅ Excel-Datei gespeichert');}catch(e){if(e&&e.code!=='declined')toast('Speichern klappt hier gerade nicht.')}return}
+  try{const f=new File([data],'mCalc.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'mCalc'});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download='mCalc.xlsx';document.body.appendChild(a);a.click();a.remove();toast('✅ Excel-Datei erstellt')}catch(e){toast('Speichern klappt hier gerade nicht.')}
+};
+
+/* ---------- Sonstiges ---------- */
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2200)}
+function closeAll(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on'))}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeAll()}));
+$('bTpl').onclick=()=>{commit();$('mTpl').classList.add('on')};
+$('bUndo').onclick=()=>{if(!undo.length){toast('Nichts mehr zum Zurücknehmen.');return}cells=JSON.parse(undo.pop());editing=false;save();select(act.r,act.c)};
+load();
+if(!Object.keys(cells).length)$('mTpl').classList.add('on');
+select(0,0);
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // mLogic – Offline-Speicher für alle Spiele. Bei Änderungen an einer Datei die Versionsnummer erhöhen.
-const CACHE = "mlogic-v19";
+const CACHE = "mlogic-v20";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "hash/", "hash/index.html", "hash/icon-180.png", "hash/icon-192.png", "hash/icon-512.png",
@@ -9,6 +9,7 @@ const FILES = [
   "rise/", "rise/index.html", "rise/icon-180.png", "rise/icon-192.png", "rise/icon-512.png",
   "code/", "code/index.html", "code/icon-180.png", "code/icon-192.png", "code/icon-512.png",
   "sudo/", "sudo/index.html", "sudo/icon-180.png", "sudo/icon-192.png", "sudo/icon-512.png",
+  "calc/", "calc/index.html", "calc/icon-180.png", "calc/icon-192.png", "calc/icon-512.png",
   "zip/", "zip/index.html", "zip/icon-180.png", "zip/icon-192.png", "zip/icon-512.png",
   "flow/", "flow/index.html", "flow/icon.png", "flow/icon-512.png", "flow/icon-maskable-192.png", "flow/icon-maskable-512.png", "flow/fredoka.woff2",
   "atom/", "atom/index.html", "atom/icon-180.png", "atom/icon-192.png", "atom/icon-512.png"
