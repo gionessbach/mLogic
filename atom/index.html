@@ -287,11 +287,19 @@ function zerfall(i){const R=G.re[i],d=R.dom;R.voll=R.voll.map(()=>false);R.t=nul
 const hoch=()=>matchMedia('(orientation:portrait)').matches;
 function bandBreite(){const b=$('belt');return (hoch()?b.clientHeight:b.clientWidth)||1000}
 // kurzes Band (Handy): langsamer, damit jedes Atom lange genug sichtbar bleibt
-function bandTempo(){return G.cfg.tempo*Math.min(1,Math.max(0.6,bandBreite()/1000))}
-function spawne(){const b=bandBreite();let el;
-  const fehlt=[];G.re.forEach(R=>R.rez.a.forEach((a,k)=>{if(!R.voll[k])fehlt.push(a[0])}));
-  if(fehlt.length&&G.rng()<0.6)el=fehlt[Math.floor(G.rng()*fehlt.length)];
-  else{const m=G.cfg.bandMix;el=m[Math.floor(G.rng()*m.length)]}
+function bandTempo(){return G.cfg.tempo*Math.min(1,Math.max(0.75,bandBreite()/1000))}
+// Nachschub: nur Atomarten, die gerade ein Reaktor braucht.
+// 1) Angefangene Reaktoren (älteste zuerst) werden garantiert beliefert: fehlt dort ein Atom,
+//    das nicht schon (weit genug vorn) auf dem Band liegt, kommt genau dieses als Nächstes.
+// 2) Sonst gewichtet nach offenen Plätzen, abzüglich dessen, was schon auf dem Band liegt.
+function waehleAtom(){
+  const rest={};G.band.forEach(it=>{if(it.x>120)rest[it.el]=(rest[it.el]||0)+1});
+  const angef=G.re.filter(R=>R.t!==null).sort((a,b)=>b.t-a.t);
+  for(const R of angef)for(let k=0;k<R.voll.length;k++)if(!R.voll[k]){const el=R.rez.a[k][0];if(rest[el]>0)rest[el]--;else return el}
+  const w={};G.re.forEach(R=>R.rez.a.forEach((a,k)=>{if(!R.voll[k])w[a[0]]=(w[a[0]]||0)+1}));
+  const els=Object.keys(w);let sum=0;const g=els.map(e=>{const x=Math.max(0.3,w[e]-(rest[e]||0));sum+=x;return x});
+  let r=G.rng()*sum;for(let i=0;i<els.length;i++){r-=g[i];if(r<=0)return els[i]}return els[els.length-1]}
+function spawne(){const b=bandBreite();const el=waehleAtom();
   G.bandLen=b;const dom=atomEl(el);const it={id:++G.uid,el,x:b+10,dom,held:false};
   dom.addEventListener('pointerdown',ev=>greife(ev,it));$('belt').appendChild(dom);G.band.push(it);posAtom(it)}
 function posAtom(it){it.dom.style.transform=hoch()?`translateY(${G.bandLen-it.x-60}px)`:`translateX(${it.x}px)`}
@@ -322,7 +330,7 @@ function entferne(it){const k=G.band.indexOf(it);if(k>=0)G.band.splice(k,1);it.d
 function schritt(dt){if(!G||!G.laeuft)return;
   G.zeit+=dt;const b=bandBreite();G.bandLen=b;const v=bandTempo();
   G.spawnT-=dt;const last=G.band[G.band.length-1];
-  if(G.spawnT<=0&&(!last||last.x<b-80)){spawne();G.spawnT=1.1}
+  if(G.spawnT<=0&&(!last||last.x<b-66)){spawne();G.spawnT=0.8}
   G.bandOff+=v*dt;
   for(let k=G.band.length-1;k>=0;k--){const it=G.band[k];it.x-=v*dt;posAtom(it);if(it.x<-70&&!it.held)entferne(it)}
   for(let i=0;i<3&&G&&G.laeuft;i++){const R=G.re[i];if(R.t===null)continue;R.t+=dt;const rest=ZERFALL-R.t;
@@ -370,6 +378,7 @@ window.matomTest={
   tick(sek){for(let t=0;t<sek;t+=0.05)schritt(0.05);return this.state()},
   setze(i,el){return setze(i,el)},
   state(){const s=document.querySelector('.scr.on').id;return G?{screen:s,masse:G.masse,stab:G.stab,zeit:+G.zeit.toFixed(1),band:G.band.length,reaktoren:G.re.map(R=>R.rez.id+':'+R.voll.filter(Boolean).length+(R.t!==null?' t='+R.t.toFixed(1):''))}:{screen:s,xp:lade('xp',0)}},
+  _G(){return G},
   simArena(){return 'Arena (E4/E5) ist noch nicht gebaut'}
 };
 startScreen();
