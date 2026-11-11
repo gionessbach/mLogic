@@ -221,6 +221,8 @@ input[type=range]{width:84px;accent-color:#7FDBFF}
 .code li.sel{background:#2A3470;outline:2px solid #FFD166;outline-offset:-2px}
 .cmdRow .brk{flex-basis:100%;height:0}
 .chip.x.sel{color:#0B1026}
+.busy .cbtn.run{opacity:1}
+.cbtn.run.stop,.play.stop{background:#FF5C8A;color:#fff}
 </style>
 </head>
 <body>
@@ -873,7 +875,7 @@ const MSG={
   parens:'Klammern vergessen? Schreib {n}()',string:'Text braucht gerade Anführungszeichen: "gelb"',luecke:'Fülle zuerst die Lücke ___.',args:'{n}() bekommt die falsche Anzahl Werte.',
   type:'Hier passt der Wert nicht (Zahl erwartet).',zero:'Durch 0 teilen geht nicht.',endless:'Endlosschleife! Die Kapsel kommt nie an.',toolong:'Das sind zu viele Schritte!',
   recursion:'Die Funktion ruft sich endlos selbst auf.',rangeonly:'range() gibt es nur in for-Schleifen.',color:'Die Farbe „{n}“ gibt es nicht. Probier gelb, blau, weiss, orange, rot.',colorarg:'farbe() braucht eine Farbe in Anführungszeichen.',
-  selfirst:'Tippe zuerst im Code auf die Zeile, die du ändern willst.',tapcell:'👆 Lies den Code und tippe auf das Feld der Plattform, auf dem die Kapsel am Ende steht.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
+  stopped:'Gestoppt! Schau dir deinen Code nochmal an.',selfirst:'Tippe zuerst im Code auf die Zeile, die du ändern willst.',tapcell:'👆 Lies den Code und tippe auf das Feld der Plattform, auf dem die Kapsel am Ende steht.',chosen:'Deine Antwort ist gewählt – jetzt ▶ Prüfen.'},
  adult:{wall:'Fehler: Zielfeld durch Hindernis blockiert.',edge:'Fehler: Bewegung würde die Plattform verlassen.',enemy:'Fehler: Kollision mit einer Drohne.',hole:'Fehler: Bewegung in ein Loch.',jumpwall:'Fehler: jump() über ein Hindernis ist nicht möglich.',
   nostar:'Fehler: Kein Objekt auf diesem Feld – pick_up() schlägt fehl.',needstars:'Programmende am Ziel, aber nicht alle Objekte gesammelt.',genau:'Am Ziel, aber nicht genau die geforderte Anzahl gesammelt.',notsaid:'Am Ziel, aber say() hat nicht die richtige Anzahl ausgegeben.',
   notyet:'Programm beendet, bevor das Ziel erreicht wurde – es fehlen Anweisungen.',over:'Ziel wurde vor Programmende erreicht – überzählige Anweisung markiert.',
@@ -884,7 +886,7 @@ const MSG={
   parens:'Aufruf ohne Klammern – {n}() schreiben.',string:'SyntaxError: Zeichenkette mit "…" schreiben.',luecke:'Lücke ___ noch offen.',args:'TypeError: {n}() mit falscher Anzahl Argumente aufgerufen.',
   type:'TypeError: unpassender Datentyp.',zero:'ZeroDivisionError.',endless:'Abbruch: Endlosschleife (Operationslimit erreicht).',toolong:'Abbruch: mehr als 500 Aktionen.',
   recursion:'RecursionError: zu tiefe Rekursion.',rangeonly:'range() hier nur in for-Schleifen erlaubt.',color:'ValueError: unbekannte Farbe „{n}“ (yellow, blue, white, orange, red).',colorarg:'color() erwartet einen String, z. B. "blue".',
-  selfirst:'Zuerst eine Codezeile antippen.',tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
+  stopped:'Programm abgebrochen.',selfirst:'Zuerst eine Codezeile antippen.',tapcell:'Endfeld vorhersagen: direkt auf die Plattform tippen.',chosen:'Antwort gewählt – mit ▶ Prüfen auswerten.'}};
 const TYICON={vorhersage:'🔮',reparieren:'🔧',luecke:'✏️'};
 
 /* ---------- Sprecher (nur Kinder-Modus): Systemstimme, hochgepitcht wie ein kleiner Roboter ---------- */
@@ -1045,8 +1047,9 @@ function curIndent(){const ta=$('#ta'),v=ta.value,p=ta.selectionStart,ls=v.lastI
 const SIMPLE={move:1,left:1,right:1,pick:1,jump:1,wait:1};
 function lineFor(id){const n=N();if(SIMPLE[id])return n[id]+'()';if(id==='var0')return n.v+' = 0';if(id==='inc')return n.v+' = '+n.v+' + 1';if(id==='say')return n.say+'('+n.v+')';return null}
 $('#cmdRow').onpointerdown=e=>{if(editing&&e.target.closest('button'))e.preventDefault()};
-$('#cmdRow').onclick=e=>{const b=e.target.closest('button');if(!b||running)return;
- if(b.id==='bPlay'){run();return}
+$('#cmdRow').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.id==='bPlay'){running?stop():run();return}
+ if(running)return;
  if(b.dataset.pick!=null){pick=+b.dataset.pick;buildCmds();showHint('chosen');return}
  if(b.dataset.chipx){chips=null;buildCmds();return}
  if(b.dataset.bm){bmode=b.dataset.bm;buildCmds();return}
@@ -1142,14 +1145,20 @@ function prep(){if(editing)setEdit(false);chips=null;
  if(L.typ==='vorhersage'&&pick==null){showHint(L.frage==='wert'?'pickfirst':'tapcell','err');return false}
  const c=compile(src);if(c.err){showErr(c.err);return false}
  if(!src.length||!lineCount()){showHint('empty','err');return false}return true}
+let abortReq=false;
+function playUI(on){const t=on?'■ Stopp':(L.typ==='vorhersage'?'▶ Prüfen':'▶ Play');$('#bRun').textContent=t;const p=$('#bPlay');if(p)p.textContent=t;
+ $('#bRun').classList.toggle('stop',on);p&&p.classList.toggle('stop',on)}
+function stop(){if(running)abortReq=true}
 async function run(){
- if(running||!prep())return;running=true;stepI=null;errLine=-1;$('#codeHead').classList.add('busy');showHint('running');vstat=[];
+ if(running||!prep())return;running=true;abortReq=false;playUI(true);stepI=null;errLine=-1;$('#codeHead').classList.add('busy');showHint('running');vstat=[];
  let fail=null,line=-1;
  for(let i=0;i<nVar();i++){vi=i;renderTabs();const r=simulate(i);setView(r.W.states[0]);await sleep(250);const ms=dur();
-  for(let k=0;k<r.W.steps.length;k++){const ok=await playStep(r,k,ms);if(!ok)break;await sleep(ms*.3)}
+  for(let k=0;k<r.W.steps.length;k++){if(abortReq)break;const ok=await playStep(r,k,ms);if(!ok)break;await sleep(ms*.3)}
+  if(abortReq)break;
   if(r.fail){fail=r.fail;line=r.err?r.err.line:-1;if(r.err&&!r.err.world){errLine=line;actLine=-1;renderCode()}vstat[i]=false;renderTabs();break}
   vstat[i]=true;renderTabs();actLine=-1;renderCode();if(i<nVar()-1)await sleep(500)}
- running=false;$('#codeHead').classList.remove('busy');
+ running=false;$('#codeHead').classList.remove('busy');playUI(false);
+ if(abortReq){abortReq=false;vstat=[];renderTabs();errLine=-1;actLine=-1;setView(startState(vi));renderCode();showHint('stopped','err');return}
  if(fail)lose(fail,(r=>r)(line));else win();
 }
 async function step(){
@@ -1193,7 +1202,7 @@ $('#winNext').onclick=()=>{
 $('#winSave').onclick=()=>{try{const svg=$('#world').outerHTML.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"'),img=new Image(),cv=document.createElement('canvas');cv.width=792;cv.height=516;
  img.onload=()=>{const c=cv.getContext('2d');c.fillStyle='#0B1026';c.fillRect(0,0,792,516);c.drawImage(img,0,0,792,516);const a=document.createElement('a');a.download='sternbild.png';a.href=cv.toDataURL('image/png');a.click()};
  img.src='data:image/svg+xml,'+encodeURIComponent(svg)}catch(e){}};
-$('#bRun').onclick=run;$('#bStep').onclick=step;$('#bUndo').onclick=undo;$('#bClear').onclick=clearAll;$('#bEdit').onclick=()=>setEdit(!editing);
+$('#bRun').onclick=()=>running?stop():run();$('#bStep').onclick=step;$('#bUndo').onclick=undo;$('#bClear').onclick=clearAll;$('#bEdit').onclick=()=>setEdit(!editing);
 $('#gBack').onclick=()=>{if(editing)setEdit(false);if(origin&&origin.kind==='custom'&&origin.edit!=null){openEditor(origin.edit,true);return}renderMap();show('sMap')};
 $('#code').onclick=e=>{if(running||L.typ==='vorhersage')return;const li=e.target.closest('li[data-i]');if(!li){setEdit(true);return}
  if(hasB()){selLine=+li.dataset.i;renderCode();buildCmds();return}
