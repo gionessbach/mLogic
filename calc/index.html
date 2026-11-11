@@ -83,6 +83,17 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
 .pl span{flex:1;font-weight:800;font-size:17px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pl span small{display:block;font-size:12px;color:#8a836a}
 .pl button.del{background:#fff;border:2px solid var(--line)}.pl button.del.sure{background:#c0392b;color:#fff;border-color:#c0392b}
+/* Strichliste */
+td.tal{text-align:left}
+.tally{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;flex-wrap:nowrap}
+.tg{display:inline-block;position:relative;height:26px;background:repeating-linear-gradient(90deg,var(--d) 0 3px,transparent 3px 7px)}
+.tg.f{width:25px}
+.tg.f::after{content:"";position:absolute;left:-4px;right:-4px;top:11px;height:3px;border-radius:2px;background:#d35400;transform:rotate(-28deg)}
+.tally small{font-size:12px;color:#8a836a;font-weight:900;margin-left:2px}
+.fn.tl{background:#FFF2A8}
+.fn.tl.big{grid-column:span 2;font-size:18px;padding:12px}
+@keyframes pop{50%{transform:scale(1.12)}}
+td.pop .tally{animation:pop .25s}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--d);color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;z-index:10}
 .toast.on{opacity:1}
 @media (orientation:portrait),(max-width:820px),(max-height:600px){
@@ -134,6 +145,9 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
       <button class="fn" data-fn="MITTELWERT"><span>⌀</span>Mittelwert</button>
       <button class="fn" data-fn="MAX"><span>⬆</span>Größte</button>
       <button class="fn" data-fn="MIN"><span>⬇</span>Kleinste</button>
+      <button class="fn tl big" id="tPlus"><span>𝍸</span>Strich dazu</button>
+      <button class="fn tl" id="tMinus"><span>⌫</span>Strich weg</button>
+      <button class="fn tl" id="tSwap"><span>🔢</span>Striche ↔ Zahl</button>
     </div><h3 style="margin-top:14px">Farbe &amp; Fett</h3><div class="sws" id="sws"></div></div>
   </aside>
 </main>
@@ -304,7 +318,8 @@ function render(){
     if(r>=sel.r1&&r<=sel.r2&&c>=sel.c1&&c<=sel.c2&&(sel.r1!==sel.r2||sel.c1!==sel.c2))cls.push('in');
     if(r===act.r&&c===act.c)cls.push('act');
     if(refs.has(k))cls.push('refd');
-    td.className=cls.join(' ');td.textContent=txt;td.style.background=FILLS[d.f||0]||'';
+    if(d.t&&typeof v==='number'&&v>=0&&v<=200&&Number.isInteger(v)){cls=cls.filter(x=>x!=='num');cls.push('tal');td.className=cls.join(' ');td.innerHTML=tallyHTML(v)}
+    else{td.className=cls.join(' ');td.textContent=txt}td.style.background=FILLS[d.f||0]||'';
   }
   grid.querySelectorAll('.thd').forEach(th=>{
     const c=th.dataset.col,r=th.dataset.row;
@@ -314,9 +329,26 @@ function render(){
   $('bold').classList.toggle('on',!!(cells[key(act.r,act.c)]||{}).b);
   showHint();
 }
+function tallyHTML(n){
+  if(!n)return '<span class="tally"><small>0</small></span>';
+  let h='<span class="tally">';for(let i=0;i<Math.floor(n/5);i++)h+='<i class="tg f"></i>';
+  const r=n%5;if(r)h+=`<i class="tg" style="width:${r*7-4}px"></i>`;
+  return h+(n>=5?`<small>${n}</small>`:'')+'</span>';
+}
+function tally(delta){
+  commit();recalc();const k=key(act.r,act.c),d=cell(k),raw=String(d.v||'').trim(),cur=cache[k];
+  if(raw.startsWith('=')){toast('Hier steht eine Rechnung – nimm ein leeres Kästchen.');return}
+  if(cur!==null&&typeof cur!=='number'){toast('Hier steht ein Wort – Striche kommen in das Kästchen daneben.');return}
+  const n=Math.max(0,Math.round(cur||0)+delta);
+  if(delta<0&&!cur){toast('Hier sind keine Striche zum Wegnehmen.');return}
+  snap();d.v=String(n);d.t=true;inp.value=d.v;editing=false;save();render();
+  const td=tdAt(act.r,act.c);td.classList.remove('pop');void td.offsetWidth;td.classList.add('pop');
+  if(delta>0&&n%5===0)toast('🎉 '+n+' Striche – wieder ein Fünferbündel!');
+}
 function showHint(){
   const h=$('hint'),k=key(act.r,act.c),v=cache[k],raw=(cells[k]||{}).v||'';
   h.classList.remove('err');
+  if(!editing&&(cells[k]||{}).t&&typeof v==='number'){h.textContent='✏️ Strichliste: Jeder Tipp auf „Strich dazu“ macht einen Strich. Fünf Striche sind ein Bündel – hier sind es '+fmt(v)+'.';return}
   if(editing&&inp.value.startsWith('=')){h.textContent='👉 Tippe auf ein Kästchen, dann kommt es in die Rechnung. Fertig? Drück OK.';return}
   if(v&&v.err){h.textContent='Hoppla in '+k+': '+v.err;h.classList.add('err');return}
   if(raw.startsWith('=')&&typeof v==='number'){h.textContent='✨ '+k+' rechnet: '+raw.slice(1)+'  →  '+fmt(v);return}
@@ -387,7 +419,7 @@ $('pad').innerHTML=['7','8','9','÷','4','5','6','×','1','2','3','−','0',',',
   const cls=['÷','×','−','+','=','(',')',':'].includes(k)?'op':k==='OK'?'ok':['Abc','🗑','⌫'].includes(k)?'dark':'';
   return `<button class="k ${cls}" data-k="${k}">${k}</button>`}).join('');
 $('pad').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k)});
-function clearSel(){snap();for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cells[key(r,c)];if(d)d.v=''}editing=false;inp.value='';save();render()}
+function clearSel(){snap();for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cells[key(r,c)];if(d){d.v='';d.t=false}}editing=false;inp.value='';save();render()}
 
 /* ---------- Rechen-Knöpfe ---------- */
 const isNum=k=>typeof cache[k]==='number';
@@ -421,6 +453,7 @@ $('sws').addEventListener('click',e=>{
 const H={f:1,b:true};
 const TPL={
  leer:{i:'⬜',n:'Leeres Blatt',d:'Alles selbst machen',rows:[]},
+ striche:{i:'✏️',n:'Strichliste',d:'Zählen mit Strichen',rows:[[['Lieblingsfarbe',H],['Striche',H]],['🔴 Rot',['3',{t:true}]],['🔵 Blau',['5',{t:true}]],['🟢 Grün',['2',{t:true}]],['🟡 Gelb',['0',{t:true}]],[['Alle zusammen',{b:true}],['=SUMME(B2:B5)',{f:4,b:true}]]]},
  tiere:{i:'🐶',n:'Tiere zählen',d:'Summe & Diagramm',rows:[[['Tier',H],['Anzahl',H]],['🐶 Hunde',3],['🐱 Katzen',5],['🐦 Vögel',8],['🐟 Fische',2],[['Alle zusammen',{b:true}],['=SUMME(B2:B5)',{f:4,b:true}]]]},
  einkauf:{i:'🛒',n:'Einkaufsliste',d:'Mal rechnen & Summe',rows:[[['Was?',H],['Wie viele?',H],['Preis €',H],['Zusammen €',H]],['🍎 Äpfel',4,'0,5','=B2*C2'],['🍞 Brot',1,'2,2','=B3*C3'],['🥛 Milch',2,'1,1','=B4*C4'],['🍌 Bananen',6,'0,3','=B5*C5'],[['Summe',{b:true}],'','',['=SUMME(D2:D5)',{f:4,b:true}]]]},
  geld:{i:'🪙',n:'Taschengeld',d:'Minus & Mittelwert',rows:[[['Woche',H],['Bekommen',H],['Ausgegeben',H],['Übrig',H]],['Woche 1',3,1,'=B2-C2'],['Woche 2',3,2,'=B3-C3'],['Woche 3',3,0,'=B4-C4'],['Woche 4',3,'2,5','=B5-C5'],[['Summe',{b:true}],'=SUMME(B2:B5)','=SUMME(C2:C5)',['=SUMME(D2:D5)',{f:4,b:true}]],[['Mittelwert',{b:true}],'','',['=MITTELWERT(D2:D5)',{f:3}]]]},
@@ -432,7 +465,7 @@ $('tpls').addEventListener('click',e=>{
   const b=e.target.closest('[data-t]');if(!b)return;snap();cells={};
   TPL[b.dataset.t].rows.forEach((row,r)=>row.forEach((x,c)=>{
     let v=x,o={};if(Array.isArray(x)){v=x[0];o=x[1]}
-    if(v===''&&!o.f)return;cells[key(r,c)]={v:String(v),f:o.f||0,b:!!o.b};
+    if(v===''&&!o.f)return;cells[key(r,c)]={v:String(v),f:o.f||0,b:!!o.b,t:!!o.t};
   }));
   save();closeAll();select(0,0);toast('📋 '+TPL[b.dataset.t].n+' geladen');
 });
@@ -540,6 +573,11 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeAll()}));
 $('bTpl').onclick=()=>{commit();$('mTpl').classList.add('on')};
 $('bUndo').onclick=()=>{if(!undo.length){toast('Nichts mehr zum Zurücknehmen.');return}cells=JSON.parse(undo.pop());editing=false;save();select(act.r,act.c)};
+$('tPlus').onclick=()=>tally(1);
+$('tMinus').onclick=()=>tally(-1);
+$('tSwap').onclick=()=>{commit();snap();const on=!(cells[key(act.r,act.c)]||{}).t;
+  for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cells[key(r,c)];if(d&&/^\d+$/.test(String(d.v).trim()))d.t=on}
+  save();render();toast(on?'✏️ Jetzt als Striche':'🔢 Jetzt als Zahl')};
 load();showProj();
 if(!Object.keys(cells).length)$('mTpl').classList.add('on');
 $('bSave').onclick=()=>persist(false);
