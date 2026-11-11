@@ -1,5 +1,5 @@
 // mLogic – Offline-Speicher für alle Spiele. Bei Änderungen an einer Datei die Versionsnummer erhöhen.
-const CACHE = "mlogic-v21";
+const CACHE = "mlogic-v22";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "hash/", "hash/index.html", "hash/icon-180.png", "hash/icon-192.png", "hash/icon-512.png",
@@ -18,6 +18,16 @@ self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c =>
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
   self.clients.claim();
+});
+// Startseite „nach unten ziehen“: alle Dateien frisch vom Server holen
+self.addEventListener("message", e => {
+  if (!e.data || e.data.type !== "refresh-all") return;
+  const port = e.ports && e.ports[0];
+  e.waitUntil(caches.open(CACHE).then(async c => {
+    const res = await Promise.allSettled(FILES.map(f => fetch(f, { cache: "reload" }).then(r => { if (!r.ok) throw r.status; return c.put(f, r); })));
+    const ok = res.filter(r => r.status === "fulfilled").length;
+    if (port) port.postMessage({ ok, fail: res.length - ok });
+  }));
 });
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;

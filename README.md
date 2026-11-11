@@ -19,3 +19,5 @@ Rätsel-Sammlung als Web-App (GitHub Pages), gebaut fürs iPad und Handy.
 Ein gemeinsamer Service Worker (`sw.js`) hält alle Spiele offline bereit.
 Bei Änderungen die Versionsnummer `CACHE` in `sw.js` erhöhen.
 
+Startseite: Ansicht als Liste oder Kacheln (gemerkt unter `mlogic.view`). Nach unten ziehen (oder „hier tippen“ im Fuß) lädt alle Dateien aus `FILES` frisch vom Server und lädt die Seite neu.
+
