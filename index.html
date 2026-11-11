@@ -77,6 +77,11 @@ footer{color:var(--muted);font-weight:600;font-size:13px;text-align:center}
       <div class="t"><strong>mTile</strong><span>Aufbauspiel: Pixelbilder mit Pastell-Teilen füllen, Sterne sammeln.</span><span class="st" id="tileStatus"></span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
+    <a class="game" href="sudo/">
+      <div class="ic"><img src="sudo/icon-192.png" alt=""></div>
+      <div class="t"><strong>mSudo</strong><span>6×6-Sudoku: jeden Tag ein Rätsel, dazu freies Spiel in drei Stufen.</span><span class="st" id="sudoStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
     <a class="game" href="zip/">
       <div class="ic"><img src="zip/icon-192.png" alt=""></div>
       <div class="t"><strong>mZip</strong><span>Zahlen der Reihe nach verbinden und jedes Feld füllen.</span></div>
@@ -126,6 +131,7 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   try{const gr=parseInt(localStorage.getItem('mgrow.record')||'0',10)||0;document.getElementById('growStatus').textContent=gr?'Rekord: '+gr+' Jahreszeiten':'Neu: einfach loslegen';}catch(e){}
   try{const mc=JSON.parse(localStorage.getItem('mcode-v1')||'{}'),dn=Object.keys(mc.done||{}).length,cr=Object.keys(mc.crowns||{}).length;document.getElementById('codeStatus').textContent=dn?dn+' von 47 Leveln'+(cr?' · '+cr+' Kronen':''):'Neu: einfach loslegen';}catch(e){}
   try{const ax=parseInt(localStorage.getItem('matom_xp')||'0',10)||0;document.getElementById('atomStatus').textContent=ax?ax+' XP':'Neu: einfach loslegen';}catch(e){}
+  try{const sd=JSON.parse(localStorage.getItem('msudo')||'{}'),dd=(sd.days||{})[t];document.getElementById('sudoStatus').textContent=!dd?'Heute: offen':dd.s==='won'?'Heute: gelöst in '+Math.floor(dd.t/60)+':'+String(dd.t%60).padStart(2,'0'):'Heute: angefangen';}catch(e){}
   document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}

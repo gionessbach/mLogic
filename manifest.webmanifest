@@ -1,7 +1,7 @@
 {
   "name": "mLogic",
   "short_name": "mLogic",
-  "description": "Rätsel-Sammlung: mHash, mCrack, mTile, mGrow, mRise, mZip, mFlow und mAtom.",
+  "description": "Rätsel-Sammlung: mHash, mCrack, mSudo, mTile, mGrow, mRise, mZip, mFlow und mAtom.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
