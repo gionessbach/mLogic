@@ -46,7 +46,7 @@ td.act{outline:3px solid var(--sel);outline-offset:-3px}
 td.refd{outline:3px dashed #E67E22;outline-offset:-4px}
 td.b{font-weight:900}
 .thd.on{background:var(--y);color:var(--d)}
-aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow:auto}
+aside{width:336px;display:flex;flex-direction:column;gap:10px;flex:none;overflow:auto}
 .card{background:#fff;border-radius:16px;border:2px solid var(--line);padding:10px}
 .card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#8a836a}
 .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
@@ -55,12 +55,25 @@ aside{width:300px;display:flex;flex-direction:column;gap:10px;flex:none;overflow
 .k.ok{background:var(--y);grid-column:span 2}
 .k.dark{background:var(--d);color:#fff;font-size:17px}
 .k:active,.fn:active,.sw:active{transform:scale(.93)}
-.fns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.fn{background:#EAF2FF;border-radius:12px;padding:8px;font-weight:900;font-size:16px;display:flex;align-items:center;gap:6px;justify-content:center}
-.fn span{font-size:22px}
-.sws{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.sw{width:40px;height:40px;border-radius:50%;border:2.5px solid var(--line)}
-.sw.bold{border-radius:10px;background:#fff;font-weight:900;font-size:20px;width:46px}
+.fns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fn{background:#EAF2FF;border-radius:12px;padding:6px 4px;font-weight:900;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:1px;justify-content:center;line-height:1.1}
+.fn span{font-size:20px}
+/* Tastatur: Tabs ABC / 123 */
+.kbtabs{display:flex;gap:6px;margin-bottom:8px}
+.kbtabs button{flex:1;border-radius:10px;padding:7px;font-weight:900;font-size:16px;background:#F6F0D6;color:#8a836a}
+.kbtabs button.on{background:var(--d);color:#fff}
+.pad.abc{grid-template-columns:repeat(6,1fr);gap:6px}
+.pad.abc .k{height:46px;font-size:22px}
+.k.lt{background:#fff;border:2px solid var(--line)}
+.k.vow{background:#FFF7CC;border-color:#F3DE7A}
+.k.uml{background:#EAF2FF;border-color:#C9DDF7}
+.k.s2{grid-column:span 2}
+.case{display:flex;padding:3px;gap:3px;background:#F6F0D6}
+.case b{flex:1;display:grid;place-items:center;border-radius:9px;font-size:20px;color:#8a836a}
+.case b.on{background:var(--d);color:#fff}
+.sws{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;margin-top:10px}
+.sw{width:32px;height:32px;flex:none;border-radius:50%;border:2.5px solid var(--line)}
+.sw.bold{border-radius:10px;background:#fff;font-weight:900;font-size:17px;width:38px}
 .sw.bold.on{background:var(--d);color:#fff}
 .modal{position:fixed;inset:0;background:rgba(38,38,37,.55);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
 .modal.on{display:flex}
@@ -91,7 +104,7 @@ td.tal{text-align:left}
 .tg.f::after{content:"";position:absolute;left:-4px;right:-4px;top:11px;height:3px;border-radius:2px;background:#d35400;transform:rotate(-28deg)}
 .tally small{font-size:12px;color:#8a836a;font-weight:900;margin-left:2px}
 .fn.tl{background:#FFF2A8}
-.fn.tl.big{grid-column:span 2;font-size:18px;padding:12px}
+.fn.tl.big{grid-column:span 2;flex-direction:row;font-size:15px;gap:6px}
 @keyframes pop{50%{transform:scale(1.12)}}
 td.pop .tally{animation:pop .25s}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--d);color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;z-index:10}
@@ -139,7 +152,7 @@ td.pop .tally{animation:pop .25s}
 <main>
   <div class="gridwrap"><table id="grid"></table></div>
   <aside>
-    <div class="card"><h3>Tasten</h3><div class="pad" id="pad"></div></div>
+    <div class="card"><div class="kbtabs"><button data-kb="abc">ABC</button><button data-kb="123">123</button></div><div class="pad" id="pad"></div></div>
     <div class="card"><h3>Rechnen</h3><div class="fns">
       <button class="fn" data-fn="SUMME"><span>Σ</span>Summe</button>
       <button class="fn" data-fn="MITTELWERT"><span>⌀</span>Mittelwert</button>
@@ -148,7 +161,7 @@ td.pop .tally{animation:pop .25s}
       <button class="fn tl big" id="tPlus"><span>𝍸</span>Strich dazu</button>
       <button class="fn tl" id="tMinus"><span>⌫</span>Strich weg</button>
       <button class="fn tl" id="tSwap"><span>🔢</span>Striche ↔ Zahl</button>
-    </div><h3 style="margin-top:14px">Farbe &amp; Fett</h3><div class="sws" id="sws"></div></div>
+    </div><div class="sws" id="sws" title="Farbe &amp; Fett"></div></div>
   </aside>
 </main>
 <div class="modal" id="mProj"><div class="box"><h2>📁 Meine Projekte</h2>
@@ -415,10 +428,33 @@ function press(k){
   if(!editing){inp.value=''}
   editing=true;inp.value+=add;render();
 }
-$('pad').innerHTML=['7','8','9','÷','4','5','6','×','1','2','3','−','0',',','=','+','(',')',':','⌫','Abc','🗑','OK'].map(k=>{
-  const cls=['÷','×','−','+','=','(',')',':'].includes(k)?'op':k==='OK'?'ok':['Abc','🗑','⌫'].includes(k)?'dark':'';
-  return `<button class="k ${cls}" data-k="${k}">${k}</button>`}).join('');
-$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k)});
+/* Tastatur: Zahlen (123) oder Alphabet (ABC, A–Z in richtiger Reihenfolge + Ä Ö Ü ß) */
+let kb='123',upper=true;
+try{kb=localStorage.getItem('mcalc-kb')||'123'}catch(e){}
+const ABC='ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜẞ'.split('');
+function renderPad(){
+  const pad=$('pad');pad.classList.toggle('abc',kb==='abc');
+  document.querySelectorAll('[data-kb]').forEach(b=>b.classList.toggle('on',b.dataset.kb===kb));
+  if(kb==='abc'){
+    pad.innerHTML=ABC.map(L=>{const ch=L==='ẞ'?'ß':(upper?L:L.toLowerCase());
+      const cls='AEIOU'.includes(L)?'vow':'ÄÖÜẞ'.includes(L)?'uml':'';
+      return `<button class="k lt ${cls}" data-ch="${ch}">${ch}</button>`}).join('')
+     +`<button class="k s2 case" data-case aria-label="Groß- oder Kleinbuchstaben"><b class="${upper?'on':''}">A</b><b class="${upper?'':'on'}">a</b></button>`
+     +`<button class="k s2 op" data-ch=" ">␣ Leer</button><button class="k dark" data-k="⌫">⌫</button><button class="k ok" style="grid-column:span 1" data-k="OK">OK</button>`;
+  }else{
+    pad.innerHTML=['7','8','9','÷','4','5','6','×','1','2','3','−','0',',','=','+','(',')',':','⌫','🗑','OK'].map(k=>{
+      const cls=['÷','×','−','+','=','(',')',':'].includes(k)?'op':k==='OK'?'ok':['🗑','⌫'].includes(k)?'dark':'';
+      return `<button class="k ${cls}" data-k="${k}"${k==='OK'?' style="grid-column:span 3"':''}>${k}</button>`}).join('');
+  }
+}
+$('pad').addEventListener('click',e=>{
+  const c=e.target.closest('[data-case]');if(c){upper=!upper;renderPad();return}
+  const l=e.target.closest('[data-ch]');if(l){press(l.dataset.ch);return}
+  const b=e.target.closest('[data-k]');if(b)press(b.dataset.k)});
+document.querySelectorAll('[data-kb]').forEach(b=>b.onclick=()=>{kb=b.dataset.kb;try{localStorage.setItem('mcalc-kb',kb)}catch(e){}renderPad()});
+renderPad();
+// Auf dem Tablet ersetzt die eigene Tastatur die Bildschirmtastatur
+if(matchMedia('(pointer:coarse)').matches)inp.setAttribute('inputmode','none');
 function clearSel(){snap();for(let r=sel.r1;r<=sel.r2;r++)for(let c=sel.c1;c<=sel.c2;c++){const d=cells[key(r,c)];if(d){d.v='';d.t=false}}editing=false;inp.value='';save();render()}
 
 /* ---------- Rechen-Knöpfe ---------- */
