@@ -1143,7 +1143,7 @@ $('#code').ondblclick=()=>setEdit(true);
 let active='game',ratio=null,rowH=0;
 function layout(){const pg=$('#paneGame'),row=$('#cmdRow'),sp=$('#split'),land=matchMedia('(orientation:landscape)').matches;
  if(row.offsetHeight)rowH=row.offsetHeight;
- const avail=(land?sp.clientWidth:sp.clientHeight)-18,base=editing?(land?.45:avail<500?.22:.32):ratio!=null?ratio:2/3,hide=active==='code'||editing;
+ const avail=(land?sp.clientWidth:sp.clientHeight)-18,roomy=land||avail>=560,base=editing?(land?.45:roomy?.42:avail<500?.22:.32):ratio!=null?ratio:2/3,hide=editing?!roomy:active==='code';
  pg.classList.toggle('nobtn',hide);const g=Math.max(80,base*avail-(hide&&!land?rowH:0));
  pg.style.flexGrow=g;$('#paneCode').style.flexGrow=Math.max(1,avail-g)}
 addEventListener('resize',()=>cur==='sGame'&&layout());
@@ -1153,7 +1153,8 @@ function fitVV(){const vv=window.visualViewport,g=$('#sGame');
  if(cur==='sGame'){layout();if(editing){const ta=$('#ta');setTimeout(()=>{const p=ta.selectionStart,lh=parseFloat(getComputedStyle(ta).lineHeight)||30,ln=ta.value.slice(0,p).split('\n').length;
   const y=(ln-1)*lh;if(y<ta.scrollTop||y>ta.scrollTop+ta.clientHeight-lh)ta.scrollTop=Math.max(0,y-ta.clientHeight/2)},30)}}}
 if(window.visualViewport){visualViewport.addEventListener('resize',fitVV);visualViewport.addEventListener('scroll',fitVV)}
-['paneGame','paneCode'].forEach(id=>$('#'+id).addEventListener('pointerdown',e=>{const a=id==='paneGame'?'game':'code';if(active!==a){active=a;ratio=null;layout()}}));
+['paneGame','paneCode'].forEach(id=>$('#'+id).addEventListener('pointerdown',e=>{const a=id==='paneGame'?'game':'code';
+  if(editing&&a==='game'&&!e.target.closest('#cmdRow')){setEdit(false);active='game';ratio=null;layout();return}if(active!==a){active=a;ratio=null;layout()}}));
 (function(){const dv=$('#divider'),sp=$('#split');let drag=false,moved=0,p0;
  dv.addEventListener('pointerdown',e=>{drag=true;moved=0;p0=[e.clientX,e.clientY];dv.setPointerCapture(e.pointerId);sp.classList.add('drag')});
  dv.addEventListener('pointermove',e=>{if(!drag)return;moved=Math.max(moved,Math.hypot(e.clientX-p0[0],e.clientY-p0[1]));if(moved<6)return;
