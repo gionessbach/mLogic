@@ -163,12 +163,12 @@ const REZEPTE={E1:[
  {id:'hcn',name:'Blausäure',formel:'HCN',teile:{H:1,C:1,N:1},a:[['H',62,115],['C',150,115],['N',238,115]],b:[[0,1,1],[1,2,3]]},
  {id:'po4',name:'Phosphat',formel:'PO₄',teile:{P:1,O:4},a:[['P',150,115],['O',150,40],['O',226,115],['O',150,190],['O',74,115]],b:[[0,1,2],[0,2,1],[0,3,1],[0,4,1]]}
 ]};
-const EBENEN={1:{titel:'Atom → Molekül',pool:'E1',masse:30,ziel:300,tempo:60,xp:10,bandMix:['H','H','H','C','N','O','O','P']}};
+const EBENEN={1:{titel:'Atom → Molekül',pool:'E1',masse:30,ziel:360,tempo:60,xp:10,bandMix:['H','H','H','C','N','O','O','P']}};
 const GESCHOEPFE=[
  {id:'bakterium',name:'Bakterium',xp:0},{id:'cyano',name:'Cyanobakterium',xp:0},
  {id:'amoebe',name:'Amöbe',xp:100},{id:'pantoffel',name:'Pantoffeltierchen',xp:100},
  {id:'hefe',name:'Hefe',xp:100},{id:'gruenalge',name:'Grünalge',xp:100}];
-const ZERFALL=20, WARN=10;
+const ZERFALL=25, WARN=10;
 
 // ---------- Speicher (Präfix matom_) ----------
 function lade(k,d){try{const v=localStorage.getItem('matom_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}}
@@ -206,7 +206,7 @@ const DIALOGE={1:[
  {t:'Die Bausteine des Lebens',p:'Alles Leben besteht vor allem aus sechs Elementen: Kohlenstoff (C), Wasserstoff (H), Stickstoff (N), Sauerstoff (O), Phosphor (P) und Schwefel (S).',s:sk(['C','H','N','O','P','S'].map((e,i)=>kugel(e,25+i*42,55,18)).join(''))},
  {t:'Atome verbinden sich',p:'Atome teilen sich Elektronen und halten so zusammen. Was dabei entsteht, heißt Molekül. Zwei Wasserstoff-Atome ergeben H₂.',s:sk(`<line x1="100" y1="55" x2="160" y2="55" stroke="#5A5955" stroke-width="8" stroke-linecap="round"/>${kugel('H',100,55,24)}${kugel('H',160,55,24)}`)},
  {t:'Wasser ist H₂O',p:'Ein Sauerstoff-Atom bindet zwei Wasserstoff-Atome. Sie stehen nicht in einer Linie, sondern im Winkel von 104,5°.',s:sk(`<line x1="130" y1="42" x2="88" y2="78" stroke="#5A5955" stroke-width="8"/><line x1="130" y1="42" x2="172" y2="78" stroke="#5A5955" stroke-width="8"/>${kugel('O',130,42,26)}${kugel('H',88,80,19)}${kugel('H',172,80,19)}<text x="130" y="106" font-size="13" font-weight="400" fill="#B9B8B2">104,5°</text>`)},
- {t:'So spielst du',p:'Zieh Atome vom Fließband in die Reaktoren. Ein angefangenes Molekül zerfällt nach 20 Sekunden, dann sinkt die Stabilität. Bei 30 Molekülen ist die kritische Masse erreicht. Schaffst du es unter 5:00, gibt es den Tempobonus.',s:sk(`<rect x="10" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="95" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="180" y="10" width="70" height="56" rx="10" fill="#31312F" stroke="#FF7A6B" stroke-dasharray="5 4"/><rect x="10" y="76" width="240" height="28" rx="10" fill="#262625"/>${kugel('H',60,90,10)}${kugel('O',130,90,11)}${kugel('C',200,90,11)}<path d="M130 80 Q 128 60 130 44" stroke="#FDD602" stroke-width="2" fill="none" stroke-dasharray="3 3"/>`)},
+ {t:'So spielst du',p:'Zieh Atome vom Fließband in die Reaktoren. Ein angefangenes Molekül zerfällt nach 25 Sekunden, dann sinkt die Stabilität. Bei 30 Molekülen ist die kritische Masse erreicht. Schaffst du es unter 6:00, gibt es den Tempobonus.',s:sk(`<rect x="10" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="95" y="10" width="70" height="56" rx="10" fill="#31312F"/><rect x="180" y="10" width="70" height="56" rx="10" fill="#31312F" stroke="#FF7A6B" stroke-dasharray="5 4"/><rect x="10" y="76" width="240" height="28" rx="10" fill="#262625"/>${kugel('H',60,90,10)}${kugel('O',130,90,11)}${kugel('C',200,90,11)}<path d="M130 80 Q 128 60 130 44" stroke="#FDD602" stroke-width="2" fill="none" stroke-dasharray="3 3"/>`)},
  {t:'Echt, aber vereinfacht',p:'Die Rezepte stammen aus der echten Chemie. Manches ist vereinfacht: Phosphat (PO₄) ist eigentlich ein geladenes Ion, und Doppel- oder Dreifachbindungen musst du nicht selbst bauen.',s:sk(`<line x1="130" y1="55" x2="130" y2="15" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="185" y2="55" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="130" y2="95" stroke="#5A5955" stroke-width="6"/><line x1="130" y1="55" x2="75" y2="55" stroke="#5A5955" stroke-width="6"/>${kugel('P',130,55,22)}${kugel('O',130,15,13)}${kugel('O',185,55,13)}${kugel('O',130,95,13)}${kugel('O',75,55,13)}`)}
 ]};
 let dlg=null;
