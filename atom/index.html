@@ -49,7 +49,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 #aFrage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(38,38,37,.35);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;padding:20px}
 #aFrage.on{display:flex}
 .fk{background:var(--s1);border-radius:22px;padding:22px;width:min(640px,100%);display:flex;flex-direction:column;gap:12px}
-.fk h2{margin:0;font-size:24px}.fk #afZ{color:var(--mut);font-size:14px}
+.fk h2{margin:0;font-size:24px}
+.afbar{height:8px;background:var(--l1);border-radius:4px;overflow:hidden}.afbar i{display:block;height:100%;background:var(--y);border-radius:4px}
 .fb{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fbt{background:var(--s2);border:2px solid var(--l2);border-radius:18px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.4}
 .fbt b{font-size:20px}.fbt.pri{border-color:var(--y)}.fbt small{color:var(--mut)}.fbt:active{transform:scale(.98)}
@@ -255,8 +256,8 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
   <div id="joy" aria-label="Steuer-Joystick"><i></i></div>
   <button id="aAuf" class="aauf">Aufnehmen</button>
   <canvas id="amap" aria-label="Übersichtskarte"></canvas>
-  <div id="aFrage"><div class="fk"><div class="kl" id="afKl">Zeitlupe</div><h2 id="afT"></h2>
-    <div class="fb"><button class="fbt" id="afFr"></button><button class="fbt pri" id="afAuf"></button></div><small id="afZ"></small></div></div>
+  <div id="aFrage"><div class="fk"><div class="kl" id="afKl">Zeitlupe · ohne Wahl wird gefressen</div><h2 id="afT"></h2>
+    <div class="fb"><button class="fbt" id="afFr"></button><button class="fbt pri" id="afAuf"></button></div><div class="afbar" aria-label="Zeit bis zum automatischen Fressen"><i id="afZ"></i></div></div></div>
 </section>
 
 <section id="ende" class="scr">
@@ -887,7 +888,7 @@ function arenaHud(){if(!A)return;const c=A.cfg,p=A.p;
   if($('aChips').innerHTML!==ch)$('aChips').innerHTML=ch;
   const b=$('aBanner'),txt=A.auf?'Aufnahme läuft … noch '+Math.max(0,2-A.auf.t).toFixed(1)+' s unbeweglich':A.msg?A.msg.t:A.o2>0?'Große Sauerstoffkatastrophe · '+(A.mito?'dein Mitochondrium nutzt den Sauerstoff':'Sauerstoff-Wolken kosten Energie')+' · '+mmss(Math.ceil(A.o2)):'';
   b.classList.toggle('on',!!txt);if(b.textContent!==txt)b.textContent=txt;b.classList.toggle('uv',A.o2>0&&!A.msg);
-  if(A.frage)$('afZ').textContent='Die Zeit läuft langsamer · ohne Wahl wird in '+Math.ceil(5-A.frage.t)+' s gefressen'}
+  if(A.frage)$('afZ').style.width=Math.max(0,100-A.frage.t/5*100)+'%'}
 // Steuerung
 (function(){const j=$('joy'),kn=j.querySelector('i');let jid=null;
   const setz=ev=>{const r=j.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2-15;let dx=ev.clientX-cx,dy=ev.clientY-cy;const l=Math.hypot(dx,dy);if(l>R){dx*=R/l;dy*=R/l}
