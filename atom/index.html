@@ -753,7 +753,8 @@ function friss(o){const p=A.p;o.weg=true;const n=o.typ==='zelle'?o.name:NAME[o.t
   if(A.verdau.length>=14){const alt=A.verdau.shift();p.m+=alt.rest}
   A.verdau.push({a,c:o.typ==='zelle'?o.c:FARBE[o.typ],r0:Math.min(o.r,p.r*0.28),t:0,dauer:o.typ==='zelle'?3:o.typ==='naehr'?1.2:2,g,rest:g,dj:(Math.random()-.5)*0.6});
   ersatz(o)}
-function verform(th,phi,q){if(!q)return 1;const d=Math.cos(th-phi);return 1+0.22*q*(d>0?-d*d:1.1*d*d)}
+function verform(th,phi,q){if(!q)return 1;const d=Math.cos(th-phi);return 1+0.38*q*(d>0?-d*d:1.15*d*d)}
+function innenAn(x,cx,cy,phi,q,R){x.save();x.translate(cx,cy);x.rotate(phi);x.translate(-0.14*q*R,0);x.scale(1-0.2*q,1+0.06*q);x.rotate(-phi);x.translate(-cx,-cy)}
 function zellPfad(x,o,rf){x.beginPath();for(let k=0;k<=40;k++){const th=k/40*6.2832,r=rf(th)*verform(th,o.phi||0,o.dq||0);k?x.lineTo(o.x+Math.cos(th)*r,o.y+Math.sin(th)*r):x.moveTo(o.x+Math.cos(th)*r,o.y+Math.sin(th)*r)}x.closePath()}
 const winkelDiff=(a,b)=>{let d=a-b;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d};
 // Verdauen, Mund schließen, Beulen gleichen sich aus
@@ -872,15 +873,15 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
     if(o.typ!=='zelle'){kapsel(x,o.x,o.y,o.r,o.ang,FARBE[o.typ]);continue}
     const gef=o.r>=p.r*FRESS,fr=o.r*FRESS<=p.r,rc=gef?'#FF7A6B':fr?'#5DD39E':o.c;
     if(o.form==='blob'){x.beginPath();for(let k=0;k<=24;k++){const a=k/24*6.283,rr=o.r*(1+0.12*Math.sin(3*a+t*2)+0.07*Math.sin(5*a-t*1.3))*verform(a,o.phi||0,o.dq||0);k?x.lineTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr):x.moveTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr)}
-      x.fillStyle='rgba(169,139,240,.25)';x.fill();x.strokeStyle=rc;x.lineWidth=4;x.stroke();x.fillStyle='rgba(169,139,240,.6)';x.beginPath();x.arc(o.x,o.y,o.r*0.32,0,6.283);x.fill()}
+      x.fillStyle='rgba(169,139,240,.25)';x.fill();x.strokeStyle=rc;x.lineWidth=4;x.stroke();innenAn(x,o.x,o.y,o.phi||0,o.dq||0,o.r);x.fillStyle='rgba(169,139,240,.6)';x.beginPath();x.arc(o.x,o.y,o.r*0.32,0,6.283);x.fill();x.restore()}
     else if(o.form==='kapsel'){kapsel(x,o.x,o.y,o.r,Math.atan2(o.vy,o.vx),o.c);if(gef||fr){x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r*1.15,0,6.283);x.stroke()}}
     else if(o.form==='oval'){const a=Math.atan2(o.vy,o.vx);x.save();x.translate(o.x,o.y);x.rotate(a);x.beginPath();x.ellipse(0,0,o.r*1.25,o.r*0.7,0,0,6.283);x.fillStyle='rgba(242,227,107,.2)';x.fill();x.strokeStyle=rc;x.lineWidth=3;x.stroke();
       for(let k=0;k<16;k++){const b=k/16*6.283,w=Math.sin(t*12+k)*2;x.beginPath();x.moveTo(Math.cos(b)*o.r*1.25,Math.sin(b)*o.r*0.7);x.lineTo(Math.cos(b)*(o.r*1.25+6),Math.sin(b)*(o.r*0.7+6)+w);x.stroke()}x.restore()}
     else if(o.form==='knospe'){x.fillStyle='rgba(255,165,82,.22)';x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();x.beginPath();x.arc(o.x+o.r*0.8,o.y-o.r*0.7,o.r*0.45,0,6.283);x.fill();x.stroke()}
-    else if(o.form==='alge'){x.fillStyle='#31312F';x.strokeStyle=gef?rc:'#5DD39E';x.lineWidth=5;zellPfad(x,o,()=>o.r);x.fill();x.stroke();x.fillStyle='#5DD39E';kapsel(x,o.x-o.r*.3,o.y-o.r*.2,o.r*.3,0.4,'#5DD39E');kapsel(x,o.x+o.r*.3,o.y+o.r*.25,o.r*.3,-0.3,'#5DD39E')}
+    else if(o.form==='alge'){x.fillStyle='#31312F';x.strokeStyle=gef?rc:'#5DD39E';x.lineWidth=5;zellPfad(x,o,()=>o.r);x.fill();x.stroke();innenAn(x,o.x,o.y,o.phi||0,o.dq||0,o.r);kapsel(x,o.x-o.r*.3,o.y-o.r*.2,o.r*.3,0.4,'#5DD39E');kapsel(x,o.x+o.r*.3,o.y+o.r*.25,o.r*.3,-0.3,'#5DD39E');x.restore()}
     else{x.fillStyle='#31312F';x.strokeStyle=rc;x.lineWidth=gef?4:3;zellPfad(x,o,()=>o.r);x.fill();x.stroke();
-      if(o.kern){x.fillStyle='#4a4a46';x.beginPath();x.arc(o.x+o.r*.15,o.y-o.r*.1,o.r*.3,0,6.283);x.fill()}
-      x.fillStyle='#5a5955';for(let k=0;k<4;k++){const a=k*1.7+o.r;x.beginPath();x.arc(o.x+Math.cos(a)*o.r*.55,o.y+Math.sin(a)*o.r*.55,2.5,0,6.283);x.fill()}}
+      innenAn(x,o.x,o.y,o.phi||0,o.dq||0,o.r);if(o.kern){x.fillStyle='#4a4a46';x.beginPath();x.arc(o.x+o.r*.15,o.y-o.r*.1,o.r*.3,0,6.283);x.fill()}
+      x.fillStyle='#5a5955';for(let k=0;k<4;k++){const a=k*1.7+o.r;x.beginPath();x.arc(o.x+Math.cos(a)*o.r*.55,o.y+Math.sin(a)*o.r*.55,2.5,0,6.283);x.fill()}x.restore()}
     if(gef){x.fillStyle='#FF9B8F';x.fillText(o.name+' – Gefahr',o.x,o.y+o.r+18/sc)}else if(fr){x.fillStyle='#5DD39E';x.fillText('fressbar',o.x,o.y+o.r+18/sc)}}
   // eigene Zelle
   // Aussehen wächst mit: Membran dicker, mehr Ribosomen, RNA-Strang (ab 15), Erbgut-Ring (35–50),
@@ -892,6 +893,7 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
   const offen=th=>A.muender.some(mu=>mu.t<0.3&&Math.abs(winkelDiff(th,mu.a))<0.16);
   x.strokeStyle='#FDD602';x.lineWidth=2+m/18;x.lineJoin='round';x.beginPath();let zug=false;
   for(let k=0;k<=NP;k++){const q=pts[k%NP];if(offen(q[2])){zug=false;continue}zug?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);zug=true}x.stroke();
+  innenAn(x,p.x,p.y,A.phi||0,A.dq||0,R);
   for(const v of A.verdau){const ein=Math.min(1,v.t/0.35),dd=1-0.45*ein-0.15*Math.min(1,Math.max(0,v.t-0.35)/v.dauer),a=v.a+v.dj*ein,
       vx=p.x+Math.cos(a)*R*dd,vy=p.y+Math.sin(a)*R*dd,pr=v.rest/v.g,rr=v.r0*(0.35+0.65*pr);
     x.strokeStyle='rgba(242,241,236,.25)';x.lineWidth=1.5;x.beginPath();x.arc(vx,vy,rr*1.5+2,0,6.283);x.stroke();
@@ -905,6 +907,7 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
   x.fillStyle='#B9B8B2';const nr=3+Math.floor(m/7);for(let k=0;k<nr;k++){const a=k*2.39996,d=R*(.25+.5*((k*0.618)%1));x.beginPath();x.arc(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,1.5+m/60,0,6.283);x.fill()}
   if(A.mito)kapsel(x,p.x-p.r*.3,p.y+p.r*.42,p.r*.22,0.3,'#FF7A6B');
   if(A.chloro)kapsel(x,p.x+p.r*.38,p.y+p.r*.2,p.r*.22,-0.5,'#5DD39E');
+  x.restore();
   if(A.auf){x.strokeStyle='#FDD602';x.lineWidth=4;x.beginPath();x.arc(p.x,p.y,p.r+9,-Math.PI/2,-Math.PI/2+A.auf.t/2*6.283);x.stroke()}
   x.fillStyle='#F2F1EC';x.fillText(stufe(p.m)+' · '+Math.floor(p.m),p.x,p.y+p.r+20/sc);
   // Mini-Karte
