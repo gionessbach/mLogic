@@ -45,7 +45,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 #joy{position:absolute;left:max(28px,env(safe-area-inset-left));bottom:max(28px,env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;border:3px solid var(--l2);touch-action:none;background:rgba(29,29,28,.4)}
 #joy i{position:absolute;left:42px;top:42px;width:60px;height:60px;border-radius:50%;background:var(--l2);pointer-events:none}
 .aauf{position:absolute;left:200px;bottom:max(50px,env(safe-area-inset-bottom));height:64px;padding:0 22px;border-radius:32px;border:none;background:var(--fg);color:var(--bg);font-weight:700;font-size:17px;touch-action:none}
-.aauf.an{background:var(--y)}
+.aauf{display:none}
+#aFrage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(38,38,37,.35);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;padding:20px}
+#aFrage.on{display:flex}
+.fk{background:var(--s1);border-radius:22px;padding:22px;width:min(640px,100%);display:flex;flex-direction:column;gap:12px}
+.fk h2{margin:0;font-size:24px}.fk #afZ{color:var(--mut);font-size:14px}
+.fb{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fbt{background:var(--s2);border:2px solid var(--l2);border-radius:18px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.4}
+.fbt b{font-size:20px}.fbt.pri{border-color:var(--y)}.fbt small{color:var(--mut)}.fbt:active{transform:scale(.98)}
+@media (orientation:portrait){.fb{grid-template-columns:1fr}}
 #amap{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));width:180px;height:130px;background:var(--s2);border-radius:14px;border:1px solid var(--l1)}
 .wk.zu{opacity:.45;filter:grayscale(1)}
 #lxDet .card{background:var(--s2);margin-top:12px;width:100%}
@@ -247,6 +255,8 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
   <div id="joy" aria-label="Steuer-Joystick"><i></i></div>
   <button id="aAuf" class="aauf">Aufnehmen</button>
   <canvas id="amap" aria-label="Übersichtskarte"></canvas>
+  <div id="aFrage"><div class="fk"><div class="kl" id="afKl">Zeitlupe</div><h2 id="afT"></h2>
+    <div class="fb"><button class="fbt" id="afFr"></button><button class="fbt pri" id="afAuf"></button></div><small id="afZ"></small></div></div>
 </section>
 
 <section id="ende" class="scr">
@@ -500,7 +510,7 @@ const DIALOGE={1:[
  {t:'Die ersten Zellen',p:'Die ersten echten Zellen waren Prokaryoten: kleine Zellen ohne Zellkern, so wie heutige Bakterien.',s:sk(`${[[60,40,'#6EC1F0',-20],[130,70,'#6EC1F0',15],[200,40,'#5DD39E',30]].map(([x,y,c,a])=>`<rect x="${x-22}" y="${y-10}" width="44" height="20" rx="10" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('')}`)},
  {t:'Fressen und gefressen werden',p:'Größere Zellen umfließen kleinere und verdauen sie. Fressen kannst du, was höchstens zwei Drittel so groß ist wie du – grün umrandet. Wer anderthalbmal so groß ist wie du, frisst dich – rot umrandet. Eine gefressene Zelle bringt dir die Hälfte ihrer Biomasse.',s:sk(`<circle cx="80" cy="55" r="26" fill="#31312F" stroke="#FDD602" stroke-width="4"/><circle cx="180" cy="55" r="42" fill="#31312F" stroke="#FF7A6B" stroke-width="4"/><circle cx="40" cy="30" r="5" fill="#FFA552"/><circle cx="30" cy="80" r="5" fill="#FFA552"/>`)},
  {t:'So spielst du',p:'Steuere mit dem Joystick unten links oder halte den Finger dorthin, wohin du schwimmen willst. Orange Punkte sind Nährstoffe, Bakterien sind Beute. Bewegung kostet Energie – ohne Energie stirbt die Zelle. Was du in Ebene 3 zusätzlich gebaut hast, macht deine Zelle größer, sparsamer und schneller. Ziel: Biomasse 50, Zielzeit 11:00.',s:sk(`<circle cx="60" cy="60" r="40" fill="none" stroke="#5A5955" stroke-width="3"/><circle cx="72" cy="52" r="16" fill="#5A5955"/><circle cx="190" cy="55" r="22" fill="#31312F" stroke="#FDD602" stroke-width="4"/><path d="M215 55 L245 55" stroke="#FDD602" stroke-width="3" stroke-dasharray="4 5"/>`)},
- {t:'Aufnehmen statt fressen',p:'Halte „Aufnehmen“ gedrückt, während du ein Bakterium berührst: Nach 2 Sekunden lebt es in dir weiter. Ein korallenrotes α-Proteobakterium wird so zum Mitochondrium, ein grünes Cyanobakterium zum Chloroplasten. Solange du aufnimmst, kannst du dich nicht bewegen. Ab Minute 4 kommt die Große Sauerstoffkatastrophe.',s:sk(`<circle cx="130" cy="55" r="40" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="152" y="46" width="40" height="18" rx="9" fill="#FF7A6B"/><path d="M130 10 A45 45 0 0 1 175 55" stroke="#FDD602" stroke-width="4" fill="none"/>`)}
+ {t:'Fressen oder aufnehmen',p:'Berührst du ein korallenrotes α-Proteobakterium oder ein grünes Cyanobakterium, läuft die Zeit langsamer und du entscheidest: fressen oder aufnehmen. Aufgenommen lebt es in dir weiter – als Mitochondrium bzw. Chloroplast. Die Aufnahme dauert 2 Sekunden, in denen du dich nicht bewegen kannst. Wählst du nicht, wird nach 5 Sekunden gefressen. Ab Minute 4 kommt die Große Sauerstoffkatastrophe.',s:sk(`<circle cx="130" cy="55" r="40" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="152" y="46" width="40" height="18" rx="9" fill="#FF7A6B"/><path d="M130 10 A45 45 0 0 1 175 55" stroke="#FDD602" stroke-width="4" fill="none"/>`)}
  ],
  w4:[
  {t:'Die Große Sauerstoffkatastrophe',p:'Mit ihrer Fotosynthese machten Cyanobakterien die Luft vor rund 2,4 Milliarden Jahren sauerstoffreich. Für viele Zellen war Sauerstoff damals giftig.',s:sk(`${[[60,50],[130,40],[200,60]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="34" fill="#6EC1F0" fill-opacity=".18"/>`).join('')}<rect x="108" y="74" width="44" height="18" rx="9" fill="#5DD39E"/>`)},
@@ -718,7 +728,7 @@ function starteArena(e){
   const lx=lade('lexikon',{}); // freigeschaltete Geschöpfe tauchen als Gegner auf
   GESCHOEPFE.filter(g=>lx[g.id]&&(e===4?g.pro:!g.pro)).forEach(g=>{for(let i=0;i<2;i++)spawnZelle(g)});
   $('aTitel').textContent='Ebene '+e+' · '+cfg.titel+(run.test?' · TEST':'');
-  zeige('arena');arenaHud();letzt=performance.now()}
+  $('aFrage').classList.remove('on');zeige('arena');arenaHud();letzt=performance.now()}
 function zufallsOrt(fern){const p=A.p;for(let k=0;k<30;k++){const x=40+A.rng()*(WELT-80),y=40+A.rng()*(WELT-80);if(!fern||Math.hypot(x-p.x,y-p.y)>700)return[x,y]}return[A.rng()*WELT,A.rng()*WELT]}
 function spawn(typ,fern){const[x,y]=zufallsOrt(fern);const o={typ,x,y,vx:0,vy:0,ang:A.rng()*6.283};
   if(typ==='naehr'){o.r=5;o.m=0.6}else{o.r=6+A.rng()*1.5;o.m=2;o.v=30+A.rng()*20}
@@ -737,7 +747,9 @@ function friss(o){const p=A.p;o.weg=true;const n=o.typ==='zelle'?o.name:NAME[o.t
   else if(o.typ==='zelle'){p.m+=o.m*0.5;A.energie+=12+o.m*0.4}
   else{p.m+=o.m*0.5;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
   ersatz(o)}
-function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt;p.r=rad(p.m);
+function arenaSchritt(dt){if(!A||!A.laeuft)return;
+  if(A.frage){A.frage.t+=dt;if(A.frage.t>=5)frageWahl('fressen');else dt*=0.1} // Zeitlupe während der Entscheidung, nach 5 s wird gefressen
+  const p=A.p,c=A.cfg;A.zeit+=dt;p.r=rad(p.m);
   // Eingabe: Finger auf dem Feld > Joystick/Tastatur
   let ix=A.input.x,iy=A.input.y;const T=A.taste;
   if(A.ziel){const dx=A.ziel.x-innerWidth/2,dy=A.ziel.y-innerHeight/2,l=Math.hypot(dx,dy);ix=l>10?dx/Math.max(l,90):0;iy=l>10?dy/Math.max(l,90):0}
@@ -776,11 +788,11 @@ function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt
   for(const o of A.ents){if(o.weg||o.gehalten)continue;const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);if(d>p.r+o.r)continue;
     const bak=o.typ==='bakt'||o.typ==='cyano'||o.typ==='alpha';
     if(o.typ==='zelle'&&o.r>=p.r*FRESS){if(d<o.r)return gefressen(o);continue}
-    if(bak&&A.halte){if(!A.auf){A.auf={o,t:0};o.gehalten=true}continue}
+    if(bak&&!A.auf&&!A.frage&&((o.typ==='alpha'&&!A.mito)||(o.typ==='cyano'&&!A.chloro))){frageAuf(o);continue}
     if(o.typ==='naehr'||o.r*FRESS<=p.r){if(d<p.r)friss(o);continue}
     if(o.typ==='zelle'&&d>0){const ov=(p.r+o.r-d)*0.5;p.x-=dx/d*ov;p.y-=dy/d*ov;o.x+=dx/d*ov;o.y+=dy/d*ov}}
   if(A.auf){const o=A.auf.o;
-    if(!A.halte||o.weg){o.gehalten=false;A.auf=null}
+    if(o.weg){A.auf=null}
     else{A.auf.t+=dt;const a=Math.atan2(o.y-p.y,o.x-p.x);o.x=p.x+Math.cos(a)*p.r*0.75;o.y=p.y+Math.sin(a)*p.r*0.75;
       if(A.auf.t>=2){o.weg=true;A.auf=null;
         if(o.typ==='alpha'&&!A.mito){A.mito=true;A.msg={t:'Mitochondrium! Das α-Proteobakterium lebt jetzt in dir.',d:4}}
@@ -791,8 +803,19 @@ function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt
   if(A.msg&&(A.msg.d-=dt)<=0)A.msg=null;
   if(A.energie<=0)return arenaScheitern('Keine Energie mehr – deine Zelle ist verhungert.');
   if(p.m>=c.masseZiel)return arenaFertig()}
+// Fressen oder Aufnehmen? (Endosymbiose)
+function frageAuf(o){A.frage={o,t:0};o.gehalten=true;A.ziel=null;
+  const al=o.typ==='alpha',kap=c=>`<svg width="56" height="28" viewBox="0 0 56 28"><rect x="4" y="5" width="48" height="18" rx="9" fill="${c}"/></svg>`;
+  $('afT').textContent=(al?'α-Proteobakterium':'Cyanobakterium')+' berührt – fressen oder aufnehmen?';
+  $('afFr').innerHTML=`${kap(al?'#FF7A6B':'#5DD39E')}<b>Fressen</b><span>+1 Biomasse, +10 Energie</span><small>Es wird verdaut.</small>`;
+  $('afAuf').innerHTML=al?`${kap('#FF7A6B')}<b>Aufnehmen → Mitochondrium</b><span>+10 % Tempo · Energie aus Sauerstoff statt Schaden in den Sauerstoff-Wolken · Voraussetzung, um Eukaryot zu werden</span><small>2 Sekunden unbeweglich</small>`
+    :`${kap('#5DD39E')}<b>Aufnehmen → Chloroplast</b><span>laufend etwas Energie aus Licht · Voraussetzung für die Grünalge (mit Cellulose-Wand)</span><small>2 Sekunden unbeweglich</small>`;
+  $('aFrage').classList.add('on')}
+function frageWahl(w){if(!A||!A.frage)return;const o=A.frage.o;A.frage=null;$('aFrage').classList.remove('on');
+  if(w==='aufnehmen')A.auf={o,t:0};else{o.gehalten=false;friss(o)}}
+$('afFr').onclick=()=>frageWahl('fressen');$('afAuf').onclick=()=>frageWahl('aufnehmen');
 function gefressen(o){arenaScheitern('Du wurdest gefressen ('+o.name+').')}
-function arenaScheitern(text){A.laeuft=false;const run=A.run,p=A.p,z=A.cfg.masseZiel;sichere('run',null);
+function arenaScheitern(text){A.laeuft=false;$('aFrage').classList.remove('on');const run=A.run,p=A.p,z=A.cfg.masseZiel;sichere('run',null);
   $('eExtra').innerHTML=`<div class="kl">Biomasse</div><div style="font-size:20px"><b>${Math.floor(p.m)} / ${z}</b> · <b style="color:#FF9B8F">es fehlten ${Math.ceil(z-p.m)}</b></div><div class="bar"><i style="width:${p.m/z*100}%"></i></div>`;
   A=null;endeZeigen(false,run,'Lauf gescheitert',text+' Die XP der geschafften Ebenen bleiben dir erhalten.')}
 function arenaFertig(){A.laeuft=false;const cfg=A.cfg,run=A.run,zm=A.zeit,tempo=zm<cfg.ziel,bonus=tempo?Math.round(cfg.xp*.5):0;
@@ -862,9 +885,9 @@ function arenaHud(){if(!A)return;const c=A.cfg,p=A.p;
   const z=$('aZeit');z.textContent=mmss(A.zeit)+' / Ziel '+mmss(c.ziel);z.classList.toggle('over',A.zeit>c.ziel);
   const ch=`<span class="chip${A.mito?' ok':''}" style="${A.mito?'background:#FF7A6B':''}">Mitochondrium ${A.mito?'✓':'–'}</span><span class="chip${A.chloro?' ok':''}" style="${A.chloro?'background:#5DD39E':''}">Chloroplast ${A.chloro?'✓':'–'}</span>`+(A.e===4?`<span class="chip">Cyanobakterien ${A.cyanoGef}/8</span>`:'');
   if($('aChips').innerHTML!==ch)$('aChips').innerHTML=ch;
-  const b=$('aBanner'),txt=A.msg?A.msg.t:A.o2>0?'Große Sauerstoffkatastrophe · '+(A.mito?'dein Mitochondrium nutzt den Sauerstoff':'Sauerstoff-Wolken kosten Energie')+' · '+mmss(Math.ceil(A.o2)):'';
+  const b=$('aBanner'),txt=A.auf?'Aufnahme läuft … noch '+Math.max(0,2-A.auf.t).toFixed(1)+' s unbeweglich':A.msg?A.msg.t:A.o2>0?'Große Sauerstoffkatastrophe · '+(A.mito?'dein Mitochondrium nutzt den Sauerstoff':'Sauerstoff-Wolken kosten Energie')+' · '+mmss(Math.ceil(A.o2)):'';
   b.classList.toggle('on',!!txt);if(b.textContent!==txt)b.textContent=txt;b.classList.toggle('uv',A.o2>0&&!A.msg);
-  $('aAuf').classList.toggle('an',A.halte);$('aAuf').textContent=A.auf?'Aufnehmen … '+Math.min(2,A.auf.t).toFixed(1)+' s':'Aufnehmen'}
+  if(A.frage)$('afZ').textContent='Die Zeit läuft langsamer · ohne Wahl wird in '+Math.ceil(5-A.frage.t)+' s gefressen'}
 // Steuerung
 (function(){const j=$('joy'),kn=j.querySelector('i');let jid=null;
   const setz=ev=>{const r=j.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2-15;let dx=ev.clientX-cx,dy=ev.clientY-cy;const l=Math.hypot(dx,dy);if(l>R){dx*=R/l;dy*=R/l}
@@ -939,7 +962,7 @@ window.matomTest={
         if((o.typ==='naehr'||o.r*FRESS<=p.r)&&d<800){const s=(o.m+0.5)*(o.typ==='alpha'&&!A.mito?6:1)/(d+30);if(s>bs){bs=s;best=o}}
         if(o.typ==='alpha'&&!A.mito&&d<p.r+o.r)beruehrt=o}
       let ix=fx,iy=fy;if(best){const d=Math.hypot(best.x-p.x,best.y-p.y)||1;ix+=(best.x-p.x)/d;iy+=(best.y-p.y)/d}
-      A.input={x:ix,y:iy};A.halte=!!beruehrt||!!(A.auf&&A.auf.o.typ==='alpha');arenaSchritt(0.05)}
+      A.input={x:ix,y:iy};if(A.frage)frageWahl(A.frage.o.typ==='alpha'?'aufnehmen':'fressen');arenaSchritt(0.05)}
     return this.arenaState()},
   arenaState(){return A?{screen:'arena',e:A.e,m:+A.p.m.toFixed(1),energie:Math.round(A.energie),zeit:+A.zeit.toFixed(1),mito:A.mito,chloro:A.chloro,cyanoGef:A.cyanoGef,gefressen:A.gefressen,ents:A.ents.length}:{screen:document.querySelector('.scr.on').id}},
   raeuber(){const o=spawnZelle(null,false);o.r=A.p.r*3;o.m=o.m0=masseAus(o.r);o.x=A.p.x+o.r*0.5;o.y=A.p.y;return o.r},

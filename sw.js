@@ -1,5 +1,5 @@
 // mLogic – Offline-Speicher für alle Spiele. Bei Änderungen an einer Datei die Versionsnummer erhöhen.
-const CACHE = "mlogic-v38";
+const CACHE = "mlogic-v39";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "hash/", "hash/index.html", "hash/icon-180.png", "hash/icon-192.png", "hash/icon-512.png",
