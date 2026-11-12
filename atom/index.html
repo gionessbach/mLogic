@@ -32,6 +32,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 #start .sub{color:var(--mut);font-size:18px;margin-top:-10px}
 .xp{border:2px solid var(--y);color:var(--y);border-radius:999px;padding:6px 16px;font-weight:700}
 #start .col{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
+/* Testmodus */
+.test{display:none;flex-direction:column;align-items:center;gap:8px;border:2px dashed var(--l2);border-radius:18px;padding:12px 16px;color:var(--mut);font-size:14px}
+.test.on{display:flex}.test .r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.test .btn{min-height:44px;padding:8px 16px;font-size:15px}
 /* Dialog / Ende */
 #dialog,#ende{align-items:center;justify-content:center}
 #ende{overflow:auto}#ende .card{margin:auto}
@@ -140,6 +143,7 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
     <button class="btn" id="bNeu">Neuer Lauf</button>
     <button class="btn" id="bLex">Lexikon</button>
   </div>
+  <div class="test" id="testBox"></div>
 </section>
 
 <section id="dialog" class="scr">
@@ -287,7 +291,7 @@ const BLITZ=(x,y,f,k=1)=>`<path transform="translate(${x} ${y}) scale(${k})" d="
 // ---------- Startbildschirm ----------
 function startScreen(){
   $('xpStand').textContent=lade('xp',0)+' XP';
-  $('bWeiter').style.display=lade('run',null)?'':'none';
+  $('bWeiter').style.display=lade('run',null)?'':'none';malTest();
   zeige('start');
 }
 $('bNeu').onclick=()=>{const run={seed:(Math.random()*2**31)|0,ebene:1,bonusStab:0,xpLauf:[]};sichere('run',run);zeigeDialog(1,()=>starteEbene(1))};
@@ -299,6 +303,17 @@ function waehleWand(id){const run=lade('run',null)||{xpLauf:[]},w=WAENDE.find(x=
   sichere('letzteWand',id);sichere('run',null); // Ebene 4 (Arena) folgt im nächsten Bauschritt
   $('eExtra').innerHTML=`<div class="kl">Deine Wahl</div><div style="font-size:18px"><b style="color:${w.c}">${w.name}</b> · ${w.weg}</div>`;
   endeZeigen(true,run,'Zellwand: '+w.name,'Deine Wahl ist gespeichert. In diesem Prototyp endet der Lauf hier – Ebene 4 (Protozelle, Arena) folgt im nächsten Bauschritt.',0)}
+// Testmodus: direkt zu einer Ebene springen, ohne XP zu speichern.
+// An: Link mit ?test öffnen oder 5× schnell aufs Logo tippen (ebenso aus).
+if(/[?&]test/.test(location.search))sichere('test',1);
+function malTest(){const B=$('testBox'),on=!!lade('test',0);B.classList.toggle('on',on);if(!on)return;
+  B.innerHTML='<b>Testmodus</b><span>Direkt starten – XP werden nicht gespeichert</span><div class="r">'+
+    [1,2,3].map(e=>`<button class="btn" data-e="${e}">E${e}</button>`).join('')+'<button class="btn" data-e="weiche">Weiche</button><button class="btn" data-e="aus">Aus</button></div>';
+  B.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=b.dataset.e;
+    if(e==='aus'){sichere('test',0);malTest();return}
+    const run={seed:(Math.random()*2**31)|0,ebene:e==='weiche'?'weiche':+e,bonusStab:0,xpLauf:[],test:true};sichere('run',run);
+    if(e==='weiche')zeigeWeiche();else starteEbene(+e)})}
+let tapN=0,tapT=0;$('bigLogo').onclick=()=>{const t=Date.now();tapN=t-tapT<700?tapN+1:1;tapT=t;if(tapN>=5){tapN=0;sichere('test',lade('test',0)?0:1);malTest()}};
 $('bLex').onclick=()=>{const xp=lade('xp',0),lx=lade('lexikon',{});
   $('lxList').innerHTML=GESCHOEPFE.map(g=>{const f=lx[g.id];
    return `<div><svg width="56" height="56" viewBox="0 0 56 56"><ellipse cx="28" cy="28" rx="24" ry="18" fill="${f?'#5DD39E':'#3A3A38'}"/></svg><b>${f?g.name:'???'}</b><small>${f?'entdeckt am '+f:(xp>=g.xp?'noch nicht entdeckt':'ab '+g.xp+' XP')}</small></div>`}).join('');
@@ -357,7 +372,7 @@ function starteEbene(e){
   const vor=(run.vorrat&&run.vorrat[e])||{};for(const k in vor)G.lager[k]=(G.lager[k]||0)+vor[k];
   G.mix=(run.mix&&run.mix[e])||null;G.mixSum=G.mix?Object.values(G.mix).reduce((a,b)=>a+b,0):0;
   G.erreicht=false;G.extra={};G.zeitMasse=null;$('bFertig').classList.remove('on');
-  $('eTitel').textContent='Ebene '+e+' · '+cfg.titel;
+  $('eTitel').textContent='Ebene '+e+' · '+cfg.titel+(run.test?' · TEST':'');
   const box=$('reactors');box.innerHTML='';$('belt').innerHTML='';
   for(let i=0;i<3;i++){const d=document.createElement('div');d.className='re';
     d.innerHTML='<div class="h"></div><svg viewBox="0 0 300 230"></svg><div class="nm"></div><div class="need"></div><div class="cd"></div>';
@@ -513,7 +528,7 @@ $('bPause').onclick=()=>{if(!G)return;G.laeuft=false;if(G.drag){G.drag.g.remove(
 function ebeneGeschafft(){G.laeuft=false;
   const cfg=G.cfg,zm=G.zeitMasse!=null?G.zeitMasse:G.zeit,tempo=zm<cfg.ziel,bonus=tempo?Math.round(cfg.xp*0.5):0,run=G.run;
   run.xpLauf.push({e:G.e,xp:cfg.xp,bonus,zeit:zm});run.bonusStab=tempo?1:0;
-  sichere('xp',lade('xp',0)+cfg.xp+bonus);
+  if(!run.test)sichere('xp',lade('xp',0)+cfg.xp+bonus);
   const nx=cfg.weiche?'weiche':EBENEN[G.e+1]?G.e+1:0;let mit='';
   if(typeof nx==='number'&&nx){const teile=new Set(REZEPTE[EBENEN[nx].pool].flatMap(r=>r.a.map(a=>a[0])));
     const f=o=>Object.fromEntries(Object.entries(o).filter(([k,v])=>teile.has(k)&&v>0));
@@ -534,7 +549,7 @@ function endeZeigen(ok,run,titel,text,nx){endeNx=nx||0;$('bFertig').classList.re
   $('eStart').textContent=endeNx?'Pause':'Zum Start';$('eNeu').textContent=endeNx==='weiche'?'Weiter zur Weiche':endeNx?'Weiter zu Ebene '+endeNx:'Neuer Lauf';
   if(G&&G.drag){G.drag.g.remove();G.drag=null}
   $('eT').textContent=titel;$('eT').style.color=ok?'#FDD602':'#FF9B8F';$('eP').textContent=text;
-  let sum=0,h='';
+  let sum=0,h=run.test?'<div><span>Testlauf – XP werden nicht gespeichert</span><b></b></div>':'';
   for(const x of run.xpLauf){sum+=x.xp+x.bonus;h+=`<div><span>Ebene ${x.e} geschafft</span><b>+${x.xp} XP</b></div>`;
     if(x.bonus)h+=`<div><span>Tempobonus (${mmss(x.zeit)} unter Ziel)</span><b>+${x.bonus} XP</b></div>`}
   if(!run.xpLauf.length)h+='<div><span>Keine Ebene geschafft</span><b>+0 XP</b></div>';
