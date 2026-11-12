@@ -32,6 +32,30 @@ button{font:inherit;color:inherit;cursor:pointer}
 #start .sub{color:var(--mut);font-size:18px;margin-top:-10px}
 .xp{border:2px solid var(--y);color:var(--y);border-radius:999px;padding:6px 16px;font-weight:700}
 #start .col{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
+/* Arena */
+#arena{padding:0}
+#acv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.atop{position:absolute;left:0;right:0;top:0;padding:max(16px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 0 max(20px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.atop header,.atop button{pointer-events:auto}
+.mass.en .bar i{background:#FFA552}.mass.en.leer .lb b{color:var(--warn2)}
+.achips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:rgba(29,29,28,.85);border-radius:999px;padding:6px 12px;font-size:14px;color:var(--mut)}
+.chip.ok{color:var(--bg)}
+#aBanner{position:static;transform:none;align-self:center;white-space:normal;text-align:center;max-width:90%}
+#joy{position:absolute;left:max(28px,env(safe-area-inset-left));bottom:max(28px,env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;border:3px solid var(--l2);touch-action:none;background:rgba(29,29,28,.4)}
+#joy i{position:absolute;left:42px;top:42px;width:60px;height:60px;border-radius:50%;background:var(--l2);pointer-events:none}
+.aauf{position:absolute;left:200px;bottom:max(50px,env(safe-area-inset-bottom));height:64px;padding:0 22px;border-radius:32px;border:none;background:var(--fg);color:var(--bg);font-weight:700;font-size:17px;touch-action:none}
+.aauf.an{background:var(--y)}
+#amap{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));width:180px;height:130px;background:var(--s2);border-radius:14px;border:1px solid var(--l1)}
+.wk.zu{opacity:.45;filter:grayscale(1)}
+#lxDet .card{background:var(--s2);margin-top:12px;width:100%}
+.lx div{cursor:pointer}
+@media (orientation:portrait){
+ #joy{width:120px;height:120px}#joy i{left:30px;top:30px;width:54px;height:54px}
+ .aauf{left:auto;right:max(20px,env(safe-area-inset-right));height:56px;font-size:15px;padding:0 18px;bottom:calc(max(24px,env(safe-area-inset-bottom)) + 92px)}
+ #amap{width:110px;height:80px}.chip{font-size:12px;padding:4px 10px}
+ .atop .mass{width:130px}
+}
 /* Testmodus */
 .test{display:none;flex-direction:column;align-items:center;gap:8px;border:2px dashed var(--l2);border-radius:18px;padding:12px 16px;color:var(--mut);font-size:14px}
 .test.on{display:flex}.test .r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.test .btn{min-height:44px;padding:8px 16px;font-size:15px}
@@ -176,11 +200,31 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
 
 <section id="weiche" class="scr">
   <div class="card wide">
-    <div class="kl">Weiche · Zellwand-Baustoff</div>
-    <h2>Welche Hülle bekommt deine Zelle?</h2>
-    <p>Deine Membran-Bläschen sind fertig. Jetzt entscheidest du, woraus die äußere Wand deiner späteren Zelle besteht. Die Wahl bestimmt, welches Geschöpf du in Ebene 5 freischalten kannst.</p>
+    <div class="kl" id="wKl"></div>
+    <h2 id="wT"></h2>
+    <p id="wP"></p>
     <div class="wahl" id="wahl"></div>
   </div>
+</section>
+
+<section id="arena" class="scr">
+  <canvas id="acv"></canvas>
+  <div class="atop">
+    <header>
+      <div class="logo" id="aLogo"></div>
+      <div class="tt"><b>mAtom</b><span id="aTitel"></span></div>
+      <div class="sp"></div>
+      <div class="mass"><div class="lb"><span>Biomasse</span><b id="aMT"></b></div><div class="bar"><i id="aMB"></i></div></div>
+      <div class="mass en"><div class="lb"><span>Energie</span><b id="aET"></b></div><div class="bar"><i id="aEB"></i></div></div>
+      <span class="time" id="aZeit"></span>
+      <button class="ib" id="aPause" aria-label="Pause und speichern"><svg width="20" height="20" viewBox="0 0 20 20"><rect x="4" y="3" width="4" height="14" fill="#F2F1EC"/><rect x="12" y="3" width="4" height="14" fill="#F2F1EC"/></svg></button>
+    </header>
+    <div class="achips" id="aChips"></div>
+    <div class="bn" id="aBanner"></div>
+  </div>
+  <div id="joy" aria-label="Steuer-Joystick"><i></i></div>
+  <button id="aAuf" class="aauf">Aufnehmen</button>
+  <canvas id="amap" aria-label="Übersichtskarte"></canvas>
 </section>
 
 <section id="ende" class="scr">
@@ -194,7 +238,7 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
   </div>
 </section>
 
-<div id="lex"><div class="card"><h2>Lexikon</h2><p>Geschöpfe, die du am Ende eines Laufs freischaltest.</p><div class="lx" id="lxList"></div><div class="row"><span></span><button class="btn pri" id="lexZu">Schließen</button></div></div></div>
+<div id="lex"><div class="card"><h2>Lexikon</h2><p>Geschöpfe, die du am Ende eines Laufs freischaltest.</p><div class="lx" id="lxList"></div><div id="lxDet"></div><div class="row"><span></span><button class="btn pri" id="lexZu">Schließen</button></div></div></div>
 
 <script>
 'use strict';
@@ -244,15 +288,33 @@ E3:[
 const EBENEN={
  1:{titel:'Atom → Molekül',pool:'E1',masse:30,ziel:360,tempo:60,xp:10,abstand:66,wort:['Molekül','Moleküle'],hint:'Atome laufen vorbei · in einen Reaktor ziehen, bevor sie verschwinden'},
  3:{titel:'Baustein → Makromolekül',pool:'E3',ziele:{protein:3,rna:3,membran:4},masse:10,ziel:540,tempo:45,xp:20,abstand:78,uv:true,weiche:true,wort:['Makromolekül','Makromoleküle'],hint:'Bausteine laufen vorbei · Ziel: 3 Proteine, 3 RNA, 4 Membran-Bläschen'},
+ 4:{titel:'Protozelle → Zelle',arena:true,start:10,masseZiel:60,ziel:660,xp:30},
+ 5:{titel:'Eukaryot',arena:true,start:30,masseZiel:100,ziel:780,xp:40},
  2:{titel:'Molekül → Baustein',pool:'E2',masse:20,ziel:480,tempo:50,xp:15,abstand:74,blitz:true,uv:true,lager:['ribose','adenin'],wort:['Baustein','Bausteine'],hint:'Moleküle laufen vorbei · Ribose und Adenin aus dem Vorrat ins Nukleotid ziehen'}};
 // Alle Teilchen (Atome, Moleküle, Bausteine) mit Beschriftung, Farbe und Symbol
 const TEIL={};
 for(const k in EL)TEIL[k]={label:k,name:EL[k].n,c:EL[k].c,atom:true};
 for(const p in REZEPTE)for(const r of REZEPTE[p]){const bild=r.bild||{a:r.a,b:r.b};TEIL[r.id]={label:r.kurz||r.formel,name:r.name,bild,c:EL[bild.a[0][0]].c,lager:!!r.lager}}
 const GESCHOEPFE=[
- {id:'bakterium',name:'Bakterium',xp:0},{id:'cyano',name:'Cyanobakterium',xp:0},
- {id:'amoebe',name:'Amöbe',xp:100},{id:'pantoffel',name:'Pantoffeltierchen',xp:100},
- {id:'hefe',name:'Hefe',xp:100},{id:'gruenalge',name:'Grünalge',xp:100}];
+ {id:'bakterium',name:'Bakterium',xp:0,pro:true,form:'kapsel',c:'#6EC1F0',weg:'Ebene 4 beenden und Prokaryot bleiben',
+  fakten:['Ein Prokaryot: Das Erbgut liegt frei in der Zelle, es gibt keinen Zellkern.','Bakterien gibt es seit rund 3,5 Milliarden Jahren.','In deinem Körper leben etwa so viele Bakterien, wie er eigene Zellen hat.']},
+ {id:'cyano',name:'Cyanobakterium',xp:0,pro:true,form:'kapsel',c:'#5DD39E',weg:'In Ebene 4 mindestens 8 Cyanobakterien fressen',
+  fakten:['Betreibt Fotosynthese und setzt dabei Sauerstoff frei.','Löste vor rund 2,4 Milliarden Jahren die Große Sauerstoffkatastrophe aus.','Ein aufgenommenes Cyanobakterium wurde zum Chloroplasten der Pflanzen.']},
+ {id:'amoebe',name:'Amöbe',xp:100,form:'blob',c:'#A98BF0',weg:'Eukaryot ohne Zellwand, Fortbewegung mit Scheinfüßchen',
+  fakten:['Kriecht mit Scheinfüßchen (Pseudopodien) voran.','Umfließt ihre Beute und verdaut sie in einem Bläschen (Phagozytose).','Hat keine feste Form.']},
+ {id:'pantoffel',name:'Pantoffeltierchen',xp:100,form:'oval',c:'#F2E36B',weg:'Eukaryot ohne Zellwand, Fortbewegung mit Wimpern',
+  fakten:['Schwimmt mit Tausenden feiner Wimpern.','Hat zwei Zellkerne: einen großen und einen kleinen.','Strudelt Nahrung in einen Zellmund.']},
+ {id:'hefe',name:'Hefe',xp:100,form:'knospe',c:'#FFA552',weg:'Eukaryot mit Chitin-Zellwand',
+  fakten:['Ein einzelliger Pilz mit einer Zellwand aus Chitin.','Vermehrt sich durch Sprossung: Eine Tochterzelle knospt ab.','Lässt Brotteig aufgehen und macht aus Zucker Alkohol.']},
+ {id:'gruenalge',name:'Grünalge',xp:100,form:'alge',c:'#5DD39E',weg:'Eukaryot mit Cellulose-Wand und aufgenommenem Cyanobakterium (Chloroplast)',
+  fakten:['Hat Chloroplasten und betreibt Fotosynthese.','Ihre Zellwand besteht wie bei Pflanzen aus Cellulose.','Alle Landpflanzen stammen von Grünalgen ab.']}];
+// kleine Skizze je Geschöpf (Lexikon, Weiche)
+function skizze(g,gr=56,grau){const c=grau?'#3A3A38':g.c,f={kapsel:`<rect x="8" y="20" width="40" height="16" rx="8" fill="${c}"/>`,
+  blob:`<path d="M12 30 C8 14 26 6 34 12 C46 8 52 24 46 32 C50 44 34 50 26 44 C14 48 6 40 12 30Z" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/><circle cx="28" cy="28" r="7" fill="${c}"/>`,
+  oval:`<ellipse cx="28" cy="28" rx="22" ry="12" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/>${[...Array(10)].map((_,k)=>{const a=k/10*6.283;return `<line x1="${28+Math.cos(a)*22}" y1="${28+Math.sin(a)*12}" x2="${28+Math.cos(a)*27}" y2="${28+Math.sin(a)*16}" stroke="${c}" stroke-width="2"/>`}).join('')}`,
+  knospe:`<circle cx="24" cy="30" r="15" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/><circle cx="42" cy="18" r="8" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/>`,
+  alge:`<circle cx="28" cy="28" r="20" fill="#31312F" stroke="${c}" stroke-width="5"/><ellipse cx="22" cy="24" rx="6" ry="3.5" fill="${c}"/><ellipse cx="34" cy="33" rx="6" ry="3.5" fill="${c}"/>`}[g.form];
+  return `<svg width="${gr}" height="${gr}" viewBox="0 0 56 56">${f}</svg>`}
 const WAENDE=[
  {id:'cellulose',name:'Cellulose',weg:'Pflanzen- und Algenweg',folge:'Feste Wand aus Zuckerketten. Führt in Ebene 5 zur Grünalge – dafür brauchst du später einen Chloroplasten.',c:'#5DD39E'},
  {id:'chitin',name:'Chitin',weg:'Pilzweg',folge:'Zähe, biegsame Wand wie bei Pilzen. Führt in Ebene 5 zur Hefe.',c:'#FFA552'},
@@ -295,28 +357,55 @@ function startScreen(){
   zeige('start');
 }
 $('bNeu').onclick=()=>{const run={seed:(Math.random()*2**31)|0,ebene:1,bonusStab:0,xpLauf:[]};sichere('run',run);zeigeDialog(1,()=>starteEbene(1))};
-$('bWeiter').onclick=()=>{const r=lade('run',null);if(!r)return;if(r.ebene==='weiche')zeigeWeiche();else starteEbene(r.ebene)};
+const WEITER={weiche:()=>zeigeWeiche(),w4:()=>zeigeDialog('w4',zeigeWeiche4),w5:()=>zeigeWeiche5()};
+$('bWeiter').onclick=()=>{const r=lade('run',null);if(!r)return;if(WEITER[r.ebene])WEITER[r.ebene]();else starteEbene(r.ebene)};
+// Karten-Weiche (Zellwand, E4-Ende, E5-Ende)
+function zeigeKarten(kl,titel,text,karten,onWahl){$('wKl').textContent=kl;$('wT').textContent=titel;$('wP').textContent=text;
+  $('wahl').innerHTML=karten.map(k=>`<button class="wk${k.zu?' zu':''}" data-id="${k.id}"${k.zu?' disabled':''}>${k.svg||''}<b>${k.name}</b><small>${k.weg||''}</small><span>${k.folge}</span><small>${k.kosten||''}</small></button>`).join('');
+  $('wahl').querySelectorAll('.wk').forEach(b=>{if(!b.disabled)b.onclick=()=>onWahl(b.dataset.id)});zeige('weiche')}
+const G_=id=>GESCHOEPFE.find(g=>g.id===id);
+function xpFuer(run){const xp=lade('xp',0);return run&&run.test?Math.max(xp,100):xp}
+function zeigeWeiche4(){const run=lade('run',null)||{xpLauf:[]},xp=xpFuer(run),cg=run.cyanoGef||0;
+  zeigeKarten('Weiche · Ende Ebene 4','Wie geht es weiter mit deiner Zelle?','Bakterium und Cyanobakterium beenden den Lauf mit einer Freischaltung. Als Eukaryot spielst du weiter bis Ebene 5.',[
+   {id:'bakterium',name:'Bakterium',svg:skizze(G_('bakterium')),weg:'Prokaryot bleiben',folge:'Der Lauf endet: Du schaltest das Bakterium frei.',kosten:'immer möglich'},
+   {id:'cyano',name:'Cyanobakterium',svg:skizze(G_('cyano'),56,cg<8),weg:'Fotosynthese betreiben',folge:'Der Lauf endet: Du schaltest das Cyanobakterium frei.',kosten:'braucht 8 gefressene Cyanobakterien (du: '+cg+')',zu:cg<8},
+   {id:'euk',name:'Eukaryot werden',svg:`<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="#31312F" stroke="${run.mito&&xp>=100?'#FDD602':'#3A3A38'}" stroke-width="4"/><circle cx="32" cy="24" r="8" fill="#4a4a46"/></svg>`,weg:'mit Zellkern und Mitochondrium',folge:'Weiter zu Ebene 5. Dort entscheidet deine Zellwand über das Geschöpf.',
+    kosten:!run.mito?'braucht ein aufgenommenes α-Proteobakterium':xp<100?'Dein Genom ist noch nicht bereit – ab 100 XP (du: '+xp+')':'α-Proteobakterium aufgenommen ✓',zu:!run.mito||xp<100}],
+   id=>{if(id==='euk'){run.ebene=5;sichere('run',run);zeigeDialog(5,()=>starteEbene(5))}else schalteFrei(id,run)})}
+function zeigeWeiche5(){const run=lade('run',null)||{xpLauf:[]},xp=xpFuer(run),w=run.wand||'keine';let ids,text='Deine Zellwand-Wahl aus Ebene 3 entscheidet, welches Geschöpf du wirst.';
+  if(w==='cellulose'&&run.chloro)ids=['gruenalge'];
+  else if(w==='chitin')ids=['hefe'];
+  else{ids=['amoebe','pantoffel'];text=w==='cellulose'?'Eine Cellulose-Wand braucht Fotosynthese – ohne Chloroplast geht das nicht. Deine Zelle verzichtet auf die Wand. Wie bewegt sie sich fort?':'Ohne Zellwand bleibt deine Zelle beweglich. Wie bewegt sie sich fort?'}
+  const karten=ids.map(id=>{const g=G_(id),zu=xp<g.xp;return{id,name:g.name,svg:skizze(g,56,zu),weg:g.weg,folge:'Der Lauf endet: Du schaltest '+(id==='amoebe'||id==='hefe'||id==='gruenalge'?'die ':'das ')+g.name+' frei.',kosten:zu?'ab '+g.xp+' XP (du: '+xp+')':'ab '+g.xp+' XP ✓',zu}});
+  if(karten.every(k=>k.zu))karten.push({id:'ende',name:'Lauf beenden',folge:'Ohne Freischaltung. Die XP der Ebenen bleiben.',kosten:''});
+  zeigeKarten('Weiche · Ende Ebene 5','Welches Geschöpf wird aus deiner Zelle?',text,karten,id=>{if(id==='ende'){sichere('run',null);$('eExtra').innerHTML='';endeZeigen(true,run,'Lauf beendet','Diesmal ohne neues Geschöpf.',0)}else schalteFrei(id,run)})}
+function schalteFrei(id,run){const g=G_(id),lx=lade('lexikon',{}),neu=!lx[id],xpG=neu?50:10;
+  if(!run.test){lx[id]=new Date().toLocaleDateString('de-DE');sichere('lexikon',lx);sichere('xp',lade('xp',0)+xpG)}
+  run.xpLauf.push({label:(neu?'Neues Geschöpf: ':'Bekanntes Geschöpf: ')+g.name,xp:xpG,bonus:0});sichere('run',null);
+  $('eExtra').innerHTML=`<div style="display:flex;gap:14px;align-items:center">${skizze(g,72)}<div><b style="font-size:20px">${g.name}</b><br><small style="color:var(--mut)">${g.weg}</small></div></div><ul style="margin:0;padding-left:20px;line-height:1.5">${g.fakten.map(f=>'<li>'+f+'</li>').join('')}</ul>`;
+  endeZeigen(true,run,g.name+' freigeschaltet!',neu?'Neu im Lexikon! In künftigen Läufen taucht es als Gegner auf.':'Dieses Geschöpf kanntest du schon.',0)}
 function zeigeWeiche(){const xp=lade('xp',0);
-  $('wahl').innerHTML=WAENDE.map(w=>`<button class="wk" data-id="${w.id}"><svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="${w.c}" stroke-width="${w.id==='keine'?2:7}" ${w.id==='chitin'?'stroke-dasharray="10 4"':''}/><circle cx="30" cy="30" r="16" fill="#31312F" stroke="#FDD602" stroke-width="2"/></svg><b>${w.name}</b><small>${w.weg}</small><span>${w.folge}</span><small>Kosten: keine · Geschöpf ab 100 XP (du hast ${xp})</small></button>`).join('');
-  $('wahl').querySelectorAll('.wk').forEach(b=>b.onclick=()=>waehleWand(b.dataset.id));zeige('weiche')}
-function waehleWand(id){const run=lade('run',null)||{xpLauf:[]},w=WAENDE.find(x=>x.id===id);run.wand=id;
-  sichere('letzteWand',id);sichere('run',null); // Ebene 4 (Arena) folgt im nächsten Bauschritt
-  $('eExtra').innerHTML=`<div class="kl">Deine Wahl</div><div style="font-size:18px"><b style="color:${w.c}">${w.name}</b> · ${w.weg}</div>`;
-  endeZeigen(true,run,'Zellwand: '+w.name,'Deine Wahl ist gespeichert. In diesem Prototyp endet der Lauf hier – Ebene 4 (Protozelle, Arena) folgt im nächsten Bauschritt.',0)}
+  zeigeKarten('Weiche · Zellwand-Baustoff','Welche Hülle bekommt deine Zelle?','Deine Membran-Bläschen sind fertig. Jetzt entscheidest du, woraus die äußere Wand deiner späteren Zelle besteht. Die Wahl bestimmt, welches Geschöpf du in Ebene 5 freischalten kannst.',
+   WAENDE.map(w=>({id:w.id,name:w.name,weg:w.weg,folge:w.folge,kosten:'Kosten: keine · Geschöpf ab 100 XP (du hast '+xp+')',
+    svg:`<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="${w.c}" stroke-width="${w.id==='keine'?2:7}" ${w.id==='chitin'?'stroke-dasharray="10 4"':''}/><circle cx="30" cy="30" r="16" fill="#31312F" stroke="#FDD602" stroke-width="2"/></svg>`})),waehleWand)}
+function waehleWand(id){const run=lade('run',null)||{seed:1,xpLauf:[]};run.wand=id;run.ebene=4;sichere('run',run);sichere('letzteWand',id);
+  zeigeDialog(4,()=>starteEbene(4))}
 // Testmodus: direkt zu einer Ebene springen, ohne XP zu speichern.
 // An: Link mit ?test öffnen oder 5× schnell aufs Logo tippen (ebenso aus).
 if(/[?&]test/.test(location.search))sichere('test',1);
 function malTest(){const B=$('testBox'),on=!!lade('test',0);B.classList.toggle('on',on);if(!on)return;
   B.innerHTML='<b>Testmodus</b><span>Direkt starten – XP werden nicht gespeichert</span><div class="r">'+
-    [1,2,3].map(e=>`<button class="btn" data-e="${e}">E${e}</button>`).join('')+'<button class="btn" data-e="weiche">Weiche</button><button class="btn" data-e="aus">Aus</button></div>';
+    [1,2,3,4,5].map(e=>`<button class="btn" data-e="${e}">E${e}</button>`).join('')+'<button class="btn" data-e="weiche">Weiche</button><button class="btn" data-e="aus">Aus</button></div>';
   B.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=b.dataset.e;
     if(e==='aus'){sichere('test',0);malTest();return}
-    const run={seed:(Math.random()*2**31)|0,ebene:e==='weiche'?'weiche':+e,bonusStab:0,xpLauf:[],test:true};sichere('run',run);
+    const run={seed:(Math.random()*2**31)|0,ebene:e==='weiche'?'weiche':+e,bonusStab:0,xpLauf:[],test:true,wand:'keine',mito:e==='5'};sichere('run',run);
     if(e==='weiche')zeigeWeiche();else starteEbene(+e)})}
 let tapN=0,tapT=0;$('bigLogo').onclick=()=>{const t=Date.now();tapN=t-tapT<700?tapN+1:1;tapT=t;if(tapN>=5){tapN=0;sichere('test',lade('test',0)?0:1);malTest()}};
-$('bLex').onclick=()=>{const xp=lade('xp',0),lx=lade('lexikon',{});
+$('bLex').onclick=()=>{const xp=lade('xp',0),lx=lade('lexikon',{});$('lxDet').innerHTML='';
   $('lxList').innerHTML=GESCHOEPFE.map(g=>{const f=lx[g.id];
-   return `<div><svg width="56" height="56" viewBox="0 0 56 56"><ellipse cx="28" cy="28" rx="24" ry="18" fill="${f?'#5DD39E':'#3A3A38'}"/></svg><b>${f?g.name:'???'}</b><small>${f?'entdeckt am '+f:(xp>=g.xp?'noch nicht entdeckt':'ab '+g.xp+' XP')}</small></div>`}).join('');
+   return `<div data-id="${f?g.id:''}">${skizze(g,56,!f)}<b>${f?g.name:'???'}</b><small>${f?'entdeckt am '+f:(xp>=g.xp?'noch nicht entdeckt':'ab '+g.xp+' XP')}</small></div>`}).join('');
+  $('lxList').querySelectorAll('div[data-id]').forEach(d=>{if(d.dataset.id)d.onclick=()=>{const g=G_(d.dataset.id);
+    $('lxDet').innerHTML=`<div class="card"><div style="display:flex;gap:14px;align-items:center">${skizze(g,72)}<div><b style="font-size:20px">${g.name}</b><br><small style="color:var(--mut)">entdeckt am ${lx[g.id]}</small></div></div><ul style="margin:0;padding-left:20px;line-height:1.5">${g.fakten.map(f=>'<li>'+f+'</li>').join('')}</ul><small style="color:var(--mut)">Weg: ${g.weg}</small></div>`}});
   $('lex').classList.add('on')};
 $('lexZu').onclick=()=>$('lex').classList.remove('on');
 
@@ -343,10 +432,28 @@ const DIALOGE={1:[
  {t:'Die RNA-Welt',p:'RNA kann Information speichern wie DNA und zugleich Reaktionen beschleunigen wie ein Protein. Viele Forschende vermuten deshalb, dass das Leben mit RNA begann.',s:sk(`<path d="M30 55 L210 55" stroke="#5A5955" stroke-width="5"/>${[30,90,150,210].map(x=>`<circle cx="${x}" cy="55" r="16" fill="#FFA552"/><rect x="${x-5}" y="72" width="10" height="20" rx="3" fill="#5DD39E"/>`).join('')}`)},
  {t:'So spielst du',p:'Jetzt laufen Bausteine über das Band. Baue 3 Proteine (je 5 Aminosäuren), 3 RNA (je 4 Nukleotide) und 4 Membran-Bläschen (je 6 Fettsäuren). Bei UV-Strahlung zerfallen angefangene Ketten doppelt so schnell. Ziel 9:00. Danach wählst du die Zellwand.',s:sk(`<rect x="10" y="10" width="75" height="60" rx="12" fill="#31312F"/><rect x="92" y="10" width="75" height="60" rx="12" fill="#31312F"/><rect x="174" y="10" width="75" height="60" rx="12" fill="#31312F"/><text x="47" y="45" font-size="13" fill="#5DD39E">3 Protein</text><text x="129" y="45" font-size="13" fill="#FFA552">3 RNA</text><text x="211" y="45" font-size="13" fill="#FF7A6B">4 Membran</text>`)},
  {t:'Echt, aber stark vereinfacht',p:'Echte Proteine sind Ketten aus Hunderten Aminosäuren, RNA aus Tausenden Nukleotiden, und eine Membran besteht aus Millionen Fettsäuren. Hier reichen wenige Glieder.',s:sk(`${struktur(TEIL.membran.bild,130,58,.42,1.2)}`)}
+ ],
+ 4:[
+ {t:'Die Protozelle',p:'Eine Membran-Hülle mit RNA und Proteinen darin nennt man Protozelle. Sie grenzt ein Inneres von außen ab, kann wachsen und sich teilen.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/>${[[112,45],[146,62],[128,72],[150,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#B9B8B2"/>`).join('')}`)},
+ {t:'Die ersten Zellen',p:'Die ersten echten Zellen waren Prokaryoten: kleine Zellen ohne Zellkern, so wie heutige Bakterien.',s:sk(`${[[60,40,'#6EC1F0',-20],[130,70,'#6EC1F0',15],[200,40,'#5DD39E',30]].map(([x,y,c,a])=>`<rect x="${x-22}" y="${y-10}" width="44" height="20" rx="10" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('')}`)},
+ {t:'Fressen und gefressen werden',p:'Größere Zellen umfließen kleinere und verdauen sie. Was deutlich kleiner ist als du, kannst du fressen. Was deutlich größer ist, frisst dich – solche Zellen sind rot umrandet.',s:sk(`<circle cx="80" cy="55" r="26" fill="#31312F" stroke="#FDD602" stroke-width="4"/><circle cx="180" cy="55" r="42" fill="#31312F" stroke="#FF7A6B" stroke-width="4"/><circle cx="40" cy="30" r="5" fill="#FFA552"/><circle cx="30" cy="80" r="5" fill="#FFA552"/>`)},
+ {t:'So spielst du',p:'Steuere mit dem Joystick unten links oder halte den Finger dorthin, wohin du schwimmen willst. Orange Punkte sind Nährstoffe, Bakterien sind Beute. Bewegung kostet Energie – ohne Energie stirbt die Zelle. Ziel: Biomasse 60, Zielzeit 11:00.',s:sk(`<circle cx="60" cy="60" r="40" fill="none" stroke="#5A5955" stroke-width="3"/><circle cx="72" cy="52" r="16" fill="#5A5955"/><circle cx="190" cy="55" r="22" fill="#31312F" stroke="#FDD602" stroke-width="4"/><path d="M215 55 L245 55" stroke="#FDD602" stroke-width="3" stroke-dasharray="4 5"/>`)},
+ {t:'Aufnehmen statt fressen',p:'Halte „Aufnehmen“ gedrückt, während du ein Bakterium berührst: Nach 2 Sekunden lebt es in dir weiter. Ein korallenrotes α-Proteobakterium wird so zum Mitochondrium, ein grünes Cyanobakterium zum Chloroplasten. Solange du aufnimmst, kannst du dich nicht bewegen. Ab Minute 4 kommt die Große Sauerstoffkatastrophe.',s:sk(`<circle cx="130" cy="55" r="40" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="152" y="46" width="40" height="18" rx="9" fill="#FF7A6B"/><path d="M130 10 A45 45 0 0 1 175 55" stroke="#FDD602" stroke-width="4" fill="none"/>`)}
+ ],
+ w4:[
+ {t:'Die Große Sauerstoffkatastrophe',p:'Mit ihrer Fotosynthese machten Cyanobakterien die Luft vor rund 2,4 Milliarden Jahren sauerstoffreich. Für viele Zellen war Sauerstoff damals giftig.',s:sk(`${[[60,50],[130,40],[200,60]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="34" fill="#6EC1F0" fill-opacity=".18"/>`).join('')}<rect x="108" y="74" width="44" height="18" rx="9" fill="#5DD39E"/>`)},
+ {t:'Energie aus Sauerstoff',p:'Mitochondrien nutzen Sauerstoff, um viel Energie zu gewinnen. Zellen mit Mitochondrium hatten dadurch plötzlich einen großen Vorteil.',s:sk(`<ellipse cx="130" cy="55" rx="60" ry="30" fill="#FF7A6B" fill-opacity=".25" stroke="#FF7A6B" stroke-width="4"/><path d="M85 55 Q100 35 115 55 T145 55 T175 55" stroke="#FF7A6B" stroke-width="3" fill="none"/>`)},
+ {t:'Deine Entscheidung',p:'Bleibst du ein Prokaryot und schaltest ein Bakterium frei – oder wagst du den Schritt zum Eukaryoten mit Zellkern? Dafür brauchst du ein aufgenommenes α-Proteobakterium und mindestens 100 XP.',s:sk(`<rect x="40" y="45" width="50" height="20" rx="10" fill="#6EC1F0"/><text x="130" y="62" font-size="18" fill="#B9B8B2">oder</text><circle cx="205" cy="55" r="30" fill="#31312F" stroke="#FDD602" stroke-width="4"/><circle cx="210" cy="50" r="10" fill="#4a4a46"/>`)}
+ ],
+ 5:[
+ {t:'Endosymbiose',p:'Eine Zelle nahm ein Bakterium auf, ohne es zu verdauen. Es lebte in ihr weiter und wurde zum Mitochondrium – dem Kraftwerk der Zelle.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="112" y="46" width="36" height="16" rx="8" fill="#FF7A6B"/>`)},
+ {t:'Der Chloroplast',p:'Später nahmen manche Zellen auch ein Cyanobakterium auf. Daraus wurde der Chloroplast, mit dem Algen und Pflanzen Fotosynthese betreiben.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="104" y="40" width="34" height="16" rx="8" fill="#FF7A6B"/><rect x="124" y="62" width="34" height="16" rx="8" fill="#5DD39E"/>`)},
+ {t:'Der Zellkern',p:'Eukaryoten verpacken ihr Erbgut in einem Zellkern. Sie sind viel größer als Bakterien und können kompliziertere Formen bilden.',s:sk(`<circle cx="130" cy="55" r="46" fill="#31312F" stroke="#FDD602" stroke-width="5"/><circle cx="138" cy="48" r="16" fill="#4a4a46"/><rect x="100" y="64" width="30" height="14" rx="7" fill="#FF7A6B"/>`)},
+ {t:'So spielst du',p:'Deine Zelle ist jetzt ein Eukaryot. Wachse auf Biomasse 100, Zielzeit 13:00. Ab Minute 3 jagt dich eine Amöbe. Für eine Grünalge brauchst du einen Chloroplasten: Nimm ein grünes Cyanobakterium auf, falls du noch keinen hast. Mit Chloroplast gewinnst du nebenbei Energie aus Licht.',s:sk(`${skizze(GESCHOEPFE[2],90)}`.replace('<svg','<svg x="85" y="10"'))}
 ]};
 let dlg=null;
 function zeigeDialog(e,weiter){dlg={karten:DIALOGE[e],i:0,weiter,e};maleDialog();zeige('dialog')}
-function maleDialog(){const k=dlg.karten[dlg.i];$('dKl').textContent='Vor Ebene '+dlg.e+' · '+(dlg.i+1)+' / '+dlg.karten.length;
+function maleDialog(){const k=dlg.karten[dlg.i];$('dKl').textContent=(typeof dlg.e==='number'?'Vor Ebene '+dlg.e:'Weiche')+' · '+(dlg.i+1)+' / '+dlg.karten.length;
   $('dT').textContent=k.t;$('dP').textContent=k.p;$('dSk').innerHTML=k.s;
   $('dDots').innerHTML=dlg.karten.map((_,j)=>`<i class="${j===dlg.i?'on':''}"></i>`).join('');
   $('dW').textContent=dlg.i===dlg.karten.length-1?'Los geht’s':'Weiter'}
@@ -361,7 +468,7 @@ const topListe=(o,n)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([
 
 // ---------- Merge-Ebene ----------
 let G=null; // laufender Spielzustand der Ebene
-function starteEbene(e){
+function starteEbene(e){if(EBENEN[e]&&EBENEN[e].arena)return starteArena(e);
   const run=lade('run',null)||{seed:1,ebene:e,bonusStab:0,xpLauf:[]};
   run.ebene=e;sichere('run',run); // Autospeichern beim Start der Ebene
   const cfg=EBENEN[e];
@@ -520,9 +627,187 @@ function malZeit(){
   const z=$('zeit');z.textContent=mmss(G.zeit)+' / Ziel '+mmss(G.cfg.ziel);z.classList.toggle('over',G.zeit>G.cfg.ziel)}
 let letzt=performance.now();
 function loop(t){const dt=Math.min(0.1,(t-letzt)/1000);letzt=t;
-  if(G&&G.laeuft&&$('merge').classList.contains('on')){schritt(dt);malZeit()}requestAnimationFrame(loop)}
+  if(G&&G.laeuft&&$('merge').classList.contains('on')){schritt(dt);malZeit()}
+  if(A&&A.laeuft&&$('arena').classList.contains('on')){arenaSchritt(dt);if(A){arenaMalen();arenaHud()}}requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 $('bPause').onclick=()=>{if(!G)return;G.laeuft=false;if(G.drag){G.drag.g.remove();G.drag=null}G=null;startScreen()};
+
+// ---------- Arena (E4/E5) ----------
+const WELT=3000;let A=null;
+const rad=m=>4+6*Math.sqrt(m);                       // Radius aus Biomasse
+const tempoR=r=>165*Math.pow(30/r,0.4);              // große Zellen sind langsamer
+const NAME={naehr:'Nährstoff',bakt:'Bakterium',cyano:'Cyanobakterium',alpha:'α-Proteobakterium'};
+const FARBE={naehr:'#FFA552',bakt:'#6EC1F0',cyano:'#5DD39E',alpha:'#FF7A6B'};
+$('aLogo').innerHTML=ATOM_SVG.replace(/%/g,36);
+function starteArena(e){
+  const run=lade('run',null)||{seed:1,ebene:e,bonusStab:0,xpLauf:[]};run.ebene=e;sichere('run',run);
+  const cfg=EBENEN[e];
+  A={e,cfg,run,rng:rngAus(run.seed+e*977),zeit:0,laeuft:true,ents:[],p:{x:WELT/2,y:WELT/2,vx:0,vy:0,m:cfg.start*(run.bonusStab?1.2:1)},
+     energie:80,mito:!!run.mito,chloro:!!run.chloro,cyanoGef:0,gefressen:{},auf:null,halte:false,o2:0,o2done:false,wolken:[],amoebe:false,
+     input:{x:0,y:0},ziel:null,msg:null,mapT:0,taste:{}};
+  A.p.r=rad(A.p.m);
+  for(let i=0;i<160;i++)spawn('naehr');
+  const bak=e===4?{bakt:28,cyano:14,alpha:7}:{bakt:24,cyano:10,alpha:4};
+  for(const k in bak)for(let i=0;i<bak[k];i++)spawn(k);
+  for(let i=0;i<8;i++)spawnZelle(null);
+  const lx=lade('lexikon',{}); // freigeschaltete Geschöpfe tauchen als Gegner auf
+  GESCHOEPFE.filter(g=>lx[g.id]&&(e===4?g.pro:!g.pro)).forEach(g=>{for(let i=0;i<2;i++)spawnZelle(g)});
+  $('aTitel').textContent='Ebene '+e+' · '+cfg.titel+(run.test?' · TEST':'');
+  zeige('arena');arenaHud();letzt=performance.now()}
+function zufallsOrt(fern){const p=A.p;for(let k=0;k<30;k++){const x=40+A.rng()*(WELT-80),y=40+A.rng()*(WELT-80);if(!fern||Math.hypot(x-p.x,y-p.y)>700)return[x,y]}return[A.rng()*WELT,A.rng()*WELT]}
+function spawn(typ,fern){const[x,y]=zufallsOrt(fern);const o={typ,x,y,vx:0,vy:0,ang:A.rng()*6.283};
+  if(typ==='naehr'){o.r=5;o.m=0.6}else{o.r=9+A.rng()*3;o.m=2.2;o.v=35+A.rng()*25}
+  A.ents.push(o);return o}
+function spawnZelle(g,fern=true){const pm=A.p.m,[x,y]=zufallsOrt(fern);let m,o;
+  if(g)m=pm*(1.3+A.rng()*0.5);else m=pm*(0.25+A.rng()*1.9);
+  o={typ:'zelle',x,y,vx:0,vy:0,m,m0:m,r:rad(m),form:g?g.form:'rund',c:g?g.c:'#B9B8B2',name:g?g.name:(A.e===4?'Protozelle':'Eukaryot'),
+     vk:g?0.85:1,jagt:!!g,ang:A.rng()*6.283,kern:A.e===5&&!g,g:g?g.id:null,denk:0};
+  A.ents.push(o);return o}
+function ersatz(o){if(o.ersatzlos)return;if(o.typ==='zelle')spawnZelle(o.g?G_(o.g):null);else spawn(o.typ,true)}
+function randAbprall(o){if(o.x<o.r||o.x>WELT-o.r){o.ang=Math.PI-o.ang;o.vx*=-1}if(o.y<o.r||o.y>WELT-o.r){o.ang=-o.ang;o.vy*=-1}
+  o.x=Math.max(o.r,Math.min(WELT-o.r,o.x));o.y=Math.max(o.r,Math.min(WELT-o.r,o.y))}
+function friss(o){const p=A.p;o.weg=true;const n=o.typ==='zelle'?o.name:NAME[o.typ];A.gefressen[n]=(A.gefressen[n]||0)+1;
+  if(o.typ==='naehr'){p.m+=0.2;A.energie+=7}
+  else if(o.typ==='zelle'){p.m+=o.m*0.12;A.energie+=15}
+  else{p.m+=o.m*0.4;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
+  ersatz(o)}
+function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt;p.r=rad(p.m);
+  // Eingabe: Finger auf dem Feld > Joystick/Tastatur
+  let ix=A.input.x,iy=A.input.y;const T=A.taste;
+  if(A.ziel){const dx=A.ziel.x-innerWidth/2,dy=A.ziel.y-innerHeight/2,l=Math.hypot(dx,dy);ix=l>10?dx/Math.max(l,90):0;iy=l>10?dy/Math.max(l,90):0}
+  else if(!ix&&!iy){ix=(T.ArrowRight||T.d?1:0)-(T.ArrowLeft||T.a?1:0);iy=(T.ArrowDown||T.s?1:0)-(T.ArrowUp||T.w?1:0)}
+  const il=Math.hypot(ix,iy);if(il>1){ix/=il;iy/=il}
+  const sp=tempoR(p.r)*(A.mito?1.1:1);if(A.auf){ix=iy=0}
+  const k=Math.min(1,dt*6);p.vx+=(ix*sp-p.vx)*k;p.vy+=(iy*sp-p.vy)*k;
+  p.x=Math.max(p.r,Math.min(WELT-p.r,p.x+p.vx*dt));p.y=Math.max(p.r,Math.min(WELT-p.r,p.y+p.vy*dt));
+  // Energie: Grundverbrauch, Bewegung kostet extra, Chloroplast liefert etwas Licht-Energie
+  const bew=Math.min(1,Math.hypot(p.vx,p.vy)/sp);
+  A.energie-=dt*(0.7+1.6*bew)*(A.e===5?1.15:1);if(A.chloro)A.energie+=dt*0.5;
+  // Große Sauerstoffkatastrophe (E4, einmal ab Minute 4, 60 s)
+  if(A.e===4&&!A.o2done&&A.zeit>=240){A.o2=60;A.o2done=true;
+    for(let i=0;i<8;i++){const[x,y]=zufallsOrt(false);A.wolken.push({x,y,r:220+A.rng()*140,vx:(A.rng()-.5)*50,vy:(A.rng()-.5)*50})}}
+  A.imO2=false;
+  if(A.o2>0){A.o2-=dt;for(const w of A.wolken){w.x+=w.vx*dt;w.y+=w.vy*dt}
+    A.imO2=A.wolken.some(w=>Math.hypot(w.x-p.x,w.y-p.y)<w.r);if(A.imO2)A.energie+=dt*(A.mito?1.5:-7);
+    if(A.o2<=0)A.wolken=[]}
+  // Amöbe jagt ab Minute 3 (E5)
+  if(A.e===5&&!A.amoebe&&A.zeit>=180){A.amoebe=true;const o=spawnZelle(G_('amoebe'));o.m=o.m0=p.m*2;o.r=rad(o.m);o.vk=0.75;o.ersatzlos=true;A.msg={t:'Eine Amöbe jagt dich!',d:5}}
+  A.energie=Math.min(100,A.energie);
+  // Bewegung der anderen
+  for(const o of A.ents){if(o.gehalten||o.typ==='naehr')continue;
+    if(o.typ!=='zelle'){o.ang+=(A.rng()-.5)*dt*2;o.x+=Math.cos(o.ang)*o.v*dt;o.y+=Math.sin(o.ang)*o.v*dt;randAbprall(o);continue}
+    o.denk-=dt;const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy)||1;let tx=Math.cos(o.ang),ty=Math.sin(o.ang),f=0.5;
+    if(d<520&&o.r>p.r*1.15&&(o.jagt||d<320)){tx=dx/d;ty=dy/d;f=1}
+    else if(d<360&&p.r>o.r*1.15){tx=-dx/d;ty=-dy/d;f=0.9}
+    else if(o.denk<=0){o.denk=1+A.rng()*2;o.ang+=(A.rng()-.5)*2}
+    const v=tempoR(o.r)*o.vk*f,kk=Math.min(1,dt*3);o.vx+=(tx*v-o.vx)*kk;o.vy+=(ty*v-o.vy)*kk;
+    o.x+=o.vx*dt;o.y+=o.vy*dt;randAbprall(o)}
+  // andere Zellen fressen Kleineres
+  for(const o of A.ents){if(o.typ!=='zelle'||o.weg)continue;
+    for(const q of A.ents){if(q===o||q.weg||q.gehalten||q.r>=o.r*0.85)continue;
+      if(Math.abs(q.x-o.x)<o.r&&Math.abs(q.y-o.y)<o.r&&Math.hypot(q.x-o.x,q.y-o.y)<o.r){q.weg=true;if(o.m<o.m0*1.5){o.m+=q.m*0.5;o.r=rad(o.m)}ersatz(q)}}}
+  // eigene Zelle: fressen, gefressen werden, abstoßen, aufnehmen
+  for(const o of A.ents){if(o.weg||o.gehalten)continue;const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);if(d>p.r+o.r)continue;
+    const bak=o.typ==='bakt'||o.typ==='cyano'||o.typ==='alpha';
+    if(o.typ==='zelle'&&o.r>p.r*1.15){if(d<o.r)return gefressen(o);continue}
+    if(bak&&A.halte){if(!A.auf){A.auf={o,t:0};o.gehalten=true}continue}
+    if(o.r<p.r*0.85){if(d<p.r)friss(o);continue}
+    if(o.typ==='zelle'&&d>0){const ov=(p.r+o.r-d)*0.5;p.x-=dx/d*ov;p.y-=dy/d*ov;o.x+=dx/d*ov;o.y+=dy/d*ov}}
+  if(A.auf){const o=A.auf.o;
+    if(!A.halte||o.weg){o.gehalten=false;A.auf=null}
+    else{A.auf.t+=dt;const a=Math.atan2(o.y-p.y,o.x-p.x);o.x=p.x+Math.cos(a)*p.r*0.75;o.y=p.y+Math.sin(a)*p.r*0.75;
+      if(A.auf.t>=2){o.weg=true;A.auf=null;
+        if(o.typ==='alpha'&&!A.mito){A.mito=true;A.msg={t:'Mitochondrium! Das α-Proteobakterium lebt jetzt in dir.',d:4}}
+        else if(o.typ==='cyano'&&!A.chloro){A.chloro=true;A.msg={t:'Chloroplast! Das Cyanobakterium betreibt jetzt Fotosynthese für dich.',d:4}}
+        else{p.m+=o.m*0.4;A.msg={t:o.typ==='bakt'?'Gewöhnliche Bakterien bringen als Endosymbiont nichts – verdaut.':'Das hast du schon – verdaut.',d:3}}
+        ersatz(o)}}}
+  A.ents=A.ents.filter(o=>!o.weg);
+  if(A.msg&&(A.msg.d-=dt)<=0)A.msg=null;
+  if(A.energie<=0)return arenaScheitern('Keine Energie mehr – deine Zelle ist verhungert.');
+  if(p.m>=c.masseZiel)return arenaFertig()}
+function gefressen(o){arenaScheitern('Du wurdest gefressen ('+o.name+').')}
+function arenaScheitern(text){A.laeuft=false;const run=A.run,p=A.p,z=A.cfg.masseZiel;sichere('run',null);
+  $('eExtra').innerHTML=`<div class="kl">Biomasse</div><div style="font-size:20px"><b>${Math.floor(p.m)} / ${z}</b> · <b style="color:#FF9B8F">es fehlten ${Math.ceil(z-p.m)}</b></div><div class="bar"><i style="width:${p.m/z*100}%"></i></div>`;
+  A=null;endeZeigen(false,run,'Lauf gescheitert',text+' Die XP der geschafften Ebenen bleiben dir erhalten.')}
+function arenaFertig(){A.laeuft=false;const cfg=A.cfg,run=A.run,zm=A.zeit,tempo=zm<cfg.ziel,bonus=tempo?Math.round(cfg.xp*.5):0;
+  run.xpLauf.push({e:A.e,xp:cfg.xp,bonus,zeit:zm});run.bonusStab=tempo?1:0;
+  if(!run.test)sichere('xp',lade('xp',0)+cfg.xp+bonus);
+  run.mito=A.mito;run.chloro=A.chloro;if(A.e===4)run.cyanoGef=A.cyanoGef;
+  const nx=A.e===4?'w4':'w5';run.ebene=nx;sichere('run',run);
+  const gf=Object.entries(A.gefressen).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<div>${k} <b>× ${n}</b></div>`).join('');
+  $('eExtra').innerHTML=`<div class="kl">Gefressen</div><div class="gebaut">${gf}</div><div class="kl" style="margin-top:6px">Endosymbionten</div><div>Mitochondrium: <b>${A.mito?'ja':'nein'}</b> · Chloroplast: <b>${A.chloro?'ja':'nein'}</b>${A.e===4?' · Cyanobakterien gefressen: <b>'+A.cyanoGef+'</b>':''}</div>`;
+  const e=A.e;A=null;endeZeigen(true,run,'Ebene '+e+' geschafft!','Deine Zelle hat die Ziel-Biomasse erreicht. Jetzt kommt die Weiche.',nx)}
+// Zeichnen
+function kapsel(x,cx,cy,r,ang,c){x.save();x.translate(cx,cy);x.rotate(ang);const L=r*1.1,w=r*0.5;x.beginPath();x.moveTo(-L+w,-w);x.lineTo(L-w,-w);x.arc(L-w,0,w,-Math.PI/2,Math.PI/2);x.lineTo(-L+w,w);x.arc(-L+w,0,w,Math.PI/2,Math.PI*1.5);x.fillStyle=c;x.fill();x.restore()}
+function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;if(!W)return;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  const x=cv.getContext('2d'),p=A.p,sc=Math.min(W,H)/820*2*Math.sqrt(23/p.r),t=A.zeit;
+  x.setTransform(1,0,0,1,0,0);x.fillStyle='#262625';x.fillRect(0,0,cv.width,cv.height);
+  x.setTransform(dpr*sc,0,0,dpr*sc,dpr*(W/2-p.x*sc),dpr*(H/2-p.y*sc));
+  const vw=W/sc/2+80,vh=H/sc/2+80,x0=p.x-vw,x1=p.x+vw,y0=p.y-vh,y1=p.y+vh;
+  x.fillStyle='#3a3a38';
+  for(let gx=Math.max(0,Math.floor(x0/40)*40);gx<=Math.min(WELT,x1);gx+=40)for(let gy=Math.max(0,Math.floor(y0/40)*40);gy<=Math.min(WELT,y1);gy+=40)x.fillRect(gx-1.5,gy-1.5,3,3);
+  x.strokeStyle='#5a5955';x.lineWidth=4/sc;x.strokeRect(0,0,WELT,WELT);
+  for(const w of A.wolken){const g=x.createRadialGradient(w.x,w.y,0,w.x,w.y,w.r);g.addColorStop(0,'rgba(110,193,240,.28)');g.addColorStop(1,'rgba(110,193,240,0)');x.fillStyle=g;x.beginPath();x.arc(w.x,w.y,w.r,0,6.283);x.fill()}
+  x.font=`700 ${14/sc}px "Space Grotesk",sans-serif`;x.textAlign='center';
+  for(const o of A.ents){if(o.x<x0-o.r||o.x>x1+o.r||o.y<y0-o.r||o.y>y1+o.r)continue;
+    if(o.typ==='naehr'){x.fillStyle=FARBE.naehr;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();continue}
+    if(o.typ!=='zelle'){kapsel(x,o.x,o.y,o.r,o.ang,FARBE[o.typ]);continue}
+    const gef=o.r>p.r*1.15,rc=gef?'#FF7A6B':o.c;
+    if(o.form==='blob'){x.beginPath();for(let k=0;k<=24;k++){const a=k/24*6.283,rr=o.r*(1+0.12*Math.sin(3*a+t*2)+0.07*Math.sin(5*a-t*1.3));k?x.lineTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr):x.moveTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr)}
+      x.fillStyle='rgba(169,139,240,.25)';x.fill();x.strokeStyle=rc;x.lineWidth=4;x.stroke();x.fillStyle='rgba(169,139,240,.6)';x.beginPath();x.arc(o.x,o.y,o.r*0.32,0,6.283);x.fill()}
+    else if(o.form==='kapsel'){kapsel(x,o.x,o.y,o.r,Math.atan2(o.vy,o.vx),o.c);if(gef){x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r*1.15,0,6.283);x.stroke()}}
+    else if(o.form==='oval'){const a=Math.atan2(o.vy,o.vx);x.save();x.translate(o.x,o.y);x.rotate(a);x.beginPath();x.ellipse(0,0,o.r*1.25,o.r*0.7,0,0,6.283);x.fillStyle='rgba(242,227,107,.2)';x.fill();x.strokeStyle=rc;x.lineWidth=3;x.stroke();
+      for(let k=0;k<16;k++){const b=k/16*6.283,w=Math.sin(t*12+k)*2;x.beginPath();x.moveTo(Math.cos(b)*o.r*1.25,Math.sin(b)*o.r*0.7);x.lineTo(Math.cos(b)*(o.r*1.25+6),Math.sin(b)*(o.r*0.7+6)+w);x.stroke()}x.restore()}
+    else if(o.form==='knospe'){x.fillStyle='rgba(255,165,82,.22)';x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();x.beginPath();x.arc(o.x+o.r*0.8,o.y-o.r*0.7,o.r*0.45,0,6.283);x.fill();x.stroke()}
+    else if(o.form==='alge'){x.fillStyle='#31312F';x.strokeStyle=gef?rc:'#5DD39E';x.lineWidth=5;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();x.fillStyle='#5DD39E';kapsel(x,o.x-o.r*.3,o.y-o.r*.2,o.r*.3,0.4,'#5DD39E');kapsel(x,o.x+o.r*.3,o.y+o.r*.25,o.r*.3,-0.3,'#5DD39E')}
+    else{x.fillStyle='#31312F';x.strokeStyle=rc;x.lineWidth=gef?4:3;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();
+      if(o.kern){x.fillStyle='#4a4a46';x.beginPath();x.arc(o.x+o.r*.15,o.y-o.r*.1,o.r*.3,0,6.283);x.fill()}
+      x.fillStyle='#5a5955';for(let k=0;k<4;k++){const a=k*1.7+o.r;x.beginPath();x.arc(o.x+Math.cos(a)*o.r*.55,o.y+Math.sin(a)*o.r*.55,2.5,0,6.283);x.fill()}}
+    if(gef){x.fillStyle='#FF9B8F';x.fillText(o.name+' – Gefahr',o.x,o.y+o.r+18/sc)}}
+  // eigene Zelle
+  x.fillStyle='#31312F';x.strokeStyle='#FDD602';x.lineWidth=5;x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fill();x.stroke();
+  if(A.e===5){x.fillStyle='#4a4a46';x.beginPath();x.arc(p.x+p.r*.15,p.y-p.r*.12,p.r*.3,0,6.283);x.fill()}
+  x.fillStyle='#B9B8B2';[[-.45,.35],[.4,.4],[-.4,-.35],[.5,.05]].forEach(([a,b])=>{x.beginPath();x.arc(p.x+a*p.r,p.y+b*p.r,2.5,0,6.283);x.fill()});
+  if(A.mito)kapsel(x,p.x-p.r*.3,p.y+p.r*.42,p.r*.22,0.3,'#FF7A6B');
+  if(A.chloro)kapsel(x,p.x+p.r*.38,p.y+p.r*.2,p.r*.22,-0.5,'#5DD39E');
+  if(A.auf){x.strokeStyle='#FDD602';x.lineWidth=4;x.beginPath();x.arc(p.x,p.y,p.r+9,-Math.PI/2,-Math.PI/2+A.auf.t/2*6.283);x.stroke()}
+  x.fillStyle='#F2F1EC';x.fillText((A.e===4?'Protozelle':'Eukaryot')+' · '+Math.floor(A.p.m),p.x,p.y+p.r+20/sc);
+  // Mini-Karte
+  if((A.mapT-=1)<=0){A.mapT=6;const m=$('amap'),mw=m.clientWidth,mh=m.clientHeight;if(m.width!==mw*dpr){m.width=mw*dpr;m.height=mh*dpr}
+    const y=m.getContext('2d');y.setTransform(dpr,0,0,dpr,0,0);y.clearRect(0,0,mw,mh);const sx=mw/WELT,sy=mh/WELT;
+    y.strokeStyle='#5a5955';y.strokeRect((p.x-W/sc/2)*sx,(p.y-H/sc/2)*sy,W/sc*sx,H/sc*sy);
+    for(const w of A.wolken){y.fillStyle='rgba(110,193,240,.2)';y.beginPath();y.arc(w.x*sx,w.y*sy,w.r*sx,0,6.283);y.fill()}
+    for(const o of A.ents){if(o.typ==='naehr'||o.typ==='bakt')continue;y.fillStyle=o.typ==='zelle'?(o.r>p.r*1.15?'#FF7A6B':'#5a5955'):FARBE[o.typ];
+      y.beginPath();y.arc(o.x*sx,o.y*sy,o.typ==='zelle'?Math.max(2,o.r*sx*1.5):1.8,0,6.283);y.fill()}
+    y.fillStyle='#FDD602';y.beginPath();y.arc(p.x*sx,p.y*sy,4,0,6.283);y.fill()}}
+function arenaHud(){if(!A)return;const c=A.cfg,p=A.p;
+  $('aMT').textContent=Math.floor(p.m)+' / '+c.masseZiel;$('aMB').style.width=Math.min(100,p.m/c.masseZiel*100)+'%';
+  $('aET').textContent=Math.max(0,Math.round(A.energie));$('aEB').style.width=Math.max(0,A.energie)+'%';
+  document.querySelector('.mass.en').classList.toggle('leer',A.energie<25);
+  const z=$('aZeit');z.textContent=mmss(A.zeit)+' / Ziel '+mmss(c.ziel);z.classList.toggle('over',A.zeit>c.ziel);
+  const ch=`<span class="chip${A.mito?' ok':''}" style="${A.mito?'background:#FF7A6B':''}">Mitochondrium ${A.mito?'✓':'–'}</span><span class="chip${A.chloro?' ok':''}" style="${A.chloro?'background:#5DD39E':''}">Chloroplast ${A.chloro?'✓':'–'}</span>`+(A.e===4?`<span class="chip">Cyanobakterien ${A.cyanoGef}/8</span>`:'');
+  if($('aChips').innerHTML!==ch)$('aChips').innerHTML=ch;
+  const b=$('aBanner'),txt=A.msg?A.msg.t:A.o2>0?'Große Sauerstoffkatastrophe · '+(A.mito?'dein Mitochondrium nutzt den Sauerstoff':'Sauerstoff-Wolken kosten Energie')+' · '+mmss(Math.ceil(A.o2)):'';
+  b.classList.toggle('on',!!txt);if(b.textContent!==txt)b.textContent=txt;b.classList.toggle('uv',A.o2>0&&!A.msg);
+  $('aAuf').classList.toggle('an',A.halte);$('aAuf').textContent=A.auf?'Aufnehmen … '+Math.min(2,A.auf.t).toFixed(1)+' s':'Aufnehmen'}
+// Steuerung
+(function(){const j=$('joy'),kn=j.querySelector('i');let jid=null;
+  const setz=ev=>{const r=j.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2-15;let dx=ev.clientX-cx,dy=ev.clientY-cy;const l=Math.hypot(dx,dy);if(l>R){dx*=R/l;dy*=R/l}
+    kn.style.transform=`translate(${dx}px,${dy}px)`;if(A)A.input={x:dx/R,y:dy/R}};
+  j.addEventListener('pointerdown',ev=>{ev.preventDefault();jid=ev.pointerId;j.setPointerCapture(jid);setz(ev)});
+  j.addEventListener('pointermove',ev=>{if(ev.pointerId===jid)setz(ev)});
+  const los=ev=>{if(ev.pointerId!==jid)return;jid=null;kn.style.transform='';if(A)A.input={x:0,y:0}};
+  j.addEventListener('pointerup',los);j.addEventListener('pointercancel',los);
+  const b=$('aAuf');b.addEventListener('pointerdown',ev=>{ev.preventDefault();b.setPointerCapture(ev.pointerId);if(A)A.halte=true});
+  const aus=()=>{if(A)A.halte=false};b.addEventListener('pointerup',aus);b.addEventListener('pointercancel',aus);
+  const cv=$('acv');let cid=null;
+  cv.addEventListener('pointerdown',ev=>{cid=ev.pointerId;cv.setPointerCapture(cid);if(A)A.ziel={x:ev.clientX,y:ev.clientY}});
+  cv.addEventListener('pointermove',ev=>{if(ev.pointerId===cid&&A)A.ziel={x:ev.clientX,y:ev.clientY}});
+  const cl=ev=>{if(ev.pointerId===cid){cid=null;if(A)A.ziel=null}};cv.addEventListener('pointerup',cl);cv.addEventListener('pointercancel',cl);
+  addEventListener('keydown',ev=>{if(!A)return;A.taste[ev.key]=1;if(ev.key===' ')A.halte=true});
+  addEventListener('keyup',ev=>{if(!A)return;A.taste[ev.key]=0;if(ev.key===' ')A.halte=false});
+  $('aPause').onclick=()=>{if(!A)return;A.laeuft=false;A=null;startScreen()}})();
 
 // ---------- Lauf-Ende ----------
 function ebeneGeschafft(){G.laeuft=false;
@@ -546,16 +831,16 @@ function gescheitert(){G.laeuft=false;const run=G.run;sichere('run',null);const 
 let endeNx=0;
 function endeZeigen(ok,run,titel,text,nx){endeNx=nx||0;$('bFertig').classList.remove('on');
   $('eKl').textContent=endeNx?'Ebene geschafft':'Lauf-Ende';
-  $('eStart').textContent=endeNx?'Pause':'Zum Start';$('eNeu').textContent=endeNx==='weiche'?'Weiter zur Weiche':endeNx?'Weiter zu Ebene '+endeNx:'Neuer Lauf';
+  $('eStart').textContent=endeNx?'Pause':'Zum Start';$('eNeu').textContent=WEITER[endeNx]?'Weiter zur Weiche':endeNx?'Weiter zu Ebene '+endeNx:'Neuer Lauf';
   if(G&&G.drag){G.drag.g.remove();G.drag=null}
   $('eT').textContent=titel;$('eT').style.color=ok?'#FDD602':'#FF9B8F';$('eP').textContent=text;
   let sum=0,h=run.test?'<div><span>Testlauf – XP werden nicht gespeichert</span><b></b></div>':'';
-  for(const x of run.xpLauf){sum+=x.xp+x.bonus;h+=`<div><span>Ebene ${x.e} geschafft</span><b>+${x.xp} XP</b></div>`;
+  for(const x of run.xpLauf){sum+=x.xp+x.bonus;h+=`<div><span>${x.label||'Ebene '+x.e+' geschafft'}</span><b>+${x.xp} XP</b></div>`;
     if(x.bonus)h+=`<div><span>Tempobonus (${mmss(x.zeit)} unter Ziel)</span><b>+${x.bonus} XP</b></div>`}
   if(!run.xpLauf.length)h+='<div><span>Keine Ebene geschafft</span><b>+0 XP</b></div>';
   h+=`<div class="sum"><span>Dieser Lauf</span><span>+${sum} XP</span></div><div class="sum" style="color:var(--mut)"><span>XP gesamt</span><span>${lade('xp',0)} XP</span></div>`;
   $('eXp').innerHTML=h;setTimeout(()=>{zeige('ende');G=null},ok?600:450)}
-$('eStart').onclick=startScreen;$('eNeu').onclick=()=>{if(endeNx==='weiche')zeigeWeiche();else if(endeNx){const n=endeNx;zeigeDialog(n,()=>starteEbene(n))}else $('bNeu').onclick()};
+$('eStart').onclick=startScreen;$('eNeu').onclick=()=>{if(WEITER[endeNx])WEITER[endeNx]();else if(endeNx){const n=endeNx;zeigeDialog(n,()=>starteEbene(n))}else $('bNeu').onclick()};
 
 // ---------- Test-Hook ----------
 window.matomTest={
@@ -571,7 +856,17 @@ window.matomTest={
       for(const p in G.lager)while(G&&G.laeuft&&G.lager[p]>0){const i=best(p);if(i<0)break;G.lager[p]--;setze(i,p);malLager()}
       for(const it of [...G.band]){if(!G||!G.laeuft)break;if(it.x>G.bandLen*0.8||it.held)continue;const i=best(it.el);if(i>=0){setze(i,it.el);entferne(it)}}}
     return this.state()},
-  simArena(){return 'Arena (E4/E5) ist noch nicht gebaut'}
+  // Arena: Autopilot frisst Erreichbares, flieht vor Gefahr, nimmt ein α-Proteobakterium auf
+  simArena(sek,ohneFlucht){for(let t=0;t<sek&&A&&A.laeuft;t+=0.05){const p=A.p;let best=null,bs=0,fx=0,fy=0,beruehrt=null;
+      for(const o of A.ents){const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy)||1;
+        if(o.typ==='zelle'&&o.r>p.r*1.1){if(!ohneFlucht&&d<o.r+p.r+220){fx-=dx/d*3;fy-=dy/d*3}continue}
+        if(o.r<p.r*0.85&&d<800){const s=(o.m+0.5)*(o.typ==='alpha'&&!A.mito?6:1)/(d+30);if(s>bs){bs=s;best=o}}
+        if(o.typ==='alpha'&&!A.mito&&d<p.r+o.r)beruehrt=o}
+      let ix=fx,iy=fy;if(best){const d=Math.hypot(best.x-p.x,best.y-p.y)||1;ix+=(best.x-p.x)/d;iy+=(best.y-p.y)/d}
+      A.input={x:ix,y:iy};A.halte=!!beruehrt||!!(A.auf&&A.auf.o.typ==='alpha');arenaSchritt(0.05)}
+    return this.arenaState()},
+  arenaState(){return A?{screen:'arena',e:A.e,m:+A.p.m.toFixed(1),energie:Math.round(A.energie),zeit:+A.zeit.toFixed(1),mito:A.mito,chloro:A.chloro,cyanoGef:A.cyanoGef,gefressen:A.gefressen,ents:A.ents.length}:{screen:document.querySelector('.scr.on').id}},
+  raeuber(){const o=spawnZelle(null,false);o.m=o.m0=A.p.m*3;o.r=rad(o.m);o.x=A.p.x+o.r*0.5;o.y=A.p.y;return o.r},
 };
 startScreen();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(()=>{}))}
