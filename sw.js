@@ -1,5 +1,5 @@
 // mLogic – Offline-Speicher für alle Spiele. Bei Änderungen an einer Datei die Versionsnummer erhöhen.
-const CACHE = "mlogic-v43";
+const CACHE = "mlogic-v44";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "hash/", "hash/index.html", "hash/icon-180.png", "hash/icon-192.png", "hash/icon-512.png",
@@ -12,7 +12,7 @@ const FILES = [
   "calc/", "calc/index.html", "calc/icon-180.png", "calc/icon-192.png", "calc/icon-512.png",
   "zip/", "zip/index.html", "zip/icon-180.png", "zip/icon-192.png", "zip/icon-512.png",
   "flow/", "flow/index.html", "flow/icon.png", "flow/icon-512.png", "flow/icon-maskable-192.png", "flow/icon-maskable-512.png", "flow/fredoka.woff2",
-  "atom/", "atom/index.html", "atom/icon-180.png", "atom/icon-192.png", "atom/icon-512.png"
+  "atom/", "atom/index.html", "atom/vielzeller.js", "atom/icon-180.png", "atom/icon-192.png", "atom/icon-512.png"
 ];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {

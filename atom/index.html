@@ -273,6 +273,7 @@ header .tt b{font-size:24px}header .tt span{font-size:14px;color:var(--mut)}
 
 <div id="lex"><div class="card"><h2>Lexikon</h2><p>Geschöpfe, die du am Ende eines Laufs freischaltest.</p><div class="lx" id="lxList"></div><div id="lxDet"></div><div class="row"><span></span><button class="btn pri" id="lexZu">Schließen</button></div></div></div>
 
+<script src="vielzeller.js"></script>
 <script>
 'use strict';
 // ---------- Daten ----------
@@ -346,7 +347,7 @@ function skizze(g,gr=56,grau){const c=grau?'#3A3A38':g.c,f={kapsel:`<rect x="8" 
   blob:`<path d="M12 30 C8 14 26 6 34 12 C46 8 52 24 46 32 C50 44 34 50 26 44 C14 48 6 40 12 30Z" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/><circle cx="28" cy="28" r="7" fill="${c}"/>`,
   oval:`<ellipse cx="28" cy="28" rx="22" ry="12" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/>${[...Array(10)].map((_,k)=>{const a=k/10*6.283;return `<line x1="${28+Math.cos(a)*22}" y1="${28+Math.sin(a)*12}" x2="${28+Math.cos(a)*27}" y2="${28+Math.sin(a)*16}" stroke="${c}" stroke-width="2"/>`}).join('')}`,
   knospe:`<circle cx="24" cy="30" r="15" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/><circle cx="42" cy="18" r="8" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="3"/>`,
-  alge:`<circle cx="28" cy="28" r="20" fill="#31312F" stroke="${c}" stroke-width="5"/><ellipse cx="22" cy="24" rx="6" ry="3.5" fill="${c}"/><ellipse cx="34" cy="33" rx="6" ry="3.5" fill="${c}"/>`}[g.form];
+  alge:`<circle cx="28" cy="28" r="20" fill="#31312F" stroke="${c}" stroke-width="5"/><ellipse cx="22" cy="24" rx="6" ry="3.5" fill="${c}"/><ellipse cx="34" cy="33" rx="6" ry="3.5" fill="${c}"/>`}[g.form]||(window.VZ?VZ.skizzeForm(g.form,c):'');
   return `<svg width="${gr}" height="${gr}" viewBox="0 0 56 56">${f}</svg>`}
 const WAENDE=[
  {id:'cellulose',name:'Cellulose',weg:'Pflanzen- und Algenweg',folge:'Feste Wand aus Zuckerketten. Führt in Ebene 5 zur Grünalge – dafür brauchst du später einen Chloroplasten.',c:'#5DD39E'},
@@ -463,9 +464,10 @@ $('moW').onclick=()=>{const run=MO.run;run.ebene=4;sichere('run',run);zeigeDialo
 if(/[?&]test/.test(location.search))sichere('test',1);
 function malTest(){const B=$('testBox'),on=!!lade('test',0);B.classList.toggle('on',on);if(!on)return;
   B.innerHTML='<b>Testmodus</b><span>Direkt starten – XP werden nicht gespeichert</span><div class="r">'+
-    [1,2,3,4,5].map(e=>`<button class="btn" data-e="${e}">E${e}</button>`).join('')+'<button class="btn" data-e="weiche">Weiche</button><button class="btn" data-e="montage">Montage</button><button class="btn" data-e="aus">Aus</button></div>';
+    [1,2,3,4,5].map(e=>`<button class="btn" data-e="${e}">E${e}</button>`).join('')+(window.VZ?VZ.testKnoepfe():'')+'<button class="btn" data-e="weiche">Weiche</button><button class="btn" data-e="montage">Montage</button><button class="btn" data-e="aus">Aus</button></div>';
   B.querySelectorAll('button').forEach(b=>b.onclick=()=>{const e=b.dataset.e;
     if(e==='aus'){sichere('test',0);malTest();return}
+    if(e.startsWith('vz'))return VZ.test(e);
     const run={seed:(Math.random()*2**31)|0,ebene:isNaN(+e)?e:+e,bonusStab:0,xpLauf:[],test:true,wand:'keine',mito:e==='5',e3:e==='montage'?{protein:5,rna:4,membran:6}:undefined};sichere('run',run);
     if(e==='weiche')zeigeWeiche();else if(e==='montage')zeigeMontage();else starteEbene(+e)})}
 let tapN=0,tapT=0;$('bigLogo').onclick=()=>{const t=Date.now();tapN=t-tapT<700?tapN+1:1;tapT=t;if(tapN>=5){tapN=0;sichere('test',lade('test',0)?0:1);malTest()}};
@@ -727,7 +729,7 @@ function starteArena(e){
   for(const k in bak)for(let i=0;i<bak[k];i++)spawn(k);
   for(let i=0;i<8;i++)spawnZelle(null);
   const lx=lade('lexikon',{}); // freigeschaltete Geschöpfe tauchen als Gegner auf
-  GESCHOEPFE.filter(g=>lx[g.id]&&(e===4?g.pro:!g.pro)).forEach(g=>{for(let i=0;i<2;i++)spawnZelle(g)});
+  GESCHOEPFE.filter(g=>lx[g.id]&&(e===4?g.pro:!g.pro&&!g.stufe)).forEach(g=>{for(let i=0;i<2;i++)spawnZelle(g)});
   $('aTitel').textContent='Ebene '+e+' · '+cfg.titel+(run.test?' · TEST':'');
   $('aFrage').classList.remove('on');zeige('arena');arenaHud();letzt=performance.now()}
 function zufallsOrt(fern){const p=A.p;for(let k=0;k<30;k++){const x=40+A.rng()*(WELT-80),y=40+A.rng()*(WELT-80);if(!fern||Math.hypot(x-p.x,y-p.y)>700)return[x,y]}return[A.rng()*WELT,A.rng()*WELT]}
@@ -1007,6 +1009,7 @@ window.matomTest={
   arenaState(){return A?{screen:'arena',e:A.e,m:+A.p.m.toFixed(1),energie:Math.round(A.energie),zeit:+A.zeit.toFixed(1),mito:A.mito,chloro:A.chloro,cyanoGef:A.cyanoGef,gefressen:A.gefressen,ents:A.ents.length}:{screen:document.querySelector('.scr.on').id}},
   raeuber(){const o=spawnZelle(null,false);o.r=A.p.r*3;o.m=o.m0=masseAus(o.r);o.x=A.p.x+o.r*0.5;o.y=A.p.y;return o.r},
 };
+if(window.VZ)VZ.init();
 startScreen();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(()=>{}))}
 </script>
