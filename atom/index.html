@@ -288,8 +288,8 @@ E3:[
 const EBENEN={
  1:{titel:'Atom → Molekül',pool:'E1',masse:30,ziel:360,tempo:60,xp:10,abstand:66,wort:['Molekül','Moleküle'],hint:'Atome laufen vorbei · in einen Reaktor ziehen, bevor sie verschwinden'},
  3:{titel:'Baustein → Makromolekül',pool:'E3',ziele:{protein:3,rna:3,membran:4},masse:10,ziel:540,tempo:45,xp:20,abstand:78,uv:true,weiche:true,wort:['Makromolekül','Makromoleküle'],hint:'Bausteine laufen vorbei · Ziel: 3 Proteine, 3 RNA, 4 Membran-Bläschen'},
- 4:{titel:'Protozelle → Zelle',arena:true,start:10,masseZiel:60,ziel:660,xp:30},
- 5:{titel:'Eukaryot',arena:true,start:30,masseZiel:100,ziel:780,xp:40},
+ 4:{titel:'Protozelle → Zelle',arena:true,start:0,masseZiel:50,ziel:660,xp:30},
+ 5:{titel:'Eukaryot',arena:true,start:50,masseZiel:100,ziel:780,xp:40},
  2:{titel:'Molekül → Baustein',pool:'E2',masse:20,ziel:480,tempo:50,xp:15,abstand:74,blitz:true,uv:true,lager:['ribose','adenin'],wort:['Baustein','Bausteine'],hint:'Moleküle laufen vorbei · Ribose und Adenin aus dem Vorrat ins Nukleotid ziehen'}};
 // Alle Teilchen (Atome, Moleküle, Bausteine) mit Beschriftung, Farbe und Symbol
 const TEIL={};
@@ -436,8 +436,8 @@ const DIALOGE={1:[
  4:[
  {t:'Die Protozelle',p:'Eine Membran-Hülle mit RNA und Proteinen darin nennt man Protozelle. Sie grenzt ein Inneres von außen ab, kann wachsen und sich teilen.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/>${[[112,45],[146,62],[128,72],[150,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#B9B8B2"/>`).join('')}`)},
  {t:'Die ersten Zellen',p:'Die ersten echten Zellen waren Prokaryoten: kleine Zellen ohne Zellkern, so wie heutige Bakterien.',s:sk(`${[[60,40,'#6EC1F0',-20],[130,70,'#6EC1F0',15],[200,40,'#5DD39E',30]].map(([x,y,c,a])=>`<rect x="${x-22}" y="${y-10}" width="44" height="20" rx="10" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('')}`)},
- {t:'Fressen und gefressen werden',p:'Größere Zellen umfließen kleinere und verdauen sie. Was deutlich kleiner ist als du, kannst du fressen. Was deutlich größer ist, frisst dich – solche Zellen sind rot umrandet.',s:sk(`<circle cx="80" cy="55" r="26" fill="#31312F" stroke="#FDD602" stroke-width="4"/><circle cx="180" cy="55" r="42" fill="#31312F" stroke="#FF7A6B" stroke-width="4"/><circle cx="40" cy="30" r="5" fill="#FFA552"/><circle cx="30" cy="80" r="5" fill="#FFA552"/>`)},
- {t:'So spielst du',p:'Steuere mit dem Joystick unten links oder halte den Finger dorthin, wohin du schwimmen willst. Orange Punkte sind Nährstoffe, Bakterien sind Beute. Bewegung kostet Energie – ohne Energie stirbt die Zelle. Ziel: Biomasse 60, Zielzeit 11:00.',s:sk(`<circle cx="60" cy="60" r="40" fill="none" stroke="#5A5955" stroke-width="3"/><circle cx="72" cy="52" r="16" fill="#5A5955"/><circle cx="190" cy="55" r="22" fill="#31312F" stroke="#FDD602" stroke-width="4"/><path d="M215 55 L245 55" stroke="#FDD602" stroke-width="3" stroke-dasharray="4 5"/>`)},
+ {t:'Fressen und gefressen werden',p:'Größere Zellen umfließen kleinere und verdauen sie. Fressen kannst du, was höchstens zwei Drittel so groß ist wie du – grün umrandet. Wer anderthalbmal so groß ist wie du, frisst dich – rot umrandet. Eine gefressene Zelle bringt dir die Hälfte ihrer Biomasse.',s:sk(`<circle cx="80" cy="55" r="26" fill="#31312F" stroke="#FDD602" stroke-width="4"/><circle cx="180" cy="55" r="42" fill="#31312F" stroke="#FF7A6B" stroke-width="4"/><circle cx="40" cy="30" r="5" fill="#FFA552"/><circle cx="30" cy="80" r="5" fill="#FFA552"/>`)},
+ {t:'So spielst du',p:'Steuere mit dem Joystick unten links oder halte den Finger dorthin, wohin du schwimmen willst. Orange Punkte sind Nährstoffe, Bakterien sind Beute. Bewegung kostet Energie – ohne Energie stirbt die Zelle. Ziel: Biomasse 50, Zielzeit 11:00.',s:sk(`<circle cx="60" cy="60" r="40" fill="none" stroke="#5A5955" stroke-width="3"/><circle cx="72" cy="52" r="16" fill="#5A5955"/><circle cx="190" cy="55" r="22" fill="#31312F" stroke="#FDD602" stroke-width="4"/><path d="M215 55 L245 55" stroke="#FDD602" stroke-width="3" stroke-dasharray="4 5"/>`)},
  {t:'Aufnehmen statt fressen',p:'Halte „Aufnehmen“ gedrückt, während du ein Bakterium berührst: Nach 2 Sekunden lebt es in dir weiter. Ein korallenrotes α-Proteobakterium wird so zum Mitochondrium, ein grünes Cyanobakterium zum Chloroplasten. Solange du aufnimmst, kannst du dich nicht bewegen. Ab Minute 4 kommt die Große Sauerstoffkatastrophe.',s:sk(`<circle cx="130" cy="55" r="40" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="152" y="46" width="40" height="18" rx="9" fill="#FF7A6B"/><path d="M130 10 A45 45 0 0 1 175 55" stroke="#FDD602" stroke-width="4" fill="none"/>`)}
  ],
  w4:[
@@ -449,7 +449,7 @@ const DIALOGE={1:[
  {t:'Endosymbiose',p:'Eine Zelle nahm ein Bakterium auf, ohne es zu verdauen. Es lebte in ihr weiter und wurde zum Mitochondrium – dem Kraftwerk der Zelle.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="112" y="46" width="36" height="16" rx="8" fill="#FF7A6B"/>`)},
  {t:'Der Chloroplast',p:'Später nahmen manche Zellen auch ein Cyanobakterium auf. Daraus wurde der Chloroplast, mit dem Algen und Pflanzen Fotosynthese betreiben.',s:sk(`<circle cx="130" cy="55" r="44" fill="#31312F" stroke="#FDD602" stroke-width="5"/><rect x="104" y="40" width="34" height="16" rx="8" fill="#FF7A6B"/><rect x="124" y="62" width="34" height="16" rx="8" fill="#5DD39E"/>`)},
  {t:'Der Zellkern',p:'Eukaryoten verpacken ihr Erbgut in einem Zellkern. Sie sind viel größer als Bakterien und können kompliziertere Formen bilden.',s:sk(`<circle cx="130" cy="55" r="46" fill="#31312F" stroke="#FDD602" stroke-width="5"/><circle cx="138" cy="48" r="16" fill="#4a4a46"/><rect x="100" y="64" width="30" height="14" rx="7" fill="#FF7A6B"/>`)},
- {t:'So spielst du',p:'Deine Zelle ist jetzt ein Eukaryot. Wachse auf Biomasse 100, Zielzeit 13:00. Ab Minute 3 jagt dich eine Amöbe. Für eine Grünalge brauchst du einen Chloroplasten: Nimm ein grünes Cyanobakterium auf, falls du noch keinen hast. Mit Chloroplast gewinnst du nebenbei Energie aus Licht.',s:sk(`${skizze(GESCHOEPFE[2],90)}`.replace('<svg','<svg x="85" y="10"'))}
+ {t:'So spielst du',p:'Deine Zelle ist jetzt ein Eukaryot. Wachse von Biomasse 50 auf 100, Zielzeit 13:00. Ab Minute 3 jagt dich eine Amöbe. Für eine Grünalge brauchst du einen Chloroplasten: Nimm ein grünes Cyanobakterium auf, falls du noch keinen hast. Mit Chloroplast gewinnst du nebenbei Energie aus Licht.',s:sk(`${skizze(GESCHOEPFE[2],90)}`.replace('<svg','<svg x="85" y="10"'))}
 ]};
 let dlg=null;
 function zeigeDialog(e,weiter){dlg={karten:DIALOGE[e],i:0,weiter,e};maleDialog();zeige('dialog')}
@@ -634,15 +634,18 @@ $('bPause').onclick=()=>{if(!G)return;G.laeuft=false;if(G.drag){G.drag.g.remove(
 
 // ---------- Arena (E4/E5) ----------
 const WELT=3000;let A=null;
-const rad=m=>4+6*Math.sqrt(m);                       // Radius aus Biomasse
-const tempoR=r=>165*Math.pow(30/r,0.4);              // große Zellen sind langsamer
+const C_R=0.345,rad=m=>C_R*(Math.max(0,m)+33.3);   // Radius linear: Biomasse 0 → halbe, 100 → doppelte Größe von früher
+const masseAus=r=>Math.max(0.5,r/C_R-33.3);
+const FRESS=1.5;                                      // so viel größer muss eine Zelle sein, um eine andere zu fressen (in beide Richtungen)
+function stufe(m,e){return m<15?'Protozelle':m<35?'Protozelle mit RNA':m<50?'Zelle':m<75?'Eukaryot':'großer Eukaryot'}
+const tempoR=r=>125*Math.pow(30/r,0.3);              // große Zellen sind langsamer
 const NAME={naehr:'Nährstoff',bakt:'Bakterium',cyano:'Cyanobakterium',alpha:'α-Proteobakterium'};
 const FARBE={naehr:'#FFA552',bakt:'#6EC1F0',cyano:'#5DD39E',alpha:'#FF7A6B'};
 $('aLogo').innerHTML=ATOM_SVG.replace(/%/g,36);
 function starteArena(e){
   const run=lade('run',null)||{seed:1,ebene:e,bonusStab:0,xpLauf:[]};run.ebene=e;sichere('run',run);
   const cfg=EBENEN[e];
-  A={e,cfg,run,rng:rngAus(run.seed+e*977),zeit:0,laeuft:true,ents:[],p:{x:WELT/2,y:WELT/2,vx:0,vy:0,m:cfg.start*(run.bonusStab?1.2:1)},
+  A={e,cfg,run,rng:rngAus(run.seed+e*977),zeit:0,laeuft:true,ents:[],p:{x:WELT/2,y:WELT/2,vx:0,vy:0,m:cfg.start+(run.bonusStab?5:0)},
      energie:80,mito:!!run.mito,chloro:!!run.chloro,cyanoGef:0,gefressen:{},auf:null,halte:false,o2:0,o2done:false,wolken:[],amoebe:false,
      input:{x:0,y:0},ziel:null,msg:null,mapT:0,taste:{}};
   A.p.r=rad(A.p.m);
@@ -656,20 +659,21 @@ function starteArena(e){
   zeige('arena');arenaHud();letzt=performance.now()}
 function zufallsOrt(fern){const p=A.p;for(let k=0;k<30;k++){const x=40+A.rng()*(WELT-80),y=40+A.rng()*(WELT-80);if(!fern||Math.hypot(x-p.x,y-p.y)>700)return[x,y]}return[A.rng()*WELT,A.rng()*WELT]}
 function spawn(typ,fern){const[x,y]=zufallsOrt(fern);const o={typ,x,y,vx:0,vy:0,ang:A.rng()*6.283};
-  if(typ==='naehr'){o.r=5;o.m=0.6}else{o.r=9+A.rng()*3;o.m=2.2;o.v=35+A.rng()*25}
+  if(typ==='naehr'){o.r=5;o.m=0.6}else{o.r=6+A.rng()*1.5;o.m=2;o.v=30+A.rng()*20}
   A.ents.push(o);return o}
 function spawnZelle(g,fern=true){const pm=A.p.m,[x,y]=zufallsOrt(fern);let m,o;
-  if(g)m=pm*(1.3+A.rng()*0.5);else m=pm*(0.25+A.rng()*1.9);
-  o={typ:'zelle',x,y,vx:0,vy:0,m,m0:m,r:rad(m),form:g?g.form:'rund',c:g?g.c:'#B9B8B2',name:g?g.name:(A.e===4?'Protozelle':'Eukaryot'),
+  // Größe relativ zur eigenen Zelle: die Hälfte fressbar, ein Viertel neutral, ein Viertel gefährlich
+  const pr=A.p.r,u=A.rng(),r=g?pr*(1.6+A.rng()*0.4):pr*(u<0.5?0.4+A.rng()*0.25:u<0.75?0.7+A.rng()*0.7:1.55+A.rng()*0.5);m=masseAus(r);
+  o={typ:'zelle',x,y,vx:0,vy:0,m,m0:m,r,form:g?g.form:'rund',c:g?g.c:'#B9B8B2',name:g?g.name:(A.e===4?'Protozelle':'Eukaryot'),
      vk:g?0.85:1,jagt:!!g,ang:A.rng()*6.283,kern:A.e===5&&!g,g:g?g.id:null,denk:0};
   A.ents.push(o);return o}
 function ersatz(o){if(o.ersatzlos)return;if(o.typ==='zelle')spawnZelle(o.g?G_(o.g):null);else spawn(o.typ,true)}
 function randAbprall(o){if(o.x<o.r||o.x>WELT-o.r){o.ang=Math.PI-o.ang;o.vx*=-1}if(o.y<o.r||o.y>WELT-o.r){o.ang=-o.ang;o.vy*=-1}
   o.x=Math.max(o.r,Math.min(WELT-o.r,o.x));o.y=Math.max(o.r,Math.min(WELT-o.r,o.y))}
 function friss(o){const p=A.p;o.weg=true;const n=o.typ==='zelle'?o.name:NAME[o.typ];A.gefressen[n]=(A.gefressen[n]||0)+1;
-  if(o.typ==='naehr'){p.m+=0.2;A.energie+=7}
-  else if(o.typ==='zelle'){p.m+=o.m*0.12;A.energie+=15}
-  else{p.m+=o.m*0.4;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
+  if(o.typ==='naehr'){p.m+=0.3;A.energie+=7}
+  else if(o.typ==='zelle'){p.m+=o.m*0.5;A.energie+=12+o.m*0.4}
+  else{p.m+=o.m*0.5;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
   ersatz(o)}
 function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt;p.r=rad(p.m);
   // Eingabe: Finger auf dem Feld > Joystick/Tastatur
@@ -691,27 +695,27 @@ function arenaSchritt(dt){if(!A||!A.laeuft)return;const p=A.p,c=A.cfg;A.zeit+=dt
     A.imO2=A.wolken.some(w=>Math.hypot(w.x-p.x,w.y-p.y)<w.r);if(A.imO2)A.energie+=dt*(A.mito?1.5:-7);
     if(A.o2<=0)A.wolken=[]}
   // Amöbe jagt ab Minute 3 (E5)
-  if(A.e===5&&!A.amoebe&&A.zeit>=180){A.amoebe=true;const o=spawnZelle(G_('amoebe'));o.m=o.m0=p.m*2;o.r=rad(o.m);o.vk=0.75;o.ersatzlos=true;A.msg={t:'Eine Amöbe jagt dich!',d:5}}
+  if(A.e===5&&!A.amoebe&&A.zeit>=180){A.amoebe=true;const o=spawnZelle(G_('amoebe'));o.r=p.r*2;o.m=o.m0=masseAus(o.r);o.vk=0.75;o.ersatzlos=true;A.msg={t:'Eine Amöbe jagt dich!',d:5}}
   A.energie=Math.min(100,A.energie);
   // Bewegung der anderen
   for(const o of A.ents){if(o.gehalten||o.typ==='naehr')continue;
     if(o.typ!=='zelle'){o.ang+=(A.rng()-.5)*dt*2;o.x+=Math.cos(o.ang)*o.v*dt;o.y+=Math.sin(o.ang)*o.v*dt;randAbprall(o);continue}
     o.denk-=dt;const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy)||1;let tx=Math.cos(o.ang),ty=Math.sin(o.ang),f=0.5;
-    if(d<520&&o.r>p.r*1.15&&(o.jagt||d<320)){tx=dx/d;ty=dy/d;f=1}
-    else if(d<360&&p.r>o.r*1.15){tx=-dx/d;ty=-dy/d;f=0.9}
+    if(d<520&&o.r>=p.r*FRESS&&(o.jagt||d<320)){tx=dx/d;ty=dy/d;f=1}
+    else if(d<360&&p.r>=o.r*FRESS){tx=-dx/d;ty=-dy/d;f=0.9}
     else if(o.denk<=0){o.denk=1+A.rng()*2;o.ang+=(A.rng()-.5)*2}
     const v=tempoR(o.r)*o.vk*f,kk=Math.min(1,dt*3);o.vx+=(tx*v-o.vx)*kk;o.vy+=(ty*v-o.vy)*kk;
     o.x+=o.vx*dt;o.y+=o.vy*dt;randAbprall(o)}
   // andere Zellen fressen Kleineres
   for(const o of A.ents){if(o.typ!=='zelle'||o.weg)continue;
-    for(const q of A.ents){if(q===o||q.weg||q.gehalten||q.r>=o.r*0.85)continue;
-      if(Math.abs(q.x-o.x)<o.r&&Math.abs(q.y-o.y)<o.r&&Math.hypot(q.x-o.x,q.y-o.y)<o.r){q.weg=true;if(o.m<o.m0*1.5){o.m+=q.m*0.5;o.r=rad(o.m)}ersatz(q)}}}
+    for(const q of A.ents){if(q===o||q.weg||q.gehalten||q.r*FRESS>o.r)continue;
+      if(Math.abs(q.x-o.x)<o.r&&Math.abs(q.y-o.y)<o.r&&Math.hypot(q.x-o.x,q.y-o.y)<o.r){q.weg=true;ersatz(q)}}}
   // eigene Zelle: fressen, gefressen werden, abstoßen, aufnehmen
   for(const o of A.ents){if(o.weg||o.gehalten)continue;const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);if(d>p.r+o.r)continue;
     const bak=o.typ==='bakt'||o.typ==='cyano'||o.typ==='alpha';
-    if(o.typ==='zelle'&&o.r>p.r*1.15){if(d<o.r)return gefressen(o);continue}
+    if(o.typ==='zelle'&&o.r>=p.r*FRESS){if(d<o.r)return gefressen(o);continue}
     if(bak&&A.halte){if(!A.auf){A.auf={o,t:0};o.gehalten=true}continue}
-    if(o.r<p.r*0.85){if(d<p.r)friss(o);continue}
+    if(o.typ==='naehr'||o.r*FRESS<=p.r){if(d<p.r)friss(o);continue}
     if(o.typ==='zelle'&&d>0){const ov=(p.r+o.r-d)*0.5;p.x-=dx/d*ov;p.y-=dy/d*ov;o.x+=dx/d*ov;o.y+=dy/d*ov}}
   if(A.auf){const o=A.auf.o;
     if(!A.halte||o.weg){o.gehalten=false;A.auf=null}
@@ -741,7 +745,7 @@ function arenaFertig(){A.laeuft=false;const cfg=A.cfg,run=A.run,zm=A.zeit,tempo=
 function kapsel(x,cx,cy,r,ang,c){x.save();x.translate(cx,cy);x.rotate(ang);const L=r*1.1,w=r*0.5;x.beginPath();x.moveTo(-L+w,-w);x.lineTo(L-w,-w);x.arc(L-w,0,w,-Math.PI/2,Math.PI/2);x.lineTo(-L+w,w);x.arc(-L+w,0,w,Math.PI/2,Math.PI*1.5);x.fillStyle=c;x.fill();x.restore()}
 function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;if(!W)return;
   if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
-  const x=cv.getContext('2d'),p=A.p,sc=Math.min(W,H)/820*2*Math.sqrt(23/p.r),t=A.zeit;
+  const x=cv.getContext('2d'),p=A.p,sc=Math.min(W,H)/820*2,t=A.zeit;
   x.setTransform(1,0,0,1,0,0);x.fillStyle='#262625';x.fillRect(0,0,cv.width,cv.height);
   x.setTransform(dpr*sc,0,0,dpr*sc,dpr*(W/2-p.x*sc),dpr*(H/2-p.y*sc));
   const vw=W/sc/2+80,vh=H/sc/2+80,x0=p.x-vw,x1=p.x+vw,y0=p.y-vh,y1=p.y+vh;
@@ -753,10 +757,10 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
   for(const o of A.ents){if(o.x<x0-o.r||o.x>x1+o.r||o.y<y0-o.r||o.y>y1+o.r)continue;
     if(o.typ==='naehr'){x.fillStyle=FARBE.naehr;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();continue}
     if(o.typ!=='zelle'){kapsel(x,o.x,o.y,o.r,o.ang,FARBE[o.typ]);continue}
-    const gef=o.r>p.r*1.15,rc=gef?'#FF7A6B':o.c;
+    const gef=o.r>=p.r*FRESS,fr=o.r*FRESS<=p.r,rc=gef?'#FF7A6B':fr?'#5DD39E':o.c;
     if(o.form==='blob'){x.beginPath();for(let k=0;k<=24;k++){const a=k/24*6.283,rr=o.r*(1+0.12*Math.sin(3*a+t*2)+0.07*Math.sin(5*a-t*1.3));k?x.lineTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr):x.moveTo(o.x+Math.cos(a)*rr,o.y+Math.sin(a)*rr)}
       x.fillStyle='rgba(169,139,240,.25)';x.fill();x.strokeStyle=rc;x.lineWidth=4;x.stroke();x.fillStyle='rgba(169,139,240,.6)';x.beginPath();x.arc(o.x,o.y,o.r*0.32,0,6.283);x.fill()}
-    else if(o.form==='kapsel'){kapsel(x,o.x,o.y,o.r,Math.atan2(o.vy,o.vx),o.c);if(gef){x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r*1.15,0,6.283);x.stroke()}}
+    else if(o.form==='kapsel'){kapsel(x,o.x,o.y,o.r,Math.atan2(o.vy,o.vx),o.c);if(gef||fr){x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r*1.15,0,6.283);x.stroke()}}
     else if(o.form==='oval'){const a=Math.atan2(o.vy,o.vx);x.save();x.translate(o.x,o.y);x.rotate(a);x.beginPath();x.ellipse(0,0,o.r*1.25,o.r*0.7,0,0,6.283);x.fillStyle='rgba(242,227,107,.2)';x.fill();x.strokeStyle=rc;x.lineWidth=3;x.stroke();
       for(let k=0;k<16;k++){const b=k/16*6.283,w=Math.sin(t*12+k)*2;x.beginPath();x.moveTo(Math.cos(b)*o.r*1.25,Math.sin(b)*o.r*0.7);x.lineTo(Math.cos(b)*(o.r*1.25+6),Math.sin(b)*(o.r*0.7+6)+w);x.stroke()}x.restore()}
     else if(o.form==='knospe'){x.fillStyle='rgba(255,165,82,.22)';x.strokeStyle=rc;x.lineWidth=3;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();x.beginPath();x.arc(o.x+o.r*0.8,o.y-o.r*0.7,o.r*0.45,0,6.283);x.fill();x.stroke()}
@@ -764,21 +768,29 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
     else{x.fillStyle='#31312F';x.strokeStyle=rc;x.lineWidth=gef?4:3;x.beginPath();x.arc(o.x,o.y,o.r,0,6.283);x.fill();x.stroke();
       if(o.kern){x.fillStyle='#4a4a46';x.beginPath();x.arc(o.x+o.r*.15,o.y-o.r*.1,o.r*.3,0,6.283);x.fill()}
       x.fillStyle='#5a5955';for(let k=0;k<4;k++){const a=k*1.7+o.r;x.beginPath();x.arc(o.x+Math.cos(a)*o.r*.55,o.y+Math.sin(a)*o.r*.55,2.5,0,6.283);x.fill()}}
-    if(gef){x.fillStyle='#FF9B8F';x.fillText(o.name+' – Gefahr',o.x,o.y+o.r+18/sc)}}
+    if(gef){x.fillStyle='#FF9B8F';x.fillText(o.name+' – Gefahr',o.x,o.y+o.r+18/sc)}else if(fr){x.fillStyle='#5DD39E';x.fillText('fressbar',o.x,o.y+o.r+18/sc)}}
   // eigene Zelle
-  x.fillStyle='#31312F';x.strokeStyle='#FDD602';x.lineWidth=5;x.beginPath();x.arc(p.x,p.y,p.r,0,6.283);x.fill();x.stroke();
-  if(A.e===5){x.fillStyle='#4a4a46';x.beginPath();x.arc(p.x+p.r*.15,p.y-p.r*.12,p.r*.3,0,6.283);x.fill()}
-  x.fillStyle='#B9B8B2';[[-.45,.35],[.4,.4],[-.4,-.35],[.5,.05]].forEach(([a,b])=>{x.beginPath();x.arc(p.x+a*p.r,p.y+b*p.r,2.5,0,6.283);x.fill()});
+  // Aussehen wächst mit: Membran dicker, mehr Ribosomen, RNA-Strang (ab 15), Erbgut-Ring (35–50),
+  // Zellkern (ab 50), Membran-Falten/ER (ab 70), Vakuole (ab 85)
+  const m=p.m,R=p.r;
+  x.fillStyle='#31312F';x.strokeStyle='#FDD602';x.lineWidth=2+m/18;x.beginPath();x.arc(p.x,p.y,R,0,6.283);x.fill();x.stroke();
+  if(m>=85){x.strokeStyle='rgba(110,193,240,.6)';x.lineWidth=2;x.fillStyle='rgba(110,193,240,.12)';x.beginPath();x.arc(p.x-R*.42,p.y-R*.3,R*.2,0,6.283);x.fill();x.stroke()}
+  if(m>=50){const kx=p.x+R*.12,ky=p.y-R*.1;
+    if(m>=70){x.strokeStyle='#5a5955';x.lineWidth=2;for(let k=1;k<=3;k++){x.beginPath();x.arc(kx,ky,R*(.3+k*.07),-0.4,1.6);x.stroke()}}
+    x.fillStyle='#4a4a46';x.beginPath();x.arc(kx,ky,R*.28,0,6.283);x.fill();x.fillStyle='#5a5955';x.beginPath();x.arc(kx+R*.06,ky-R*.05,R*.08,0,6.283);x.fill()}
+  else if(m>=35){x.strokeStyle='#A98BF0';x.lineWidth=2;x.setLineDash([4,3]);x.beginPath();x.ellipse(p.x+R*.1,p.y-R*.05,R*.32,R*.22,0.4,0,6.283);x.stroke();x.setLineDash([])}
+  if(m>=15&&m<50){x.strokeStyle='#FFA552';x.lineWidth=2;x.beginPath();for(let k=0;k<=20;k++){const u=k/20,xx=p.x-R*.5+u*R,yy=p.y+R*.35+Math.sin(u*12)*R*.06;k?x.lineTo(xx,yy):x.moveTo(xx,yy)}x.stroke()}
+  x.fillStyle='#B9B8B2';const nr=3+Math.floor(m/7);for(let k=0;k<nr;k++){const a=k*2.39996,d=R*(.25+.5*((k*0.618)%1));x.beginPath();x.arc(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,1.5+m/60,0,6.283);x.fill()}
   if(A.mito)kapsel(x,p.x-p.r*.3,p.y+p.r*.42,p.r*.22,0.3,'#FF7A6B');
   if(A.chloro)kapsel(x,p.x+p.r*.38,p.y+p.r*.2,p.r*.22,-0.5,'#5DD39E');
   if(A.auf){x.strokeStyle='#FDD602';x.lineWidth=4;x.beginPath();x.arc(p.x,p.y,p.r+9,-Math.PI/2,-Math.PI/2+A.auf.t/2*6.283);x.stroke()}
-  x.fillStyle='#F2F1EC';x.fillText((A.e===4?'Protozelle':'Eukaryot')+' · '+Math.floor(A.p.m),p.x,p.y+p.r+20/sc);
+  x.fillStyle='#F2F1EC';x.fillText(stufe(p.m)+' · '+Math.floor(p.m),p.x,p.y+p.r+20/sc);
   // Mini-Karte
   if((A.mapT-=1)<=0){A.mapT=6;const m=$('amap'),mw=m.clientWidth,mh=m.clientHeight;if(m.width!==mw*dpr){m.width=mw*dpr;m.height=mh*dpr}
     const y=m.getContext('2d');y.setTransform(dpr,0,0,dpr,0,0);y.clearRect(0,0,mw,mh);const sx=mw/WELT,sy=mh/WELT;
     y.strokeStyle='#5a5955';y.strokeRect((p.x-W/sc/2)*sx,(p.y-H/sc/2)*sy,W/sc*sx,H/sc*sy);
     for(const w of A.wolken){y.fillStyle='rgba(110,193,240,.2)';y.beginPath();y.arc(w.x*sx,w.y*sy,w.r*sx,0,6.283);y.fill()}
-    for(const o of A.ents){if(o.typ==='naehr'||o.typ==='bakt')continue;y.fillStyle=o.typ==='zelle'?(o.r>p.r*1.15?'#FF7A6B':'#5a5955'):FARBE[o.typ];
+    for(const o of A.ents){if(o.typ==='naehr'||o.typ==='bakt')continue;y.fillStyle=o.typ==='zelle'?(o.r>=p.r*FRESS?'#FF7A6B':o.r*FRESS<=p.r?'#5DD39E':'#5a5955'):FARBE[o.typ];
       y.beginPath();y.arc(o.x*sx,o.y*sy,o.typ==='zelle'?Math.max(2,o.r*sx*1.5):1.8,0,6.283);y.fill()}
     y.fillStyle='#FDD602';y.beginPath();y.arc(p.x*sx,p.y*sy,4,0,6.283);y.fill()}}
 function arenaHud(){if(!A)return;const c=A.cfg,p=A.p;
@@ -859,14 +871,14 @@ window.matomTest={
   // Arena: Autopilot frisst Erreichbares, flieht vor Gefahr, nimmt ein α-Proteobakterium auf
   simArena(sek,ohneFlucht){for(let t=0;t<sek&&A&&A.laeuft;t+=0.05){const p=A.p;let best=null,bs=0,fx=0,fy=0,beruehrt=null;
       for(const o of A.ents){const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy)||1;
-        if(o.typ==='zelle'&&o.r>p.r*1.1){if(!ohneFlucht&&d<o.r+p.r+220){fx-=dx/d*3;fy-=dy/d*3}continue}
-        if(o.r<p.r*0.85&&d<800){const s=(o.m+0.5)*(o.typ==='alpha'&&!A.mito?6:1)/(d+30);if(s>bs){bs=s;best=o}}
+        if(o.typ==='zelle'&&o.r>=p.r*1.4){if(!ohneFlucht&&d<o.r+p.r+220){fx-=dx/d*3;fy-=dy/d*3}continue}
+        if((o.typ==='naehr'||o.r*FRESS<=p.r)&&d<800){const s=(o.m+0.5)*(o.typ==='alpha'&&!A.mito?6:1)/(d+30);if(s>bs){bs=s;best=o}}
         if(o.typ==='alpha'&&!A.mito&&d<p.r+o.r)beruehrt=o}
       let ix=fx,iy=fy;if(best){const d=Math.hypot(best.x-p.x,best.y-p.y)||1;ix+=(best.x-p.x)/d;iy+=(best.y-p.y)/d}
       A.input={x:ix,y:iy};A.halte=!!beruehrt||!!(A.auf&&A.auf.o.typ==='alpha');arenaSchritt(0.05)}
     return this.arenaState()},
   arenaState(){return A?{screen:'arena',e:A.e,m:+A.p.m.toFixed(1),energie:Math.round(A.energie),zeit:+A.zeit.toFixed(1),mito:A.mito,chloro:A.chloro,cyanoGef:A.cyanoGef,gefressen:A.gefressen,ents:A.ents.length}:{screen:document.querySelector('.scr.on').id}},
-  raeuber(){const o=spawnZelle(null,false);o.m=o.m0=A.p.m*3;o.r=rad(o.m);o.x=A.p.x+o.r*0.5;o.y=A.p.y;return o.r},
+  raeuber(){const o=spawnZelle(null,false);o.r=A.p.r*3;o.m=o.m0=masseAus(o.r);o.x=A.p.x+o.r*0.5;o.y=A.p.y;return o.r},
 };
 startScreen();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).catch(()=>{}))}
