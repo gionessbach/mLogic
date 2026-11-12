@@ -720,7 +720,7 @@ function starteArena(e){
   const cfg=EBENEN[e],bon=protoBoni(run.e3);
   A={e,cfg,run,bon,rng:rngAus(run.seed+e*977),zeit:0,laeuft:true,ents:[],p:{x:WELT/2,y:WELT/2,vx:0,vy:0,m:cfg.start+(run.bonusStab?5:0)+(e===4?bon.start:0)},
      energie:80,mito:!!run.mito,chloro:!!run.chloro,cyanoGef:0,gefressen:{},auf:null,halte:false,o2:0,o2done:false,wolken:[],amoebe:false,
-     input:{x:0,y:0},ziel:null,msg:null,mapT:0,taste:{}};
+     input:{x:0,y:0},ziel:null,msg:null,mapT:0,taste:{},beulen:new Array(48).fill(0),muender:[],verdau:[]};
   A.p.r=rad(A.p.m);
   for(let i=0;i<160;i++)spawn('naehr');
   const bak=e===4?{bakt:28,cyano:14,alpha:7}:{bakt:24,cyano:10,alpha:4};
@@ -744,10 +744,32 @@ function ersatz(o){if(o.ersatzlos)return;if(o.typ==='zelle')spawnZelle(o.g?G_(o.
 function randAbprall(o){if(o.x<o.r||o.x>WELT-o.r){o.ang=Math.PI-o.ang;o.vx*=-1}if(o.y<o.r||o.y>WELT-o.r){o.ang=-o.ang;o.vy*=-1}
   o.x=Math.max(o.r,Math.min(WELT-o.r,o.x));o.y=Math.max(o.r,Math.min(WELT-o.r,o.y))}
 function friss(o){const p=A.p;o.weg=true;const n=o.typ==='zelle'?o.name:NAME[o.typ];A.gefressen[n]=(A.gefressen[n]||0)+1;
-  if(o.typ==='naehr'){p.m+=0.3;A.energie+=7}
-  else if(o.typ==='zelle'){p.m+=o.m*0.5;A.energie+=12+o.m*0.4}
-  else{p.m+=o.m*0.5;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
+  let g;
+  if(o.typ==='naehr'){g=0.3;A.energie+=7}
+  else if(o.typ==='zelle'){g=o.m*0.5;A.energie+=12+o.m*0.4}
+  else{g=o.m*0.5;A.energie+=10;if(o.typ==='cyano')A.cyanoGef++}
+  const a=Math.atan2(o.y-p.y,o.x-p.x);
+  if(!A.muender.some(mu=>mu.t<0.2&&Math.abs(winkelDiff(mu.a,a))<0.4))A.muender.push({a,t:0});
+  if(A.verdau.length>=14){const alt=A.verdau.shift();p.m+=alt.rest}
+  A.verdau.push({a,c:o.typ==='zelle'?o.c:FARBE[o.typ],r0:Math.min(o.r,p.r*0.28),t:0,dauer:o.typ==='zelle'?3:o.typ==='naehr'?1.2:2,g,rest:g,dj:(Math.random()-.5)*0.6});
   ersatz(o)}
+const winkelDiff=(a,b)=>{let d=a-b;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d};
+// Verdauen, Mund schließen, Beulen gleichen sich aus
+function verdauSchritt(dt){const p=A.p,B=A.beulen,n=B.length;
+  for(const mu of A.muender)mu.t+=dt;A.muender=A.muender.filter(mu=>mu.t<0.45);
+  for(const v of A.verdau){v.t+=dt;if(v.t<0.35)continue;
+    const st=Math.min(v.rest,v.g*dt/v.dauer);v.rest-=st;p.m+=st;
+    // Beule dort, wo aufgenommen wurde
+    const k0=Math.round(((v.a+6.2832)%6.2832)/6.2832*n),amt=st/(p.m+15)*5;
+    for(let j=-4;j<=4;j++){const k=(k0+j+n)%n;B[k]=Math.min(0.35,B[k]+amt*Math.exp(-j*j/5))}}
+  A.verdau=A.verdau.filter(v=>v.rest>1e-4);
+  const f=Math.min(0.45,3*dt),alt=B.slice();
+  for(let k=0;k<n;k++)B[k]=(alt[k]+(alt[(k+n-1)%n]+alt[(k+1)%n]-2*alt[k])*f)*(1-0.3*dt)}
+// Radius der eigenen Membran in Richtung th (Beulen + Mund-Einbuchtung)
+function membranR(th){const B=A.beulen,n=B.length,u=((th+6.2832)%6.2832)/6.2832*n,k=Math.floor(u)%n,fr=u-Math.floor(u);
+  let r=A.p.r*(1+B[k]*(1-fr)+B[(k+1)%n]*fr);
+  for(const mu of A.muender){const d=winkelDiff(th,mu.a);r-=A.p.r*0.28*Math.sin(Math.PI*mu.t/0.45)*Math.exp(-((d/0.3)**2))}
+  return r}
 function arenaSchritt(dt){if(!A||!A.laeuft)return;
   if(A.frage){A.frage.t+=dt;if(A.frage.t>=5)frageWahl('fressen');else dt*=0.1} // Zeitlupe während der Entscheidung, nach 5 s wird gefressen
   const p=A.p,c=A.cfg;A.zeit+=dt;p.r=rad(p.m);
@@ -801,6 +823,7 @@ function arenaSchritt(dt){if(!A||!A.laeuft)return;
         else{p.m+=o.m*0.4;A.msg={t:o.typ==='bakt'?'Gewöhnliche Bakterien bringen als Endosymbiont nichts – verdaut.':'Das hast du schon – verdaut.',d:3}}
         ersatz(o)}}}
   A.ents=A.ents.filter(o=>!o.weg);
+  verdauSchritt(dt);
   if(A.msg&&(A.msg.d-=dt)<=0)A.msg=null;
   if(A.energie<=0)return arenaScheitern('Keine Energie mehr – deine Zelle ist verhungert.');
   if(p.m>=c.masseZiel)return arenaFertig()}
@@ -859,7 +882,16 @@ function arenaMalen(){const cv=$('acv'),dpr=Math.min(2,devicePixelRatio||1),W=cv
   // Aussehen wächst mit: Membran dicker, mehr Ribosomen, RNA-Strang (ab 15), Erbgut-Ring (35–50),
   // Zellkern (ab 50), Membran-Falten/ER (ab 70), Vakuole (ab 85)
   const m=p.m,R=p.r;
-  x.fillStyle='#31312F';x.strokeStyle='#FDD602';x.lineWidth=2+m/18;x.beginPath();x.arc(p.x,p.y,R,0,6.283);x.fill();x.stroke();
+  const NP=96,pts=[];for(let k=0;k<NP;k++){const th=k/NP*6.2832,r=membranR(th);pts.push([p.x+Math.cos(th)*r,p.y+Math.sin(th)*r,th])}
+  x.fillStyle='#31312F';x.beginPath();pts.forEach(([a,b],k)=>k?x.lineTo(a,b):x.moveTo(a,b));x.closePath();x.fill();
+  // Membran-Linie, am offenen Mund unterbrochen
+  const offen=th=>A.muender.some(mu=>mu.t<0.3&&Math.abs(winkelDiff(th,mu.a))<0.16);
+  x.strokeStyle='#FDD602';x.lineWidth=2+m/18;x.lineJoin='round';x.beginPath();let zug=false;
+  for(let k=0;k<=NP;k++){const q=pts[k%NP];if(offen(q[2])){zug=false;continue}zug?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);zug=true}x.stroke();
+  for(const v of A.verdau){const ein=Math.min(1,v.t/0.35),dd=1-0.45*ein-0.15*Math.min(1,Math.max(0,v.t-0.35)/v.dauer),a=v.a+v.dj*ein,
+      vx=p.x+Math.cos(a)*R*dd,vy=p.y+Math.sin(a)*R*dd,pr=v.rest/v.g,rr=v.r0*(0.35+0.65*pr);
+    x.strokeStyle='rgba(242,241,236,.25)';x.lineWidth=1.5;x.beginPath();x.arc(vx,vy,rr*1.5+2,0,6.283);x.stroke();
+    x.globalAlpha=0.35+0.65*pr;x.fillStyle=v.c;x.beginPath();x.arc(vx,vy,rr,0,6.283);x.fill();x.globalAlpha=1}
   if(m>=85){x.strokeStyle='rgba(110,193,240,.6)';x.lineWidth=2;x.fillStyle='rgba(110,193,240,.12)';x.beginPath();x.arc(p.x-R*.42,p.y-R*.3,R*.2,0,6.283);x.fill();x.stroke()}
   if(m>=50){const kx=p.x+R*.12,ky=p.y-R*.1;
     if(m>=70){x.strokeStyle='#5a5955';x.lineWidth=2;for(let k=1;k<=3;k++){x.beginPath();x.arc(kx,ky,R*(.3+k*.07),-0.4,1.6);x.stroke()}}
