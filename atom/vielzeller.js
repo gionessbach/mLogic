@@ -195,14 +195,23 @@ function entferne(i){if(!V.bel[i])return false;if(!verbunden(i))return hinweis('
 // ---------- Darstellung ----------
 let hT=0;function hinweis(t){const h=$('vzHint');h.textContent=t||'';h.classList.toggle('on',!!t);clearTimeout(hT);if(t)hT=setTimeout(()=>h.classList.remove('on'),3200);return false}
 function baueBrett(){const c=cfgE(),sil=SIL[c.sil],U=V.U;let s='';
- if(sil.boden!=null)s+=`<rect x="0" y="${sil.boden*1000}" width="1000" height="${(1-sil.boden)*1000}" fill="#2E2A24"/><line x1="0" y1="${sil.boden*1000}" x2="1000" y2="${sil.boden*1000}" stroke="#5A5955" stroke-width="4" stroke-dasharray="14 10"/><text x="20" y="${sil.boden*1000+40}" fill="#B9B8B2" font-size="26" opacity=".7">${c.sil==='pilz'?'Substrat (Laub)':'Boden'}</text><text x="20" y="${sil.boden*1000-18}" fill="#B9B8B2" font-size="26" opacity=".7">${c.sil==='pilz'?'Luft':'Luft und Licht'}</text>`;
+ if(sil.boden!=null)s+=`<rect x="-3000" y="${sil.boden*1000}" width="7000" height="4000" fill="#2E2A24"/><line x1="-3000" y1="${sil.boden*1000}" x2="4000" y2="${sil.boden*1000}" stroke="#5A5955" stroke-width="4" stroke-dasharray="14 10"/><text x="20" y="${sil.boden*1000+40}" fill="#B9B8B2" font-size="26" opacity=".7">${c.sil==='pilz'?'Substrat (Laub)':'Boden'}</text><text x="20" y="${sil.boden*1000-18}" fill="#B9B8B2" font-size="26" opacity=".7">${c.sil==='pilz'?'Luft':'Luft und Licht'}</text>`;
  sil.holes.forEach(h=>s+=`<polygon points="${pts(h)}" fill="#22303A"/>`);
  if(c.sil==='schwamm')s+='<text x="500" y="40" fill="#6EC1F0" font-size="26" text-anchor="middle" opacity=".7">Öffnung (Osculum)</text><text x="500" y="420" fill="#6EC1F0" font-size="24" text-anchor="middle" opacity=".55">Hohlraum</text>';
  s+='<g id="vzZ">'+U.map((u,i)=>u.seg?`<line data-i="${i}" x1="${u.seg[0][0]*1000}" y1="${u.seg[0][1]*1000}" x2="${u.seg[1][0]*1000}" y2="${u.seg[1][1]*1000}" stroke-linecap="round"/>`
   :`<polygon data-i="${i}" points="${pts(u.poly)}" stroke-linejoin="round"/>`).join('')+'</g>';
  if(U.N)s+='<g fill="#5A5955">'+U.N.map(n=>`<circle cx="${n[0]*1000}" cy="${n[1]*1000}" r="5"/>`).join('')+`</g><circle cx="${U.spore[0]*1000}" cy="${U.spore[1]*1000}" r="13" fill="#FDD602"/>`;
  s+='<g id="vzMark" pointer-events="none"></g><g id="vzFx" pointer-events="none"></g>';
- $('vzSvg').innerHTML=s}
+ $('vzSvg').innerHTML='<g id="vzCam">'+s+'</g>';kamFit()}
+// ---------- Kamera: Zoom und Verschieben ----------
+let KAM={z:1,tx:0,ty:0};
+function kamSetzen(){const g=$('vzCam');if(g)g.setAttribute('transform',`translate(${KAM.tx} ${KAM.ty}) scale(${KAM.z})`)}
+function kamFit(){const U=V.U;let x0=9,y0=9,x1=-9,y1=-9;U.forEach(u=>(u.poly||u.seg).forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}));
+ const m=.03,w=(x1-x0+2*m)*1000,h=(y1-y0+2*m)*1000,z=Math.min(1000/w,1000/h);KAM={z,tx:500-(x0+x1)/2*1000*z,ty:500-(y0+y1)/2*1000*z,min:z*.8,max:z*5};kamSetzen()}
+const svgPunkt=(cx,cy)=>{const svg=$('vzSvg'),p=svg.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(svg.getScreenCTM().inverse())};
+const weltPunkt=(cx,cy)=>{const q=svgPunkt(cx,cy);return{x:(q.x-KAM.tx)/KAM.z,y:(q.y-KAM.ty)/KAM.z}};
+function kamZoom(f,cx,cy){const q=cx==null?{x:500,y:500}:svgPunkt(cx,cy),wx=(q.x-KAM.tx)/KAM.z,wy=(q.y-KAM.ty)/KAM.z;
+ KAM.z=Math.max(KAM.min,Math.min(KAM.max,KAM.z*f));KAM.tx=q.x-wx*KAM.z;KAM.ty=q.y-wy*KAM.z;kamSetzen()}
 function malZellen(){const U=V.U,hy=!!U.N;let mk='';
  $('vzZ').querySelectorAll('[data-i]').forEach(el=>{const i=+el.dataset.i,u=U[i],t=V.bel[i],zu=u.ab>V.ab,frei=!t&&!zu&&belegbar(i);
   const T=t&&typ(t),z=u.zone;
@@ -233,17 +242,29 @@ function malPanel(){const A=abs(),ev=ereignis();
 function aktualisiere(){rechne();malKopf();malZellen();malPanel();malPaletteWahl()}
 
 // ---------- Bedienung: tippen oder überwischen ----------
-function einheitBei(ev){const svg=$('vzSvg'),p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse()),x=q.x/1000,y=q.y/1000;
+function einheitBei(ev){const q=weltPunkt(ev.clientX,ev.clientY),x=q.x/1000,y=q.y/1000;
  let b=-1,bd=V.U.gr*(V.U.N?.45:.75);V.U.forEach((u,i)=>{const d=Math.hypot(u.x-x,u.y-y);if(d<bd){bd=d;b=i}});return b}
-function bindeBrett(){const svg=$('vzSvg');let mode=null,pid=null,last=-1;
- const tun=i=>{if(i<0||i===last)return;last=i;let r;
+function bindeBrett(){const svg=$('vzSvg'),P=new Map();let mode=null,pid=null,last=-1,strich=[],t0=0,geste=null,pan=null;
+ const tun=i=>{if(i<0||i===last)return;last=i;let r;const vor=V.bel[i],b0=V.budget;
   if(mode===null)mode=V.bel[i]?'weg':'setzen';
   if(mode==='weg')r=entferne(i);else r=setze(i,V.typ);
-  if(r===true)aktualisiere()};
- svg.addEventListener('pointerdown',ev=>{if(!V||V.probe)return;ev.preventDefault();pid=ev.pointerId;svg.setPointerCapture(pid);mode=null;last=-1;tun(einheitBei(ev))});
- svg.addEventListener('pointermove',ev=>{if(ev.pointerId!==pid||!V)return;tun(einheitBei(ev))});
- const ende=ev=>{if(ev.pointerId!==pid)return;pid=null;if(V&&V.bel.some(Boolean))speichere()};
- svg.addEventListener('pointerup',ende);svg.addEventListener('pointercancel',ende)}
+  if(r===true){strich.push([i,vor,b0]);aktualisiere()}};
+ const zurueck=()=>{for(let k=strich.length-1;k>=0;k--){const[i,vor,b0]=strich[k];V.bel[i]=vor;V.budget=b0}strich=[];aktualisiere()};
+ const mitte=()=>{const a=[...P.values()];return{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2,d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1}};
+ svg.addEventListener('pointerdown',ev=>{if(!V)return;ev.preventDefault();try{svg.setPointerCapture(ev.pointerId)}catch(e){}P.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+  if(P.size===2){// Zwei Finger: zoomen/verschieben, gerade begonnenen Strich zurücknehmen
+   if(pid!=null&&performance.now()-t0<450)zurueck();pid=null;pan=null;const m=mitte(),q=svgPunkt(m.x,m.y);geste={m,z0:KAM.z,wx:(q.x-KAM.tx)/KAM.z,wy:(q.y-KAM.ty)/KAM.z};return}
+  if(P.size>2||V.probe)return;const i=einheitBei(ev);
+  if(i<0){pan={x:ev.clientX,y:ev.clientY,tx:KAM.tx,ty:KAM.ty};return}// außerhalb des Körpers: verschieben
+  pid=ev.pointerId;mode=null;last=-1;strich=[];t0=performance.now();tun(i)});
+ svg.addEventListener('pointermove',ev=>{if(!V||!P.has(ev.pointerId))return;P.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+  if(geste&&P.size>=2){const m=mitte(),q=svgPunkt(m.x,m.y);KAM.z=Math.max(KAM.min,Math.min(KAM.max,geste.z0*m.d/geste.m.d));KAM.tx=q.x-geste.wx*KAM.z;KAM.ty=q.y-geste.wy*KAM.z;kamSetzen();return}
+  if(pan){const a=svgPunkt(pan.x,pan.y),b=svgPunkt(ev.clientX,ev.clientY);KAM.tx=pan.tx+b.x-a.x;KAM.ty=pan.ty+b.y-a.y;kamSetzen();return}
+  if(ev.pointerId===pid)tun(einheitBei(ev))});
+ const ende=ev=>{P.delete(ev.pointerId);if(P.size<2)geste=null;if(!P.size)pan=null;if(ev.pointerId!==pid)return;pid=null;strich=[];if(V&&V.bel.some(Boolean))speichere()};
+ svg.addEventListener('pointerup',ende);svg.addEventListener('pointercancel',ende);
+ svg.addEventListener('wheel',ev=>{if(!V)return;ev.preventDefault();kamZoom(Math.exp(-ev.deltaY*.0015),ev.clientX,ev.clientY)},{passive:false});
+ $('vzZin').onclick=()=>kamZoom(1.4);$('vzZout').onclick=()=>kamZoom(1/1.4);$('vzZfit').onclick=kamFit}
 
 // ---------- Lebensprobe ----------
 const idxTyp=(...T)=>V.U.map((u,i)=>i).filter(i=>T.includes(V.bel[i]));
@@ -313,6 +334,9 @@ const CSS=`
 #vzSvg{position:absolute;inset:8px;width:calc(100% - 16px);height:calc(100% - 16px);touch-action:none}
 #vzHint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--s1);border:2px solid var(--y);color:var(--fg);border-radius:999px;padding:8px 16px;font-size:15px;display:none;max-width:92%;text-align:center}
 #vzHint.on{display:block}
+#vzBrett,.vzBrett{touch-action:none}
+.vzZoom{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px}
+.vzZoom button{width:44px;height:44px;border-radius:12px;background:var(--s1);border:2px solid var(--l2);color:var(--fg);font-size:22px;font-weight:700;display:grid;place-items:center}
 #vzRes{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(29,29,28,.55);padding:16px}#vzRes.on{display:flex}
 .vzSeite{width:350px;flex:none;display:flex;flex-direction:column;gap:10px;overflow:auto;padding-right:2px}
 .vzBox{background:var(--s1);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -330,6 +354,9 @@ const CSS=`
 .vzW.ok .bar u{background:#5DD39E}.vzW.nein .bar u{background:var(--warn)}.vzW.nein .lb b{color:var(--warn2)}
 #vzGoBox{position:sticky;bottom:0;box-shadow:0 -10px 18px rgba(38,38,37,.9)}#vzGo{width:100%}#vzGo:disabled{opacity:.4}
 #vzVers{font-size:12px;color:var(--mut)}
+@media (orientation:landscape) and (max-height:600px){#vz{gap:6px}#vzWeg,.vzTipp,#vzVers,.vzT small{display:none}.vzMain{gap:8px}.vzSeite{width:300px;gap:6px}.vzBox{padding:8px;gap:6px}
+ .vzT{padding:4px 8px}.vzT i{width:20px;height:20px}#vzGoBox{position:static;box-shadow:none}#vzBal{display:grid!important;grid-template-columns:1fr 1fr;gap:4px 10px!important}
+ #vzGo{min-height:42px;font-size:15px}.vzZoom button{width:38px;height:38px}#vz header .mass{width:130px}}
 @media (orientation:portrait){#vz{gap:8px}.vzMain{flex-direction:column;gap:8px}.vzSeite{width:auto;flex:none;max-height:52%;gap:8px}.vzBrett{min-height:0}
  #vzPal{flex-direction:row;overflow-x:auto}.vzT{min-width:150px}.vzT small,.vzTipp,#vzVers{display:none}.vzBox{padding:10px}
  #vzBal{display:grid!important;grid-template-columns:1fr 1fr;gap:6px 14px!important}#vzGo{min-height:46px;font-size:16px}
@@ -341,7 +368,7 @@ const HTML=`<section id="vz" class="scr">
   <div class="mass"><div class="lb"><span>Biomasse</span><b id="vzBT"></b></div><div class="bar"><i id="vzBB"></i></div></div>
   <button class="ib" id="vzPause" aria-label="Pause und speichern"><svg width="20" height="20" viewBox="0 0 20 20"><rect x="4" y="3" width="4" height="14" fill="#F2F1EC"/><rect x="12" y="3" width="4" height="14" fill="#F2F1EC"/></svg></button></header>
  <div id="vzWeg"></div>
- <div class="vzMain"><div class="vzBrett"><svg id="vzSvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg><div id="vzHint"></div><div id="vzRes"></div></div>
+ <div class="vzMain"><div class="vzBrett"><svg id="vzSvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg><div id="vzHint"></div><div class="vzZoom"><button id="vzZin" aria-label="Heranzoomen">+</button><button id="vzZout" aria-label="Herauszoomen">−</button><button id="vzZfit" aria-label="Ganz zeigen">⤢</button></div><div id="vzRes"></div></div>
   <div class="vzSeite"><div class="vzBox"><div class="kl">Zelltypen · Kosten in Biomasse</div><div id="vzPal"></div><small class="vzTipp" style="color:var(--mut);font-size:12px">Antippen oder überwischen = setzen · belegte Zelle antippen = entfernen (50 % zurück)</small></div>
    <div class="vzBox" id="vzCheck"></div><div class="vzBox" id="vzEv"></div><div class="vzBox" id="vzGoBox"><div id="vzBal" style="display:flex;flex-direction:column;gap:10px"></div><div id="vzVers"></div><button class="btn pri" id="vzGo">Lebensprobe starten</button></div></div></div>
 </section>`;
