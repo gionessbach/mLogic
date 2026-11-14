@@ -106,6 +106,20 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .promo button span{font-size:12px;font-family:var(--font-body);font-weight:800}
 .moves{font-size:16px;line-height:1.8;column-count:2;font-variant-numeric:tabular-nums}
 .sec{margin-top:16px}
+.av svg{width:86%;height:86%;display:block}.av.big,.ph .av.big{width:66px;height:66px;font-size:40px}
+#train{overflow-y:auto}
+.who{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:6px 14px 6px 6px;text-align:left;line-height:1.15}
+.who .av{width:48px;height:48px;font-size:28px}
+.crew{display:flex}.crew .av{width:54px;height:54px;margin-right:-10px;border:3px solid var(--bg)}
+.isles{display:grid;gap:14px;padding-bottom:20px}
+.isle{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;text-align:left;width:calc(100% - 44px)}
+.isle:nth-child(even){margin-left:44px}.isle b{font-family:var(--font-display);font-size:21px}
+.isle.locked{opacity:.55}.isle:active{transform:translateY(3px)}
+.isst{font-family:var(--font-display);font-weight:800;font-size:18px;text-align:center;line-height:1.1;min-width:52px}
+.bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ink)}
+.bigstars{font-size:58px;text-align:center;letter-spacing:8px;line-height:1.1;margin:4px 0 8px}
+.trcard{display:flex;align-items:center;gap:14px;text-align:left;width:100%}.trcard b{font-family:var(--font-display);font-size:24px}
+.trcard .go{font-size:34px;font-weight:800;color:var(--ink-soft)}
 .startrow{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}.startrow.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -139,6 +153,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
         <button class="slot" data-act="pick" data-i="1"></button>
       </div>
     </div>
+    <button class="card trcard" data-act="train"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">Schach lernen mit Igel Ida und ihren Freunden – 5 Inseln, 28 Lektionen</div></div><span class="go" aria-hidden="true">›</span></button>
     <div class="card">
       <p class="lbl">Spielerprofile</p>
       <div class="plist" id="profList"></div>
@@ -149,6 +164,18 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
     </div>
     <p class="note">Gegen den Computer spielen: auf Weiß oder Schwarz tippen und einen Computergegner wählen.</p>
+  </div>
+</div>
+
+<div id="train" class="screen" hidden>
+  <div class="wrap">
+    <div class="topbar">
+      <button class="icon-btn" data-act="trhome" aria-label="Zurück zur Startseite"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="spacer"></span>
+      <button class="who" id="trWho" data-act="trwho"></button>
+    </div>
+    <div class="hero"><div class="crew" id="trCrew"></div><div style="margin-left:12px"><h1>Training</h1><p>Schach lernen – Insel für Insel</p></div></div>
+    <div class="isles" id="isles"></div>
   </div>
 </div>
 
@@ -163,6 +190,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 <div id="sheet" class="sheet-bg" hidden><div class="sheet" id="sheetIn"></div></div>
 
 <script src="three.min.js"></script>
+<script src="training.js"></script>
 <script>
 "use strict";
 const $=s=>document.querySelector(s);
@@ -186,7 +214,7 @@ const HELP=[['ziele','Zugziele zeigen','Punkte zeigen, wohin die Figur ziehen ka
   ['sonder','Sonderregeln erklären','Rochade, en passant und Umwandlung beim ersten Mal'],
   ['werte','Figurenwerte','Beim Schlagen den Wert der Figur zeigen']];
 const BADGES=[['partie1','Erste Partie'],['schach','Erstes Schach'],['rochade','Erste Rochade'],['dame','Dame geschlagen'],
-  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien'],['cpu','Computer besiegt']];
+  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien'],['cpu','Computer besiegt'],['figurenprofi','Figuren-Profi'],['matt1','Erstes Matt in 1'],['schachabwehr','Schach-Abwehr']];
 const AV=['k','q','r','b','n','p'],AC=['#FDD602','#5DCAA5','#F0997B','#85B7EB','#AFA9EC','#97C459'];
 const STYLES=[['A','3D Staunton'],['1','m-Klassik'],['2','Bauhaus']];
 const SPECIAL={rochade:'<b>Rochade:</b> König und Turm dürfen in einem Zug tauschen – der König zieht zwei Felder zum Turm, der Turm springt über ihn. Tippe dafür den König an.',
@@ -224,6 +252,39 @@ function newProfile(kid,guest){return{id:(guest?'g':'p')+Date.now().toString(36)
   av:kid?'n':'k',col:kid?1:0,kid:!!kid,help:defHelp(!!kid),undo:kid?3:0,clock:0,stats:{g:0,w:0,d:0,l:0},badges:{},seen:{},guest:!!guest}}
 const prof=id=>DB.profiles.find(p=>p.id===id)||null;
 const FALLBACK=newProfile(false,true);
+/* Figuren im Pixel-Stil wie Bit aus mCode */
+const PXC={K:'#262625',W:'#FFFFFF',Y:'#FDD602',B:'#7A5230',R:'#4E3220',b:'#A0703F',C:'#F3D9B1',P:'#F4A6A6',O:'#E8772E',G:'#8A7560',g:'#C2AE93'};
+function pix(W,H,draw){const g=[...Array(H)].map(()=>Array(W).fill(0)),set=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<W&&y<H)g[y][x]=c},
+  ell=(cx,cy,rx,ry,c)=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(((x-cx)/rx)**2+((y-cy)/ry)**2<=1)g[y][x]=c},pts=(a,c)=>a.forEach(q=>set(q[0],q[1],c)),
+  sg=(px,py,ax,ay,bx,by)=>(px-bx)*(ay-by)-(ax-bx)*(py-by),
+  tri=(x0,y0,x1,y1,x2,y2,c)=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++){const d1=sg(x,y,x0,y0,x1,y1),d2=sg(x,y,x1,y1,x2,y2),d3=sg(x,y,x2,y2,x0,y0);if(!((d1<0||d2<0||d3<0)&&(d1>0||d2>0||d3>0)))g[y][x]=c}};
+  draw({set,ell,pts,tri});let r='';for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x])r+=`<rect x="${x}" y="${y}" width="1.03" height="1.03" fill="${PXC[g[y][x]]}"/>`;
+  return`<svg viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`}
+const EYE=['.KK.','KWKK','KKKK','KKKW','.KK.'];
+const eyes=(D,xs,top)=>xs.forEach(ex=>{const x0=Math.floor(ex-1.5);EYE.forEach((r,j)=>[...r].forEach((c,i)=>{if(c!=='.')D.set(x0+i,top+j,c)}))});
+const FIG={
+ cpu1:pix(24,24,D=>{D.ell(12,14,10.5,8.5,'B');for(let k=0;k<8;k++){const t=Math.PI*(1.02+k*.137),c=Math.cos(t),n=Math.sin(t),bx=12+c*9,by=14+n*7.2;D.tri(bx-n*2.2,by+c*2.2,bx+n*2.2,by-c*2.2,12+c*12.6,14+n*11,'R')}
+   D.pts([[6,10],[9,7],[14,6],[18,9],[11,9],[16,11]],'b');D.ell(12,16.6,7.2,5.6,'C');eyes(D,[8.8,15.2],12);D.ell(12,18.6,1.4,1,'K');D.pts([[6,18],[7,18],[17,18],[18,18]],'P');D.pts([[11,20],[12,20.6],[13,20]],'K');
+   D.tri(8.5,1,12,3.5,8.5,6,'Y');D.tri(15.5,1,12,3.5,15.5,6,'Y');D.ell(12,3.5,1.1,1.1,'O');D.ell(8,22.6,2,1.3,'C');D.ell(16,22.6,2,1.3,'C')}),
+ cpu2:pix(24,24,D=>{D.tri(2,0,10,7,3,11,'O');D.tri(22,0,14,7,21,11,'O');D.tri(3,2,7,6,4,8,'K');D.tri(21,2,17,6,20,8,'K');D.ell(12,13,9.5,7.6,'O');
+   D.tri(1,13,9,11,9,20,'W');D.tri(23,13,15,11,15,20,'W');D.ell(12,17.2,4.8,3.6,'W');eyes(D,[8.6,15.4],9.5);D.ell(12,15.6,1.4,1,'K');
+   D.pts([[9,18],[10,19],[11,19],[12,19],[13,19],[14,18]],'K');D.ell(12,23,5.5,2.4,'O');D.ell(12,23.4,2.2,1.4,'W')}),
+ cpu3:pix(24,24,D=>{D.tri(2,0,8,6,4,9,'G');D.tri(22,0,16,6,20,9,'G');D.ell(12,13.5,10,10,'G');D.ell(12,18.5,6.3,5,'g');
+   D.pts([[9,17],[10,18],[11,17],[13,17],[14,18],[15,17],[10,20],[11,21],[12,20],[13,21],[14,20]],'G');
+   for(const ex of[7.6,16.4]){D.ell(ex,10.5,4.5,4.5,'K');D.ell(ex,10.5,3.5,3.5,'W')}D.pts([[11,10],[12,10],[13,10]],'K');eyes(D,[7.6,16.4],8);
+   D.tri(10.2,13.5,13.8,13.5,12,17,'Y');D.pts([[8,23],[9,23],[10,23],[14,23],[15,23],[16,23]],'Y')}),
+ cpu4:pix(24,24,D=>{D.ell(4.8,5,3.4,3.4,'B');D.ell(19.2,5,3.4,3.4,'B');D.ell(4.8,5,1.7,1.7,'C');D.ell(19.2,5,1.7,1.7,'C');D.ell(12,13,10,8.8,'B');
+   D.pts([[6,8],[8,6],[15,6],[18,8]],'b');D.ell(12,17,5.4,3.8,'C');D.ell(12,15.2,2.2,1.4,'K');eyes(D,[7.4,16.6],8.5);
+   D.pts([[12,16],[12,17],[11,18],[10,18],[13,18],[14,18]],'K');D.ell(12,23.4,7.5,2.6,'B');D.ell(12,23.6,3.5,1.6,'C')})};
+/* Stimmen: pro Tier eigene Stimmlage, natürliche Stimmen bevorzugt */
+const VOICE={def:{f:1,p:1,r:.95},cpu1:{f:1,p:1.22,r:1.03},cpu2:{f:0,p:1.12,r:1.08},cpu3:{f:1,p:.92,r:.86},cpu4:{f:0,p:.72,r:.84}};
+const BADV=/eddy|flo\b|grandma|grandpa|reed|rocko|sandy|shelley|bad news|bells|boing|bubbles|cellos|jester|organ|superstar|trinoids|whisper|wobble|zarvox|albert|fred|junior|ralph|kathy|good news|hysterical/i;
+const FEM=/anna|helena|petra|marlene|vicki|katja|hedda|sabine|klara|lena|amala|seraphina|katharina|elke|female|frau/i,MAL=/markus|yannick|martin|hans|stefan|conrad|viktor|killian|florian|jonas|bernd|male\b|mann/i;
+let VV=[];const loadV=()=>{try{VV=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang)&&!BADV.test(v.name))}catch(e){}};
+if(window.speechSynthesis){loadV();if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',loadV)}
+function voiceFor(f){const sc=v=>(/premium|enhanced|erweitert|neural|natural|siri|google|online|wavenet/i.test(v.name)?6:0)+((f?FEM:MAL).test(v.name)?3:0)-((f?MAL:FEM).test(v.name)?3:0)+(/de-DE/i.test(v.lang)?1:0);
+  return VV.slice().sort((a,b)=>sc(b)-sc(a))[0]||null}
+let vUnlocked=false;document.addEventListener('pointerdown',()=>{if(vUnlocked||!window.speechSynthesis)return;vUnlocked=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{capture:true});
 const CPU={};
 [['cpu1','Igel Ida','p',5,1,'Anfängerin – macht auch mal Fehler',0,{idle:['Hmm …','Mal sehen …','Wohin nur?'],cap:['Oh, die nehme ich!','Hihi, erwischt.'],chk:['Schach! Pass auf deinen König auf.'],lose:['Oh nein, meine Figur!','Huch, die war weg.']}],
  ['cpu2','Fuchs Fritz','n',2,2,'Frech – greift gern an',40,{idle:['Ich hab da eine Idee …','Angriff!','Hehe …'],cap:['Schnapp!','Meins!'],chk:['Schach! Überraschung!'],lose:['Mist, gut gemacht.','Hey, das war meine!']}],
@@ -273,8 +334,9 @@ function make(st,m){const b=st.b.slice(),t=st.turn;
   for(const s of[m.from,m.to]){if(s===63)rm('K');if(s===56)rm('Q');if(s===7)rm('k');if(s===0)rm('q')}
   return{b,turn:t==='w'?'b':'w',cast:c,ep:m.dbl?(m.from+m.to)/2:-1,half:(m.p.toLowerCase()==='p'||m.cap)?0:st.half+1,full:st.full+(t==='b'?1:0)}}
 const kingSq=(b,c)=>b.indexOf(c==='w'?'K':'k');
-function legal(st,only){const op=st.turn==='w'?'b':'w';return gen(st,only).filter(m=>{const n=make(st,m);return!attackers(n.b,kingSq(n.b,st.turn),op).length})}
-const inCheck=st=>attackers(st.b,kingSq(st.b,st.turn),st.turn==='w'?'b':'w').length>0;
+const kAtt=(b,c)=>{const k=kingSq(b,c);return k>=0&&attackers(b,k,c==='w'?'b':'w').length>0};
+function legal(st,only){return gen(st,only).filter(m=>!kAtt(make(st,m).b,st.turn))}
+const inCheck=st=>kAtt(st.b,st.turn);
 const sqn=s=>'abcdefgh'[s&7]+(8-(s>>3));
 function san(st,m,all){if(m.castle)return m.castle==='K'?'0-0':'0-0-0';const k=m.p.toLowerCase();let s='';
   if(k==='p'){if(m.cap)s='abcdefgh'[m.from&7]+'x';s+=sqn(m.to);if(m.promo)s+='='+DE[m.promo]}
@@ -307,10 +369,10 @@ let NODES=0,DEAD=0,ABORT=false;
 const ordered=ms=>ms.map(m=>({m,o:(m.cap?1000+10*PV[m.cap.toLowerCase()]-PV[m.p.toLowerCase()]/10:0)+(m.promo?PV[m.promo]:0)})).sort((a,b)=>b.o-a.o).map(x=>x.m);
 const tick=()=>{if((++NODES&511)===0&&performance.now()>DEAD)ABORT=true};
 function qs(st,a,b,d){tick();const sp=(st.turn==='w'?1:-1)*evalW(st.b);if(sp>=b)return sp;if(sp>a)a=sp;if(d>5||ABORT)return a;const op=st.turn==='w'?'b':'w';
-  for(const m of ordered(gen(st).filter(m=>m.cap||m.promo))){const n=make(st,m);if(attackers(n.b,kingSq(n.b,st.turn),op).length)continue;const v=-qs(n,-b,-a,d+1);if(ABORT)return a;if(v>=b)return v;if(v>a)a=v}
+  for(const m of ordered(gen(st).filter(m=>m.cap||m.promo))){const n=make(st,m);if(kAtt(n.b,st.turn))continue;const v=-qs(n,-b,-a,d+1);if(ABORT)return a;if(v>=b)return v;if(v>a)a=v}
   return a}
 function ab(st,d,a,b,ply){tick();if(ABORT)return 0;if(d<=0)return qs(st,a,b,0);const op=st.turn==='w'?'b':'w';let any=false,best=-1e9;
-  for(const m of ordered(gen(st))){const n=make(st,m);if(attackers(n.b,kingSq(n.b,st.turn),op).length)continue;any=true;
+  for(const m of ordered(gen(st))){const n=make(st,m);if(kAtt(n.b,st.turn))continue;any=true;
     const v=-ab(n,d-1,-b,-a,ply+1);if(ABORT)return 0;if(v>best)best=v;if(v>a)a=v;if(a>=b)break}
   return any?best:(inCheck(st)?-100000+ply:0)}
 function cpuPick(st,P){const L=P.lvl,ms=legal(st);if(ms.length===1)return ms[0];
@@ -329,7 +391,7 @@ const FLIPV=()=>!!(G&&isCpu(0)&&!isCpu(1));
 function maybeCpu(){if(!G||!running()||thinking||$('#game').hidden)return;const i=curI();if(!isCpu(i))return;const P=PL(i);
   thinking=true;msgs[i]=pick(P.lines.idle)+' <span class="ps">denkt nach …</span>';renderPanels();
   const go=()=>{if(!G||!running()||curI()!==i||$('#game').hidden){thinking=false;renderPanels();return}if(anim){setTimeout(go,120);return}
-    const m=cpuPick(cur(),P);thinking=false;doMove(m);if(!G.res){const n=cur();msgs[i]=inCheck(n)?pick(P.lines.chk):m.cap?pick(P.lines.cap):null;renderPanels()}};
+    const m=cpuPick(cur(),P);thinking=false;doMove(m);if(!G.res){const n=cur(),hu=PL(1-i);msgs[i]=inCheck(n)?pick(P.lines.chk):m.cap?pick(P.lines.cap):null;renderPanels();if(msgs[i]&&(G.tr||(hu.help&&hu.help.erklaeren)))speak(msgs[i],P.id)}};
   setTimeout(go,650)}
 
 /* ---------- Spielzustand ---------- */
@@ -340,17 +402,18 @@ const curI=()=>cur().turn==='w'?0:1;
 const PL=i=>refP(G.p[i]);
 const nm=i=>PL(i).name||(i?'Schwarz':'Weiß');
 const running=()=>G&&!G.res&&replay<0;
-function speak(t){try{if(!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,' '));u.lang='de-DE';u.rate=.95;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function speak(t,who){try{if(!window.speechSynthesis||!t)return;if(!VV.length)loadV();const c=VOICE[who]||VOICE.def,u=new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g,' ').replace(/[★☆]/g,'').replace(/\s+/g,' ').trim());
+  u.lang='de-DE';const v=voiceFor(c.f);if(v)u.voice=v;u.pitch=c.p;u.rate=c.r;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 
 function startGame(){
   const refs=DB.sel.map((r,i)=>r||newProfile(i===1,true));
   G=DB.game={p:refs,states:[initState()],hist:[],keys:[],clock:refs.map(r=>{const c=refP(r).clock;return c?c*60000:null}),undo:[0,0],res:null,offer:null};
   G.keys.push(key(G.states[0]));replay=-1;persist();enterGame();}
 function enterGame(){sel=null;explain=null;anim=null;msgs=[null,null];confirmResign=-1;
-  $('#home').hidden=true;$('#game').hidden=false;
+  $('#home').hidden=true;$('#train').hidden=true;$('#game').hidden=false;
   if(DB.style==='A'&&!init3D())DB.style='1';
   thinking=false;afterTurn();renderPanels();requestAnimationFrame(layout);setTimeout(maybeCpu,400);}
-function leaveGame(){$('#game').hidden=true;$('#home').hidden=false;closeSheet();replay=-1;renderHome();}
+function leaveGame(){const wasTr=!!(G&&G.tr);$('#game').hidden=true;closeSheet();replay=-1;thinking=false;if(wasTr){G=DB.game;$('#train').hidden=false;renderTrain()}else{$('#home').hidden=false;renderHome()}}
 
 function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.help||{};msgs[j]=null;
   if(inCheck(st))msgs[j]=H.schach?'<b>Schach!</b> Dein König wird angegriffen (orange Ring). Grün umrandete Figuren können ihn retten.':'<b>Schach!</b>';
@@ -359,7 +422,7 @@ function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.hel
       if(ok&&!p.seen[t]){p.seen[t]=1;msgs[j]=SPECIAL[t]+' <button data-act="say" data-i="'+j+'">Vorlesen</button>';break}}
   if(G.offer===1-j)msgs[j]=(msgs[j]?msgs[j]+'<br>':'')+esc(nm(1-j))+' bietet Remis an.<br><button data-act="acc" data-i="'+j+'">Annehmen</button><button data-act="dec" data-i="'+j+'">Ablehnen</button>';}
 
-function doMove(m){const st=cur(),all=legal(st),i=curI(),s=san(st,m,all),n=make(st,m),pr=PL(i);
+function doMove(m){if(G.tr)return trMove(m);const st=cur(),all=legal(st),i=curI(),s=san(st,m,all),n=make(st,m),pr=PL(i);
   G.hist.push({from:m.from,to:m.to,san:s,cap:m.cap||null,by:i});G.states.push(n);G.keys.push(key(n));
   if(G.offer===1-i)G.offer=null;sel=null;explain=null;msgs[i]=null;confirmResign=-1;
   if(m.cap&&pr.help&&pr.help.werte){const k=m.cap.toLowerCase();msgs[i]=`Geschlagen: <b>${NAME[k]}</b> · +${VAL[k]} ${VAL[k]===1?'Punkt':'Punkte'}`}
@@ -369,7 +432,7 @@ function doMove(m){const st=cur(),all=legal(st),i=curI(),s=san(st,m,all),n=make(
   anim={p:n.b[m.to],from:m.from,to:m.to,t0:performance.now(),k:0};
   checkEnd();if(G.res&&G.res.t==='matt')award('matt');
   if(nb.length)msgs[i]=(msgs[i]?msgs[i]+'<br>':'')+'Neues Abzeichen: <b>'+nb.map(k=>BADGES.find(b=>b[0]===k)[1]).join(', ')+'</b>';
-  if(m.cap&&isCpu(1-i)&&!G.res)msgs[1-i]=pick(PL(1-i).lines.lose);
+  if(m.cap&&isCpu(1-i)&&!G.res){msgs[1-i]=pick(PL(1-i).lines.lose);if(pr.help&&pr.help.erklaeren)speak(msgs[1-i],PL(1-i).id)}
   afterTurn();persist();renderPanels();if(is3())sync3D();kick();maybeCpu();}
 function checkEnd(){const st=cur(),ms=legal(st),i=curI();let r=null;
   if(!ms.length)r=inCheck(st)?{t:'matt',w:1-i,text:`Schachmatt! ${nm(1-i)} gewinnt.`}:{t:'patt',w:null,text:`Patt – unentschieden. ${nm(i)} kann nicht ziehen, steht aber nicht im Schach.`};
@@ -388,8 +451,9 @@ function undo(i){if(!G.hist.length||anim||thinking)return;const k=(isCpu(1-i)&&G
 /* ---------- Markierungen ---------- */
 function marks(){const st=view(),M={last:null,sel:null,tg:[],thr:[],chk:null,atk:[],mov:[],exp:false};
   const h=G.hist[(replay<0?G.hist.length:replay)-1];if(h)M.last=[h.from,h.to];
+  if(G.tr){M.star=G.tr.stars;M.hint=G.tr.hint;M.qm=G.tr.qmark;if(G.tr.L.t==='quiz')return M}
   if(!running())return M;
-  const t=st.turn,H=PL(curI()).help||{};
+  const t=st.turn,H=G.tr?Object.assign({},PL(0).help,{ziele:true}):(PL(curI()).help||{});
   if(explain!=null){M.sel=explain;M.exp=true;const fs=Object.assign({},st,{turn:col(st.b[explain])});M.tg=legal(fs,explain).map(m=>({sq:m.to,cap:!!m.cap}));return M}
   if(inCheck(st)){M.chk=kingSq(st.b,t);if(H.schach){M.atk=attackers(st.b,M.chk,t==='w'?'b':'w');M.mov=[...new Set(legal(st).map(m=>m.from))]}}
   if(H.bedroht)M.thr=threatened(st);
@@ -407,7 +471,11 @@ function drawMarks(x,pad,q,M,sty,F){const D=s=>F?63-s:s;
   M.thr.forEach(s=>ring(s,'#D8433A',.07,.46));
   for(const t of M.tg){const c=M.exp?'#3A7BD5':t.risk==='g'?'#2E9E5B':t.risk==='y'?'#F2A900':t.risk==='r'?'#D8433A':'rgba(38,38,37,.42)';
     if(t.cap)ring(t.sq,c,.1,.42);else{const[cx,cy]=C(t.sq);x.beginPath();x.arc(cx,cy,q*(t.risk?.19:.15),0,7);x.fillStyle=c;x.fill();
-      if(t.risk){x.lineWidth=q*.03;x.strokeStyle='rgba(38,38,37,.55)';x.stroke()}}}}
+      if(t.risk){x.lineWidth=q*.03;x.strokeStyle='rgba(38,38,37,.55)';x.stroke()}}}
+  (M.qm||[]).forEach(s=>{s=D(s);x.lineWidth=q*.09;x.strokeStyle='#3A7BD5';x.strokeRect(pad+(s&7)*q+q*.05,pad+(s>>3)*q+q*.05,q*.9,q*.9)});
+  (M.hint||[]).forEach(s=>ring(s,'#3A7BD5',.1,.45));
+  (M.star||[]).forEach(s=>{const[cx,cy]=C(s);x.beginPath();for(let k=0;k<10;k++){const r=(k%2?.16:.38)*q,a=-Math.PI/2+k*Math.PI/5;x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}
+    x.closePath();x.fillStyle='#FDD602';x.fill();x.lineWidth=q*.035;x.strokeStyle='#262625';x.stroke()})}
 
 /* ---------- 2D-Bretter (m-Klassik, Bauhaus) ---------- */
 function draw2D(M){const c=$('#bc'),x=c.getContext('2d'),S=c.width,sty=DB.style,st=view();let pad=0,L='#F1EFE8',D='#D3D1C7';
@@ -513,9 +581,12 @@ function showExplain(sq){const p=cur().b[sq],k=p.toLowerCase(),i=curI();explain=
   const v=k==='k'?'Wert: unbezahlbar – ohne König ist die Partie verloren.':`Wert: ${VAL[k]} ${VAL[k]===1?'Punkt':'Punkte'}.`;
   msgs[i]=`<b>${NAME[k]}</b> (${col(p)==='w'?'weiß':'schwarz'}) – ${RULE[k]} ${v} Blaue Punkte zeigen seine Ziele. <button data-act="say" data-i="${i}">Nochmal vorlesen</button>`;
   speak(RULE[k]+' '+v);renderPanels();draw()}
-function tap(sq){if(!running()||anim||sq<0||thinking||isCpu(curI()))return;const st=cur();
+function tap(sq){if(!running()||anim||sq<0||thinking||isCpu(curI())||(G.tr&&G.tr.L.t==='quiz'))return;const st=cur();
   if(explain!=null){explain=null;msgs[curI()]=null;afterTurn();renderPanels()}
-  if(sel!=null){const ms=legal(st,sel).filter(m=>m.to===sq);if(ms.length){if(ms.length>1)promoPick(ms);else doMove(ms[0]);return}}
+  if(sel!=null){const ms=legal(st,sel).filter(m=>m.to===sq);if(ms.length){
+    if(G.tr){const T=G.tr,m=ms.find(x=>!x.promo||x.promo==='q');if(T.L.t==='puzzle'&&!trCheck(T.L,st,m)){T.mist++;msgs[1]=trWhy(T.L,st,m);speak(msgs[1],ISLANDS[T.isl].tr);sel=null;
+      if(T.mist>=2&&!T.hl)trHint();else{renderPanels();draw()}return}doMove(m);return}
+    if(ms.length>1)promoPick(ms);else doMove(ms[0]);return}}
   const p=st.b[sq];sel=(p&&col(p)===st.turn&&sq!==sel)?sq:null;draw()}
 function promoPick(ms){const i=curI(),w=i===0;
   openSheet(`<h2>Bauer wird zu …</h2><p>Meist ist die Dame die beste Wahl.</p><div class="promo">${'qrbn'.split('').map(k=>`<button data-act="promo" data-k="${k}" style="color:${w?'#fff':'#262625'};-webkit-text-stroke:1.5px #262625">${GL[k]+FE}</button>`).join('')}</div>`,i===1&&DB.table);
@@ -528,8 +599,9 @@ const ICON={undo:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor"
   menu:'<svg viewBox="0 0 24 24" style="fill:currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>',
   prev:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   next:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  say:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
   x:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
-const avHTML=p=>`<div class="av" style="background:${AC[p.col]||AC[0]}">${GL[p.av]||GL.k}${FE}</div>`;
+const avHTML=(p,big)=>`<div class="av${big?' big':''}" style="background:${AC[p.col]||AC[0]}">${p.cpu&&FIG[p.id]?FIG[p.id]:(GL[p.av]||GL.k)+FE}</div>`;
 const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const pbtn=(a,i,l)=>`<button class="pb" data-act="${a}" data-i="${i}" aria-label="${l}">${ICON[a]}</button>`;
 function panelHTML(i){const p=PL(i),st=view(),n=replay<0?G.hist.length:replay,hs=G.hist.slice(0,n);
@@ -544,7 +616,7 @@ function panelHTML(i){const p=PL(i),st=view(),n=replay<0?G.hist.length:replay,hs
   h+='</div>';if(msgs[i])h+=`<div class="msg">${msgs[i]}</div>`;
   if(G.res&&replay<0)h+=`<div class="msg">${esc(G.res.text)}</div>`;
   return h}
-function renderPanels(){if(!G)return;const F=FLIPV();$('#pW').innerHTML=panelHTML(F?1:0);$('#pB').innerHTML=panelHTML(F?0:1);$('#pB').classList.toggle('flip',!!DB.table&&!isCpu(0)&&!isCpu(1))}
+function renderPanels(){if(!G)return;if(G.tr){const[a,b]=trPanels();$('#pB').innerHTML=a;$('#pW').innerHTML=b;$('#pB').classList.remove('flip');return}const F=FLIPV();$('#pW').innerHTML=panelHTML(F?1:0);$('#pB').innerHTML=panelHTML(F?0:1);$('#pB').classList.toggle('flip',!!DB.table&&!isCpu(0)&&!isCpu(1))}
 
 /* ---------- Uhr ---------- */
 let lastT=performance.now(),saveT=0;
@@ -602,6 +674,7 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
   document.querySelectorAll('.slot').forEach(b=>{const i=+b.dataset.i,p=refP(DB.sel[i]);
     b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.cpu?'Computer · '+'★'.repeat(p.lvl):(p.kid?'Kind':'Erwachsen')+(p.guest?' · Gast':'')}</small>`});
   $('#profList').innerHTML=DB.profiles.length?DB.profiles.map(p=>`<div class="pi"><button data-act="edit" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button></div>`).join(''):'<p class="ps" style="margin:0">Lege Profile an, damit Hilfen, Bilanz und Abzeichen gespeichert bleiben.</p>';
+  $('#homeCrew').innerHTML=Object.values(CPU).slice(0,2).map(c=>avHTML(c)).join('');
   const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
 function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
@@ -627,9 +700,84 @@ function showEditor(){const p=ED,isNew=!prof(p.id);
   <button class="btn light" data-act="close">Abbrechen</button></div>`)}
 function keepName(){const el=$('#edName');if(el&&ED)ED.name=el.value}
 
+/* ---------- Training ---------- */
+const sqIdx=q=>(8-+q[1])*8+'abcdefgh'.indexOf(q[0]);
+const uci=m=>sqn(m.from)+sqn(m.to);
+function parsePos(str){const b=Array(64).fill(null),stars=[];str.split(/\s+/).forEach(t=>{const[pc,q]=t.split('@');if(pc==='*')stars.push(sqIdx(q));else b[sqIdx(q)]=pc});return{st:{b,turn:'w',cast:'',ep:-1,half:0,full:1},stars}}
+const trainer=()=>refP(DB.trainer||(DB.trainer=newProfile(true,true)));
+const trStars=(p,L)=>(p.training||{})[L.id]||0;
+const islStars=(p,I)=>I.lessons.reduce((a,L)=>a+trStars(p,L),0);
+const islOpen=(p,k)=>k===0||islStars(p,ISLANDS[k-1])>=Math.ceil(ISLANDS[k-1].lessons.length*1.5);
+const LOCK='<svg viewBox="0 0 24 24" width="28" height="28" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const starRow=n=>`<span style="color:#F2A900">${'★'.repeat(n)}</span><span style="color:var(--line)">${'★'.repeat(3-n)}</span>`;
+function renderTrain(){const p=trainer();$('#trWho').innerHTML=`${avHTML(p)}<span><b>${esc(p.name||'Spieler')}</b><br><span class="ps">trainiert · wechseln</span></span>`;
+  $('#trCrew').innerHTML=Object.values(CPU).map(c=>avHTML(c)).join('');
+  $('#isles').innerHTML=ISLANDS.map((I,k)=>{const st=islStars(p,I),mx=I.lessons.length*3,open=islOpen(p,k);
+    return`<button class="isle${open?'':' locked'}" data-act="isle" data-v="${k}"><div class="av big" style="background:${AC[I.col]}">${GL[I.av]+FE}</div><div class="grow"><b>${k+1}. ${I.name}</b><div class="ps">${open?I.desc+' · mit '+CPU[I.tr].name:'Gesperrt – sammle erst Sterne auf der Insel davor'}</div><div class="bar"><i style="width:${Math.round(st/mx*100)}%"></i></div></div><div class="isst">${open?st+'/'+mx+'<br><span style="color:#F2A900">★</span>':LOCK}</div></button>`}).join('')}
+function showIsle(k){const I=ISLANDS[k],p=trainer();if(!islOpen(p,k)){speak('Diese Insel ist noch gesperrt. Sammle zuerst Sterne auf der Insel davor.',ISLANDS[k-1].tr);return}
+  openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>${I.name}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><p class="ps">${I.desc} · mit ${CPU[I.tr].name}</p>
+  <div class="tiles t3">${I.lessons.map((L,j)=>`<button class="tile${trStars(p,L)?' on':''}" data-act="lesson" data-i="${k}" data-v="${j}"><span style="font-family:var(--font-display);font-size:30px;line-height:1">${j+1}</span>${esc(L.title)}<small style="font-size:17px;letter-spacing:2px">${starRow(trStars(p,L))}</small></button>`).join('')}</div>`)}
+function showTrWho(){openSheet(`<div class="shead"><h2>Wer trainiert?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><div class="plist">${DB.profiles.map(p=>`<div class="pi"><button data-act="trpick" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${ISLANDS.reduce((a,I)=>a+islStars(p,I),0)} Sterne gesammelt</span></span></button></div>`).join('')}
+  <div class="pi"><button data-act="trpick" data-id="">${avHTML({av:'n',col:1})}<span><b>Gast</b><br><span class="ps">ohne Profil, nur auf diesem Gerät</span></span></button></div></div>`)}
+const trText=()=>{const T=G.tr;return T.L.t==='quiz'?(T.qi===0?T.L.text+' ':'')+T.L.q[T.qi].text:T.L.text};
+function startLesson(k,j){const I=ISLANDS[k],L=I.lessons[j];closeSheet();trainer();const P=parsePos(L.t==='quiz'?L.q[0].pos:L.pos);
+  G={p:[DB.trainer,I.tr],states:[P.st],hist:[],keys:[key(P.st)],clock:[null,null],undo:[0,0],res:null,offer:null,
+    tr:{L,isl:k,idx:j,moves:0,mist:0,stars:P.stars,hint:[],hl:0,qi:0,qmark:L.t==='quiz'&&L.q[0].mark?[sqIdx(L.q[0].mark)]:[]}};
+  replay=-1;enterGame();speak(trText(),I.tr)}
+function trPanels(){const T=G.tr,L=T.L,I=ISLANDS[T.isl],tp=PL(1),me=PL(0),b2=(a,ic,l)=>`<button class="pb" data-act="${a}" aria-label="${l}">${ic}</button>`;
+  let top=`<div class="ph">${avHTML(tp,1)}<div class="grow"><div class="pn">${esc(L.title)}</div><div class="ps">${tp.name} · ${I.name} ${T.idx+1}/${I.lessons.length}</div></div>${b2('trsay',ICON.say,'Vorlesen')}${L.t==='puzzle'&&!G.res?b2('trhint',ICON.help,'Tipp'):''}${b2('trrestart',ICON.undo,'Neu starten')}${b2('trx',ICON.x,'Zur Inselkarte')}</div><div class="msg">${msgs[1]||esc(trText())}</div>`;
+  if(L.t==='quiz'&&!G.res){const Q=L.q[T.qi];top+=`<div class="tiles${Q.opts.length>2?' t3':''}">${Q.opts.map((o,n)=>`<button class="tile" data-act="qans" data-v="${n}" style="min-height:64px;font-size:19px">${o[0]}</button>`).join('')}</div>`}
+  const stat=L.t==='solo'?`Züge: ${T.moves} · Ziel: ${L.par}`:L.t==='puzzle'?`Fehlversuche: ${T.mist}`:L.t==='quiz'?`Frage ${T.qi+1} von ${L.q.length}`:'Bring einen Bauern ganz nach oben!';
+  const bot=`<div class="ph">${avHTML(me)}<div class="grow"><div class="pn">${esc(me.name||'Du')}${running()&&curI()===0&&L.t!=='quiz'?' <span class="turn">am Zug</span>':''}</div><div class="ps">${stat}</div></div><span class="clk" style="letter-spacing:2px">${starRow(trStars(me,L))}</span></div>`;
+  return[top,bot]}
+function trCheck(L,st,m){const n=make(st,m),q=L.sq?sqIdx(L.sq):-1;switch(L.goal){
+  case'mate':return inCheck(n)&&!legal(n).length;case'ok':return L.ok.includes(uci(m));
+  case'save':return m.from===q&&!attackers(n.b,m.to,'b').length;case'defend':return m.from!==q&&!!n.b[q]&&attackers(n.b,q,'w').length>0;
+  case'kingmove':return m.p==='K';case'block':return m.p!=='K'&&!m.cap;case'capcheck':return m.to===q;default:return true}}
+function trWhy(L,st,m){const n=make(st,m),q=L.sq?sqIdx(L.sq):-1;switch(L.goal){
+  case'mate':return inCheck(n)?'Schach – aber der König kann sich noch retten. Probier es nochmal!':'Das ist noch kein Schach. Probier es nochmal!';
+  case'save':return m.from!==q?'Bring zuerst die bedrohte Figur in Sicherheit.':'Dort kann sie geschlagen werden. Such ein sicheres Feld!';
+  case'defend':return m.from===q?'Lass die Figur stehen und decke sie mit einer anderen.':'So ist die Figur noch nicht gedeckt.';
+  case'kingmove':return'Diesmal soll der König selbst wegziehen.';case'block':return m.p==='K'?'Der König bleibt stehen – stell eine Figur dazwischen.':'Stell eine Figur zwischen Angreifer und König.';
+  case'capcheck':return'Schlag die Figur, die Schach gibt.';default:return L.why||'Probier einen anderen Zug.'}}
+function trHint(){const T=G.tr,st=cur(),sol=legal(st).find(m=>trCheck(T.L,st,m));if(!sol||G.res)return;T.hl=Math.min(2,T.hl+1);T.mist=Math.max(T.mist,T.hl);
+  T.hint=T.hl===1?[sol.from]:[sol.from,sol.to];msgs[1]=T.hl===1?'Tipp: Mit der blau umrandeten Figur geht es.':'Tipp: Zieh sie auf das blau umrandete Feld.';speak(msgs[1],ISLANDS[T.isl].tr);renderPanels();draw()}
+function trMove(m){const T=G.tr,L=T.L,st=cur(),i=curI(),n=make(st,m);if(L.t==='solo'){n.turn='w';n.ep=-1}
+  G.hist.push({from:m.from,to:m.to,san:'',cap:m.cap||null,by:i});G.states.push(n);G.keys.push(key(n));sel=null;explain=null;T.hint=[];
+  anim={p:n.b[m.to],from:m.from,to:m.to,t0:performance.now(),k:0};if(i===0){T.moves++;msgs[1]=null}
+  if(L.t==='solo'){T.stars=T.stars.filter(q=>q!==m.to);if(!T.stars.length&&!n.b.some(c=>c&&c>='a'))trDone(T.moves<=L.par?3:T.moves<=L.par+2?2:1,T.moves<=L.par?'Perfekt – kürzer geht es nicht!':'Geschafft! Mit weniger Zügen gibt es mehr Sterne.')}
+  else if(L.t==='puzzle')trDone(T.mist===0?3:T.mist===1?2:1,'Richtig gelöst!');
+  else if(L.t==='war'){if(m.promo){if(i===0)trDone(3,'Geschafft – dein Bauer ist durch!');else trFail(PL(1).name+' war schneller. Versuch es nochmal!')}
+    else if(!legal(n).length)trDone(1,'Keiner kann mehr ziehen – unentschieden.')}
+  renderPanels();if(is3())sync3D();kick();maybeCpu()}
+function trDone(stars,text){const T=G.tr,L=T.L,p=PL(0),I=ISLANDS[T.isl];G.res={t:'tr',w:null,text:''};p.training=p.training||{};p.training[L.id]=Math.max(p.training[L.id]||0,stars);
+  const nb=[],aw=(k,ok)=>{if(ok&&!p.guest&&!p.badges[k]){p.badges[k]=Date.now();nb.push(k)}};
+  aw('figurenprofi',ISLANDS[0].lessons.every(l=>trStars(p,l)));aw('matt1',L.goal==='mate');aw('schachabwehr',ISLANDS[3].lessons.every(l=>trStars(p,l)));
+  persist();const next=T.idx<I.lessons.length-1,praise=stars>=3?'Super!':stars===2?'Gut gemacht!':'Geschafft!';speak(praise+' '+text,I.tr);
+  setTimeout(()=>{if(!G||G.tr!==T)return;openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>${praise}</h2></div><div class="bigstars">${starRow(stars)}</div><p>${esc(text)}</p>
+    ${nb.length?`<p><b>Neues Abzeichen:</b> ${nb.map(k=>BADGES.find(b=>b[0]===k)[1]).join(', ')}</p>`:''}
+    <div class="sec tiles"><button class="tile" data-act="trrestart">${MICON.replay}Nochmal</button><button class="tile dark" data-act="${next?'trnext':'trx'}">${MICON.play}${next?'Nächste Lektion':'Zur Inselkarte'}</button></div>`)},800)}
+function trFail(text){const T=G.tr,I=ISLANDS[T.isl];G.res={t:'tr',w:null,text:''};speak(text,I.tr);
+  setTimeout(()=>{if(!G||G.tr!==T)return;openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>Fast!</h2></div><p>${esc(text)}</p><div class="sec tiles"><button class="tile" data-act="trx">${MICON.home}Zur Inselkarte</button><button class="tile dark" data-act="trrestart">${MICON.replay}Nochmal</button></div>`)},800)}
+
 /* ---------- Klicks ---------- */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,i=b.dataset.i!=null?+b.dataset.i:null,v=b.dataset.v;
   switch(a){
+  case'train':$('#home').hidden=true;$('#train').hidden=false;renderTrain();break;
+  case'trhome':$('#train').hidden=true;$('#home').hidden=false;renderHome();break;
+  case'trwho':showTrWho();break;
+  case'trpick':DB.trainer=b.dataset.id||(DB.trainer&&typeof DB.trainer==='object'?DB.trainer:newProfile(true,true));persist();closeSheet();renderTrain();break;
+  case'isle':showIsle(+v);break;
+  case'lesson':startLesson(i,+v);break;
+  case'trx':leaveGame();break;
+  case'trrestart':if(G&&G.tr){const T=G.tr;startLesson(T.isl,T.idx)}break;
+  case'trnext':if(G&&G.tr){const T=G.tr;startLesson(T.isl,T.idx+1)}break;
+  case'trsay':if(G&&G.tr)speak(msgs[1]||trText(),ISLANDS[G.tr.isl].tr);break;
+  case'trhint':if(G&&G.tr)trHint();break;
+  case'qans':{const T=G&&G.tr;if(!T||G.res)break;const Q=T.L.q[T.qi],who=ISLANDS[T.isl].tr;
+    if(Q.opts[+v][1]){T.qi++;if(T.qi>=T.L.q.length){msgs[1]='Alle Fragen richtig!';trDone(T.mist===0?3:T.mist===1?2:1,'Alle Fragen beantwortet!');renderPanels();draw();break}
+      const N=T.L.q[T.qi],P=parsePos(N.pos);G.states=[P.st];G.keys=[key(P.st)];T.qmark=N.mark?[sqIdx(N.mark)]:[];msgs[1]='Richtig! '+esc(N.text);speak('Richtig! '+N.text,who);if(is3())sync3D();renderPanels();draw()}
+    else{T.mist++;msgs[1]='Nicht ganz – schau nochmal genau hin. '+esc(Q.text);speak('Nicht ganz. Schau nochmal genau hin.',who);renderPanels()}break}
   case'night':DB.night=!DB.night;persist();renderHome();break;
   case'style':DB.style=v;persist();renderHome();break;
   case'table':DB.table=!DB.table;persist();renderHome();break;
