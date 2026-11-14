@@ -460,7 +460,7 @@ const FLIPV=()=>!!(G&&isCpu(0)&&!isCpu(1));
 function maybeCpu(){if(!G||!running()||thinking||$('#game').hidden)return;const i=curI();if(!isCpu(i))return;const P=PL(i);
   thinking=true;msgs[i]=pick(P.lines.idle)+' <span class="ps">denkt nach …</span>';renderPanels();
   const go=()=>{if(!G||!running()||curI()!==i||$('#game').hidden){thinking=false;renderPanels();return}if(anim){setTimeout(go,120);return}
-    const m=cpuPick(cur(),P);thinking=false;doMove(m);if(!G.res){const n=cur(),hu=PL(1-i);msgs[i]=inCheck(n)?pick(P.lines.chk):m.cap?pick(P.lines.cap):null;renderPanels();if(msgs[i]&&(G.tr||(hu.help&&hu.help.erklaeren)))speak(msgs[i],P.id)}};
+    const m=cpuPick(cur(),P);thinking=false;doMove(m);if(!G.res){const n=cur(),hu=PL(1-i);msgs[i]=inCheck(n)?pick(P.lines.chk):m.cap?pick(P.lines.cap):null;renderPanels();if(msgs[i]&&!inCheck(n)&&(G.tr||(hu.help&&hu.help.erklaeren)))speak(msgs[i],P.id)}};
   setTimeout(go,650)}
 
 /* ---------- Spielzustand ---------- */
@@ -486,6 +486,7 @@ function leaveGame(){const wasTr=!!(G&&G.tr);$('#game').hidden=true;closeSheet()
 
 function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.help||{};msgs[j]=null;
   if(inCheck(st))msgs[j]=H.schach?'<b>Schach!</b> Dein König wird angegriffen (orange Ring). Grün umrandete Figuren können ihn retten.':'<b>Schach!</b>';
+  if(inCheck(st)&&!p.cpu&&(H.schach||H.erklaeren))speak(H.schach?'Schach! Dein König wird angegriffen. Die grün umrandeten Figuren können ihn retten.':'Schach!');
   else if(H.sonder){const ms=legal(st);p.seen=p.seen||{};
     for(const[t,ok]of[['rochade',ms.some(m=>m.castle)],['enpassant',ms.some(m=>m.ep)],['umwandlung',ms.some(m=>m.promo)]])
       if(ok&&!p.seen[t]){p.seen[t]=1;msgs[j]=SPECIAL[t]+' <button data-act="say" data-i="'+j+'">Vorlesen</button>';break}}
@@ -509,7 +510,7 @@ function checkEnd(){const st=cur(),ms=legal(st),i=curI();let r=null;
   else if(st.half>=100)r={t:'50',w:null,text:'Remis nach der 50-Züge-Regel: 50 Züge ohne Schlagen und ohne Bauernzug.'};
   else{const k=G.keys[G.keys.length-1];if(G.keys.filter(x=>x===k).length>=3)r={t:'wdh',w:null,text:'Remis – dieselbe Stellung kam dreimal vor.'}}
   if(r)finish(r)}
-function finish(r){G.res=r;G.offer=null;msgs=[null,null];
+function finish(r){G.res=r;G.offer=null;msgs=[null,null];if([0,1].some(k=>{const q=PL(k);return !q.cpu&&q.help&&(q.help.erklaeren||q.help.schach)}))speak(r.text);
   for(const i of[0,1]){const p=PL(i);if(p.guest)continue;p.stats.g++;if(r.w===null)p.stats.d++;else if(r.w===i)p.stats.w++;else p.stats.l++;
     if(!p.badges.partie1)p.badges.partie1=Date.now();if(r.w===i&&isCpu(1-i)&&!p.badges.cpu)p.badges.cpu=Date.now();if(p.stats.g>=10&&!p.badges.partie10)p.badges.partie10=Date.now()}
   persist();setTimeout(showEnd,700)}
