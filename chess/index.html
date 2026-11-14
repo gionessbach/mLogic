@@ -148,17 +148,18 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .isst{font-family:var(--font-display);font-weight:800;font-size:18px;text-align:center;line-height:1.1;min-width:52px}
 .bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ink)}
 .bigstars{font-size:58px;text-align:center;letter-spacing:8px;line-height:1.1;margin:4px 0 8px}
-.trcard{display:flex;align-items:center;gap:14px;text-align:left;width:100%}.trcard b{font-family:var(--font-display);font-size:24px}
+.trcard{display:flex;align-items:center;gap:14px;text-align:left;width:100%;box-sizing:border-box;cursor:pointer}.trcard:active{transform:translateY(3px)}.trcard b{font-family:var(--font-display);font-size:24px}
 .trcard .go{font-size:34px;font-weight:800;color:var(--ink-soft)}
 .startrow{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}.startrow.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (orientation:landscape){
-  #home .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,2fr);gap:14px 18px;align-content:center;min-height:100%;
+  #home .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,2fr);gap:14px 18px;align-content:stretch;height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr) auto;
     grid-template-areas:"back hero night" "train players start" "note note note"}
   #home .topbar{display:contents}#home .topbar .spacer{display:none}#home .topbar a{grid-area:back;justify-self:start;align-self:center}
   #home .topbar [data-act=night]{grid-area:night;justify-self:end;align-self:center}
   #home .hero{grid-area:hero;justify-self:center;align-self:center}
-  #home .pcard{grid-area:players}#home .note{grid-area:note}
-  #home .trcard{grid-area:train;flex-direction:column;justify-content:center;text-align:center;gap:8px}#home .trcard .go{display:none}
+  #home .pcard{grid-area:players;display:flex;flex-direction:column}#home .pcard .slots{flex:1;align-items:stretch}#home .pcard .swapc{align-self:center}#home .slot{height:100%;box-sizing:border-box}
+  #home .slot .av{width:64px;height:64px;font-size:38px}#home .note{grid-area:note;align-self:end}
+  #home .trcard{grid-area:train;flex-direction:column;justify-content:center;text-align:center;gap:8px}#home .trcard .go{display:none}#home .trcard{height:100%;box-sizing:border-box}#home .trcard .grow{flex:0 0 auto}
   #home .startrow,#home .startrow.two{grid-area:start;display:flex;flex-direction:column;gap:12px}#home .startrow .btn{flex:1}#home #startBtn{order:-1}
   #train .wrap{max-width:1100px}#train .isles{grid-template-columns:repeat(2,minmax(0,1fr))}#train .isle,#train .isle:nth-child(even){width:100%;margin-left:0}
 }
@@ -169,6 +170,11 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
   .slots .icon-btn{width:44px;height:44px}.trcard b{font-size:20px}.trcard .ps{font-size:12px}.crew .av{width:42px;height:42px}
   #home .btn{padding:10px 14px;font-size:16px}#home .btn small{font-size:11px}#home .note{font-size:11px}
   .who{padding:4px 10px 4px 4px}.who .av{width:38px;height:38px}.isles{gap:8px}.isle{padding:8px 12px;gap:10px}.isle .av.big{width:46px;height:46px;font-size:26px}.isle b{font-size:17px}.isle .ps{font-size:11px}#train .hero p{display:none}#train .crew .av{width:36px;height:36px}#train .isle{padding:6px 12px}#train .wrap{gap:6px}#train .bar{margin-top:3px}
+}
+@media (orientation:landscape) and (min-height:641px){
+  #home .trcard b{font-size:32px}#home .trcard .ps{font-size:16px}#home .trcard .crew .av{width:84px;height:84px}
+  #home .slot{gap:8px}#home .slot .av{width:92px;height:92px;font-size:54px}#home .slot b{font-size:28px}#home .slot small{font-size:16px}
+  #home .startrow .btn{font-size:24px}#home .startrow .btn small{font-size:15px}#home .note{font-size:15px}
 }
 </style>
 </head>
@@ -185,11 +191,11 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <p class="lbl">Spieler</p>
       <div class="slots">
         <button class="slot" data-act="pick" data-i="0"></button>
-        <button class="icon-btn" data-act="swap" aria-label="Farben tauschen"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h15l-4-4M20 16H5l4 4"/></svg></button>
+        <button class="icon-btn swapc" data-act="swap" aria-label="Farben tauschen"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h15l-4-4M20 16H5l4 4"/></svg></button>
         <button class="slot" data-act="pick" data-i="1"></button>
       </div>
     </div>
-    <button class="card trcard" data-act="train"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">Schach lernen mit Igel Ida und ihren Freunden – 5 Inseln, 28 Lektionen</div></div><span class="go" aria-hidden="true">›</span></button>
+    <div class="card trcard" data-act="train" role="button" tabindex="0"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">Schach lernen mit Igel Ida und ihren Freunden – 5 Inseln, 28 Lektionen</div></div><span class="go" aria-hidden="true">›</span></div>
     <div class="startrow" id="startRow">
       <button class="btn dark" id="resumeBtn" data-act="resume" hidden>Partie fortsetzen<small id="resumeInfo"></small></button>
       <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
