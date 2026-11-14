@@ -240,6 +240,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 </div>
 
 <div id="sheet" class="sheet-bg" hidden><div class="sheet" id="sheetIn"></div></div>
+<div id="confirm" class="sheet-bg" hidden style="z-index:30"><div class="sheet narrow" id="confirmIn"></div></div>
 
 <script src="three.min.js"></script>
 <script src="training.js"></script>
@@ -680,8 +681,12 @@ setInterval(()=>{const now=performance.now(),dt=now-lastT;lastT=now;if(!G||!runn
 document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(document.hidden)persist()});
 
 /* ---------- Blätter ---------- */
-function openSheet(html,flip){delete $('#sheetIn').dataset.end;$('#sheetIn').classList.remove('wide');$('#sheetIn').innerHTML=html;$('#sheetIn').classList.toggle('flip',!!flip);$('#sheet').hidden=false;$('#sheetIn').scrollTop=0}
-function closeSheet(){$('#sheet').hidden=true;PROMO=null}
+let sheetKind='';
+function openSheet(html,flip,kind){const el=$('#sheetIn'),keep=kind&&kind===sheetKind&&!$('#sheet').hidden,y=el.scrollTop;sheetKind=kind||'';delete el.dataset.end;el.classList.remove('wide');el.innerHTML=html;el.classList.toggle('flip',!!flip);$('#sheet').hidden=false;el.scrollTop=keep?y:0}
+function openConfirm(html,flip){$('#confirmIn').innerHTML=html;$('#confirmIn').classList.toggle('flip',!!flip);$('#confirm').hidden=false}
+function closeConfirm(){$('#confirm').hidden=true}
+$('#confirm').addEventListener('click',e=>{if(e.target.id==='confirm')closeConfirm()});
+function closeSheet(){$('#sheet').hidden=true;PROMO=null;sheetKind='';closeConfirm()}
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet'&&!PROMO&&!(G&&G.res&&$('#sheetIn').dataset.end))closeSheet()});
 const segHTML=(act,opts,v,extra)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${String(k)===String(v)?'on':''}" data-act="${act}" data-v="${k}"${extra||''}>${l}</button>`).join('')}</div>`;
 const SHORT={ziele:'Zugziele',gefahr:'Gefahr-Ampel',bedroht:'Bedrohte Figuren',schach:'Schach-Hilfe',erklaeren:'Figur erklären',sonder:'Sonderregeln',werte:'Figurenwerte'};
@@ -692,7 +697,7 @@ const undoTiles=(act,v,extra)=>`<div class="tiles t3">${[[0,'Keine','0'],[3,'Dre
 function showHelp(i){const p=PL(i);
   openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(nm(i))}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div>
   ${helpRows(p,'ghelp',` data-i="${i}"`)}
-  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('gundo',p.undo,` data-i="${i}"`)}</div>`,i===1&&DB.table)}
+  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('gundo',p.undo,` data-i="${i}"`)}</div>`,i===1&&DB.table,'help'+i)}
 const preSteps=()=>[0,1].filter(j=>!refP(DB.sel[j]).cpu);
 function startFlow(){const h=preSteps();if(!h.length){startGame();return}showPreHelp(h[0])}
 function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),last=ix===st.length-1;
@@ -701,7 +706,7 @@ function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),l
   ${helpRows(p,'phelp',` data-i="${i}"`)}
   <div class="mcols sec"><div><p class="lbl">Zug zurücknehmen</p>${undoTiles('pundo',p.undo,` data-i="${i}"`)}</div>
   <div class="tiles" style="align-self:end;margin-top:12px"><button class="tile" data-act="${ix?'pback':'close'}" data-to="${st[ix-1]}">${MICON[ix?'replay':'home']}${ix?'Zurück':'Abbrechen'}</button>
-  <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div></div>`,i===1&&DB.table&&st.length===2)}
+  <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div></div>`,i===1&&DB.table&&st.length===2,'pre'+i)}
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
   openSheet(`<div class="mcols"><div><div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
@@ -710,7 +715,7 @@ function showMenu(i){menuI=i;const r=G.res;
   <div class="sec"><div class="tiles t3">${STYLES.map(([k,l])=>`<button class="tile${DB.style===k?' on':''}" data-act="gstyle" data-v="${k}">${boardIcon(k)}${l}</button>`).join('')}</div></div>
   <div class="sec"><button class="tile${DB.table?' on':''}" data-act="gtable" style="width:100%;flex-direction:row;min-height:70px;gap:12px">${MICON.table}<span style="text-align:left">Tischmodus<br><small>Schwarz liest von oben</small></span></button></div>
   </div><div><div class="sec"><p class="lbl">Züge</p>${movesHTML()}</div>
-  <div class="sec tiles"><button class="tile" data-act="home">${MICON.home}Zur Startseite</button><button class="tile dark" data-act="close">${MICON.play}Weiterspielen</button></div></div></div>`,i===1&&DB.table)}
+  <div class="sec tiles"><button class="tile" data-act="home">${MICON.home}Zur Startseite</button><button class="tile dark" data-act="close">${MICON.play}Weiterspielen</button></div></div></div>`,i===1&&DB.table,'menu')}
 function movesHTML(){if(!G.hist.length)return'<p class="ps" style="margin:0">Noch keine Züge.</p>';let h='<div class="mini">';
   for(let k=0;k<G.hist.length;k+=2)h+=`<span><b>${k/2+1}.</b> ${esc(G.hist[k].san)} ${G.hist[k+1]?esc(G.hist[k+1].san):''}</span>`;return h+'</div>'}
 function showEnd(){if(!G||!G.res||$('#game').hidden)return;const r=G.res;
@@ -752,8 +757,8 @@ function showEditor(){const p=ED,isNew=!prof(p.id);
   <div class="badges">${BADGES.map(([k,l])=>`<span class="badge${p.badges[k]?'':' off'}">${l}</span>`).join('')}</div></div>`}
   </div><div><div class="sec"><p class="lbl">Hilfen</p>${helpRows(p,'ehelp').replace('tiles h4','tiles')}</div>
   </div></div><div class="btns" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"><button class="btn dark" data-act="esave">Speichern</button>
-  ${isNew?'':`<button class="btn light" data-act="edel">${ED_DEL?'Wirklich löschen?':'Spieler löschen'}</button>`}
-  <button class="btn light" data-act="close">Abbrechen</button></div>`)}
+  ${isNew?'':`<button class="btn light" data-act="edel">Spieler löschen</button>`}
+  <button class="btn light" data-act="close">Abbrechen</button></div>`,false,'ed')}
 function keepName(){const el=$('#edName');if(el&&ED)ED.name=el.value}
 
 /* ---------- Training ---------- */
@@ -864,8 +869,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
     const ix=DB.profiles.findIndex(p=>p.id===ED.id);if(ix>=0)DB.profiles[ix]=ED;else DB.profiles.push(ED);
     if(ED_SLOT>=0){const o=1-ED_SLOT;if(DB.sel[o]===ED.id)DB.sel[o]=DB.sel[ED_SLOT];DB.sel[ED_SLOT]=ED.id}
     persist();closeSheet();renderHome();break}
-  case'edel':if(!ED_DEL){ED_DEL=true;keepName();showEditor();break}
-    DB.profiles=DB.profiles.filter(p=>p.id!==ED.id);DB.sel=DB.sel.map((r,j)=>r===ED.id?newProfile(j===1,true):r);persist();closeSheet();renderHome();break;
+  case'edel':keepName();openConfirm(`<div class="shead">${avHTML(ED)}<h2>${esc(ED.name||'Spieler')} löschen?</h2></div><p>Bilanz, Abzeichen und Trainingsfortschritt gehen dabei verloren.</p>
+    <div class="sec tiles"><button class="tile" data-act="cno">${ICON.x}Abbrechen</button><button class="tile warn" data-act="cdel" style="background:#d8433a;color:#fff">${SV('<path d="M12 14h24M19 14v-4h10v4M15 14l2 26h14l2-26" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>')}Löschen</button></div>`);break;
+  case'cno':closeConfirm();break;
+  case'cdel':DB.profiles=DB.profiles.filter(p=>p.id!==ED.id);DB.sel=DB.sel.map((r,j)=>r===ED.id?newProfile(j===1,true):r);if(DB.trainer===ED.id)DB.trainer=null;persist();closeSheet();renderHome();break;
   case'close':closeSheet();if(G&&!$('#game').hidden){renderPanels();draw()}break;
   case'help':showHelp(i);break;
   case'ghelp':{const p=PL(i);p.help[b.dataset.k]=!p.help[b.dataset.k];persist();showHelp(i);renderPanels();draw();break}
