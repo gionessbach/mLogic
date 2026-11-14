@@ -154,11 +154,6 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       </div>
     </div>
     <button class="card trcard" data-act="train"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">Schach lernen mit Igel Ida und ihren Freunden – 5 Inseln, 28 Lektionen</div></div><span class="go" aria-hidden="true">›</span></button>
-    <div class="card">
-      <p class="lbl">Spielerprofile</p>
-      <div class="plist" id="profList"></div>
-      <div class="btns" style="margin-top:10px"><button class="btn light" data-act="newp">Neuen Spieler anlegen</button></div>
-    </div>
     <div class="startrow" id="startRow">
       <button class="btn dark" id="resumeBtn" data-act="resume" hidden>Partie fortsetzen<small id="resumeInfo"></small></button>
       <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
@@ -673,16 +668,15 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
   document.querySelector('meta[name="theme-color"]').content=DB.night?'#12110d':'#FDD602';
   document.querySelectorAll('.slot').forEach(b=>{const i=+b.dataset.i,p=refP(DB.sel[i]);
     b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.cpu?'Computer · '+'★'.repeat(p.lvl):(p.kid?'Kind':'Erwachsen')+(p.guest?' · Gast':'')}</small>`});
-  $('#profList').innerHTML=DB.profiles.length?DB.profiles.map(p=>`<div class="pi"><button data-act="edit" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button></div>`).join(''):'<p class="ps" style="margin:0">Lege Profile an, damit Hilfen, Bilanz und Abzeichen gespeichert bleiben.</p>';
   $('#homeCrew').innerHTML=Object.values(CPU).slice(0,2).map(c=>avHTML(c)).join('');
   const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
 function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
-  openSheet(`<h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><div class="plist">${rows||'<p class="ps">Noch keine Spieler angelegt.</p>'}
+  openSheet(`<div class="shead"><h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><button class="tile dark" data-act="newp" data-i="${i}" style="width:100%;flex-direction:row;min-height:64px;gap:12px;margin-bottom:10px">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 14v20M14 24h20" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/>')}Neuen Spieler anlegen</button><div class="plist">${rows}
   <div class="pi"><button data-act="guest" data-kid="1" data-i="${i}"><div class="av" style="background:${AC[1]}">${GL.n+FE}</div><span><b>Gast-Kind</b><br><span class="ps">ohne Speichern, alle Hilfen an</span></span></button></div>
   <div class="pi"><button data-act="guest" data-kid="0" data-i="${i}"><div class="av" style="background:${AC[0]}">${GL.k+FE}</div><span><b>Gast</b><br><span class="ps">Erwachsen, ohne Speichern</span></span></button></div></div>
   <div class="sec"><p class="lbl">Computer</p><div class="plist">${Object.values(CPU).map(c=>`<div class="pi"><button data-act="choose" data-id="${c.id}" data-i="${i}">${avHTML(c)}<span><b>${c.name}</b> <span class="ps">${'★'.repeat(c.lvl)}</span><br><span class="ps">${c.desc}</span></span></button></div>`).join('')}</div></div>
-  <div class="btns"><button class="btn dark" data-act="newp" data-i="${i}">Neuer Spieler</button></div>`)}
+  `)}
 let ED=null,ED_SLOT=-1,ED_DEL=false;
 function showEditor(){const p=ED,isNew=!prof(p.id);
   openSheet(`<h2>${isNew?'Neuer Spieler':'Spieler bearbeiten'}</h2>
