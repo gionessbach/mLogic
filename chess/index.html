@@ -520,6 +520,13 @@ function showHelp(i){const p=PL(i);
   openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(nm(i))}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div>
   ${helpRows(p,'ghelp',` data-i="${i}"`)}
   <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('gundo',p.undo,` data-i="${i}"`)}</div>`,i===1&&DB.table)}
+function showPreHelp(i){const p=refP(DB.sel[i]);
+  openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(p.name||'Spieler')}</h2><span class="ps">${i+1} / 2</span></div>
+  <p class="ps">${i?'Schwarz':'Weiß'} · ${p.kid?'Kind':'Erwachsen'} – tippe an, was helfen soll. Im Spiel geht das jederzeit über die Glühbirne.</p>
+  ${helpRows(p,'phelp',` data-i="${i}"`)}
+  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('pundo',p.undo,` data-i="${i}"`)}</div>
+  <div class="sec tiles"><button class="tile" data-act="${i?'pback':'close'}">${MICON[i?'replay':'home']}${i?'Zurück':'Abbrechen'}</button>
+  <button class="tile dark" data-act="${i?'start2':'pnext'}">${MICON.play}${i?'Los geht’s':'Weiter'}</button></div>`,i===1&&DB.table)}
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
   openSheet(`<div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
@@ -575,7 +582,13 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'style':DB.style=v;persist();renderHome();break;
   case'table':DB.table=!DB.table;persist();renderHome();break;
   case'swap':DB.sel.reverse();persist();renderHome();break;
-  case'start':startGame();break;
+  case'start':showPreHelp(0);break;
+  case'pnext':showPreHelp(1);break;
+  case'pback':showPreHelp(0);break;
+  case'start2':closeSheet();startGame();break;
+  case'phelp':{const p=refP(DB.sel[i]);p.help[b.dataset.k]=!p.help[b.dataset.k];persist();showPreHelp(i);break}
+  case'phelpall':{const p=refP(DB.sel[i]);HELP.forEach(([k])=>p.help[k]=v==='1');persist();showPreHelp(i);break}
+  case'pundo':{refP(DB.sel[i]).undo=+v;persist();showPreHelp(i);break}
   case'resume':G=DB.game;replay=-1;enterGame();break;
   case'pick':showPicker(i);break;
   case'choose':{const o=1-i;if(DB.sel[o]===b.dataset.id)DB.sel[o]=DB.sel[i];DB.sel[i]=b.dataset.id;persist();closeSheet();renderHome();break}
