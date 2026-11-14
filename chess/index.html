@@ -108,6 +108,34 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .promo button span{font-size:12px;font-family:var(--font-body);font-weight:800}
 .moves{font-size:16px;line-height:1.8;column-count:2;font-variant-numeric:tabular-nums}
 .sec{margin-top:16px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{background:var(--soft);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
+  border:3px solid transparent;font-weight:800;font-size:15px;line-height:1.15;min-height:96px;position:relative}
+.tile svg{width:46px;height:46px;flex:none}
+.tile small{font-weight:600;font-size:12px;color:var(--ink-soft)}
+.tile.on{border-color:var(--ink);background:var(--card)}
+.tile.on::after{content:"✓";position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--on-ink);font-size:13px;display:grid;place-items:center}
+.tile.dark{background:var(--ink);color:var(--on-ink)}
+.tile.warn{color:#d8433a}
+.tile:active{transform:translateY(2px)}
+.mini{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14px;max-height:84px;overflow-y:auto;font-variant-numeric:tabular-nums}
+.shead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.shead h2{margin:0;flex:1}.shead>svg{width:48px;height:48px;flex:none}
+.mcols{display:grid;gap:0 18px}.mcols>div>.sec:first-child,.mcols>div>.tiles:first-child{margin-top:0}
+@media (orientation:landscape){
+  .sheet{max-width:min(980px,96vw);max-height:94vh}.sheet.narrow{max-width:560px}
+  .mcols{grid-template-columns:repeat(2,minmax(0,1fr))}.mcols>div>.sec:first-child{margin-top:16px}.mcols>div:first-child>.sec:first-child,.mcols>div>*:first-child{margin-top:0}
+  .tiles.h4,.tiles.tl{grid-template-columns:repeat(4,minmax(0,1fr))}.plist.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sec{margin-top:12px}.tile{min-height:82px}.g6{grid-template-columns:repeat(6,minmax(0,54px));justify-content:start}
+}
+@media (orientation:landscape) and (max-height:640px){
+  .sheet{padding:12px 14px;border-radius:20px}.sheet h2{font-size:21px}.shead{margin-bottom:6px;gap:8px}.shead .av,.shead .av.big{width:40px;height:40px;font-size:24px}
+  .tile{flex-direction:row;justify-content:flex-start;text-align:left;min-height:48px;padding:6px 10px;gap:8px;font-size:14px}
+  .tile svg{width:28px;height:28px}.tile small{display:none}.tile.on::after{top:4px;right:4px;width:18px;height:18px;font-size:11px}
+  .sec{margin-top:8px}.lbl{margin-bottom:6px;font-size:13px}.btns{margin-top:8px;gap:8px}.btn{padding:12px 16px;font-size:17px}
+  .pi{padding:2px 6px}.pi>button:first-child{min-height:46px}.pi .av{width:40px;height:40px;font-size:24px}.g6{margin:4px 0;gap:6px}.sheet p.hint{display:none}.g6 button{font-size:20px}
+  .seg button{min-height:42px}input[type=text]{padding:8px 12px;font-size:17px}.bigstars{font-size:40px}.mini{max-height:120px}
+}
 .av svg{width:86%;height:86%;display:block}.av.big,.ph .av.big{width:66px;height:66px;font-size:40px}
 #train{overflow-y:auto}
 .who{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:6px 14px 6px 6px;text-align:left;line-height:1.15}
@@ -123,19 +151,6 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .trcard{display:flex;align-items:center;gap:14px;text-align:left;width:100%}.trcard b{font-family:var(--font-display);font-size:24px}
 .trcard .go{font-size:34px;font-weight:800;color:var(--ink-soft)}
 .startrow{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}.startrow.two{grid-template-columns:repeat(2,minmax(0,1fr))}
-.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.tile{background:var(--soft);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
-  border:3px solid transparent;font-weight:800;font-size:15px;line-height:1.15;min-height:96px;position:relative}
-.tile svg{width:46px;height:46px;flex:none}
-.tile small{font-weight:600;font-size:12px;color:var(--ink-soft)}
-.tile.on{border-color:var(--ink);background:var(--card)}
-.tile.on::after{content:"✓";position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--on-ink);font-size:13px;display:grid;place-items:center}
-.tile.dark{background:var(--ink);color:var(--on-ink)}
-.tile.warn{color:#d8433a}
-.tile:active{transform:translateY(2px)}
-.mini{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14px;max-height:84px;overflow-y:auto;font-variant-numeric:tabular-nums}
-.shead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.shead h2{margin:0;flex:1}.shead>svg{width:48px;height:48px;flex:none}
 </style>
 </head>
 <body>
@@ -631,7 +646,7 @@ $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet'&&!PROMO&&!(G&&
 const segHTML=(act,opts,v,extra)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${String(k)===String(v)?'on':''}" data-act="${act}" data-v="${k}"${extra||''}>${l}</button>`).join('')}</div>`;
 const SHORT={ziele:'Zugziele',gefahr:'Gefahr-Ampel',bedroht:'Bedrohte Figuren',schach:'Schach-Hilfe',erklaeren:'Figur erklären',sonder:'Sonderregeln',werte:'Figurenwerte'};
 const SUB={ziele:'Wohin kann sie?',gefahr:'Grün · Gelb · Rot',bedroht:'Rote Ringe',schach:'Wer rettet den König?',erklaeren:'Lange tippen',sonder:'Rochade & Co.',werte:'+3 beim Schlagen'};
-function helpRows(p,act,extra){return `<div class="tiles">${HELP.map(([k,l])=>`<button class="tile${p.help[k]?' on':''}" data-act="${act}" data-k="${k}"${extra||''} aria-pressed="${!!p.help[k]}" aria-label="${l}">${HICON[k]}${SHORT[k]}<small>${SUB[k]}</small></button>`).join('')}
+function helpRows(p,act,extra){return `<div class="tiles h4">${HELP.map(([k,l])=>`<button class="tile${p.help[k]?' on':''}" data-act="${act}" data-k="${k}"${extra||''} aria-pressed="${!!p.help[k]}" aria-label="${l}">${HICON[k]}${SHORT[k]}<small>${SUB[k]}</small></button>`).join('')}
   <button class="tile" data-act="${act}all" data-v="${HELP.every(([k])=>p.help[k])?0:1}"${extra||''}>${SV('<rect x="4" y="4" width="40" height="40" rx="10" fill="#262625"/><path d="M14 24l7 7 13-14" fill="none" stroke="#FDD602" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>')}${HELP.every(([k])=>p.help[k])?'Alle aus':'Alle an'}<small>auf einen Tipp</small></button></div>`}
 const undoTiles=(act,v,extra)=>`<div class="tiles t3">${[[0,'Keine','0'],[3,'Drei','3'],[99,'Immer','∞']].map(([n,l,sym])=>`<button class="tile${v===n?' on':''}" data-act="${act}" data-v="${n}"${extra||''}>${SV(`<circle cx="24" cy="24" r="20" fill="#e6dec5"/><text x="24" y="${sym==='∞'?33:32}" text-anchor="middle" font-size="${sym==='∞'?28:22}" font-weight="800" font-family="system-ui" fill="#262625">${sym}</text>`)}${l}</button>`).join('')}</div>`;
 function showHelp(i){const p=PL(i);
@@ -642,20 +657,20 @@ const preSteps=()=>[0,1].filter(j=>!refP(DB.sel[j]).cpu);
 function startFlow(){const h=preSteps();if(!h.length){startGame();return}showPreHelp(h[0])}
 function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),last=ix===st.length-1;
   openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(p.name||'Spieler')}</h2><span class="ps">${ix+1} / ${st.length}</span></div>
-  <p class="ps">${i?'Schwarz':'Weiß'} · ${p.kid?'Kind':'Erwachsen'} – tippe an, was helfen soll. Im Spiel geht das jederzeit über die Glühbirne.</p>
+  <p class="ps hint">${i?'Schwarz':'Weiß'} · ${p.kid?'Kind':'Erwachsen'} – tippe an, was helfen soll. Im Spiel geht das jederzeit über die Glühbirne.</p>
   ${helpRows(p,'phelp',` data-i="${i}"`)}
-  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('pundo',p.undo,` data-i="${i}"`)}</div>
-  <div class="sec tiles"><button class="tile" data-act="${ix?'pback':'close'}" data-to="${st[ix-1]}">${MICON[ix?'replay':'home']}${ix?'Zurück':'Abbrechen'}</button>
-  <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div>`,i===1&&DB.table&&st.length===2)}
+  <div class="mcols sec"><div><p class="lbl">Zug zurücknehmen</p>${undoTiles('pundo',p.undo,` data-i="${i}"`)}</div>
+  <div class="tiles" style="align-self:end;margin-top:12px"><button class="tile" data-act="${ix?'pback':'close'}" data-to="${st[ix-1]}">${MICON[ix?'replay':'home']}${ix?'Zurück':'Abbrechen'}</button>
+  <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div></div>`,i===1&&DB.table&&st.length===2)}
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
-  openSheet(`<div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
+  openSheet(`<div class="mcols"><div><div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
     <button class="tile${confirmResign===i?' warn on':''}" data-act="resign" data-i="${i}">${MICON.aufgabe}${confirmResign===i?'Wirklich aufgeben?':'Aufgeben'}</button>`:
     `<button class="tile" data-act="replay" style="grid-column:1/-1">${MICON.replay}Partie nachspielen</button>`}</div>
   <div class="sec"><div class="tiles t3">${STYLES.map(([k,l])=>`<button class="tile${DB.style===k?' on':''}" data-act="gstyle" data-v="${k}">${boardIcon(k)}${l}</button>`).join('')}</div></div>
   <div class="sec"><button class="tile${DB.table?' on':''}" data-act="gtable" style="width:100%;flex-direction:row;min-height:70px;gap:12px">${MICON.table}<span style="text-align:left">Tischmodus<br><small>Schwarz liest von oben</small></span></button></div>
-  <div class="sec"><p class="lbl">Züge</p>${movesHTML()}</div>
-  <div class="sec tiles"><button class="tile" data-act="home">${MICON.home}Zur Startseite</button><button class="tile dark" data-act="close">${MICON.play}Weiterspielen</button></div>`,i===1&&DB.table)}
+  </div><div><div class="sec"><p class="lbl">Züge</p>${movesHTML()}</div>
+  <div class="sec tiles"><button class="tile" data-act="home">${MICON.home}Zur Startseite</button><button class="tile dark" data-act="close">${MICON.play}Weiterspielen</button></div></div></div>`,i===1&&DB.table)}
 function movesHTML(){if(!G.hist.length)return'<p class="ps" style="margin:0">Noch keine Züge.</p>';let h='<div class="mini">';
   for(let k=0;k<G.hist.length;k+=2)h+=`<span><b>${k/2+1}.</b> ${esc(G.hist[k].san)} ${G.hist[k+1]?esc(G.hist[k+1].san):''}</span>`;return h+'</div>'}
 function showEnd(){if(!G||!G.res||$('#game').hidden)return;const r=G.res;
@@ -674,24 +689,24 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
   const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
 function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
-  openSheet(`<div class="shead"><h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><button class="tile dark" data-act="newp" data-i="${i}" style="width:100%;flex-direction:row;min-height:64px;gap:12px;margin-bottom:10px">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 14v20M14 24h20" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/>')}Neuen Spieler anlegen</button><div class="plist">${rows}
+  openSheet(`<div class="shead"><h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><button class="tile dark" data-act="newp" data-i="${i}" style="width:100%;flex-direction:row;min-height:64px;gap:12px;margin-bottom:10px">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 14v20M14 24h20" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/>')}Neuen Spieler anlegen</button><div class="plist two">${rows}
   <div class="pi"><button data-act="guest" data-kid="1" data-i="${i}"><div class="av" style="background:${AC[1]}">${GL.n+FE}</div><span><b>Gast-Kind</b><br><span class="ps">ohne Speichern, alle Hilfen an</span></span></button></div>
   <div class="pi"><button data-act="guest" data-kid="0" data-i="${i}"><div class="av" style="background:${AC[0]}">${GL.k+FE}</div><span><b>Gast</b><br><span class="ps">Erwachsen, ohne Speichern</span></span></button></div></div>
-  <div class="sec"><p class="lbl">Computer</p><div class="plist">${Object.values(CPU).map(c=>`<div class="pi"><button data-act="choose" data-id="${c.id}" data-i="${i}">${avHTML(c)}<span><b>${c.name}</b> <span class="ps">${'★'.repeat(c.lvl)}</span><br><span class="ps">${c.desc}</span></span></button></div>`).join('')}</div></div>
+  <div class="sec"><p class="lbl">Computer</p><div class="plist two">${Object.values(CPU).map(c=>`<div class="pi"><button data-act="choose" data-id="${c.id}" data-i="${i}">${avHTML(c)}<span><b>${c.name}</b> <span class="ps">${'★'.repeat(c.lvl)}</span><br><span class="ps">${c.desc}</span></span></button></div>`).join('')}</div></div>
   `)}
 let ED=null,ED_SLOT=-1,ED_DEL=false;
 function showEditor(){const p=ED,isNew=!prof(p.id);
   openSheet(`<h2>${isNew?'Neuer Spieler':'Spieler bearbeiten'}</h2>
-  <input type="text" id="edName" maxlength="16" placeholder="Name" value="${esc(p.name)}">
+  <div class="mcols"><div><input type="text" id="edName" maxlength="16" placeholder="Name" value="${esc(p.name)}">
   <div class="sec"><p class="lbl">Bild</p><div class="g6">${AV.map(k=>`<button class="${p.av===k?'on':''}" data-act="eav" data-v="${k}" style="background:${AC[p.col]}">${GL[k]+FE}</button>`).join('')}</div>
   <div class="g6">${AC.map((c,j)=>`<button class="${p.col===j?'on':''}" data-act="ecol" data-v="${j}" style="background:${c}" aria-label="Farbe ${j+1}"></button>`).join('')}</div></div>
   <div class="sec"><p class="lbl">Spielt als</p>${segHTML('ekid',[[1,'Kind'],[0,'Erwachsen']],p.kid?1:0)}</div>
-  <div class="sec"><p class="lbl">Hilfen</p>${helpRows(p,'ehelp')}</div>
   <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('eundo',p.undo,'')}</div>
-  <div class="sec"><p class="lbl">Schachuhr</p>${segHTML('eclock',[[0,'Aus'],[5,'5 Min'],[10,'10 Min'],[15,'15 Min']],p.clock)}<p class="ps" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div>
+  <div class="sec"><p class="lbl">Schachuhr</p>${segHTML('eclock',[[0,'Aus'],[5,'5 Min'],[10,'10 Min'],[15,'15 Min']],p.clock)}<p class="ps hint" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div>
   ${isNew?'':`<div class="sec"><p class="lbl">Bilanz</p><p>${p.stats.g} Partien · ${p.stats.w} gewonnen · ${p.stats.d} remis · ${p.stats.l} verloren</p>
   <div class="badges">${BADGES.map(([k,l])=>`<span class="badge${p.badges[k]?'':' off'}">${l}</span>`).join('')}</div></div>`}
-  <div class="btns"><button class="btn dark" data-act="esave">Speichern</button>
+  </div><div><div class="sec"><p class="lbl">Hilfen</p>${helpRows(p,'ehelp').replace('tiles h4','tiles')}</div>
+  </div></div><div class="btns" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"><button class="btn dark" data-act="esave">Speichern</button>
   ${isNew?'':`<button class="btn light" data-act="edel">${ED_DEL?'Wirklich löschen?':'Spieler löschen'}</button>`}
   <button class="btn light" data-act="close">Abbrechen</button></div>`)}
 function keepName(){const el=$('#edName');if(el&&ED)ED.name=el.value}
@@ -712,8 +727,8 @@ function renderTrain(){const p=trainer();$('#trWho').innerHTML=`${avHTML(p)}<spa
     return`<button class="isle${open?'':' locked'}" data-act="isle" data-v="${k}"><div class="av big" style="background:${AC[I.col]}">${GL[I.av]+FE}</div><div class="grow"><b>${k+1}. ${I.name}</b><div class="ps">${open?I.desc+' · mit '+CPU[I.tr].name:'Gesperrt – sammle erst Sterne auf der Insel davor'}</div><div class="bar"><i style="width:${Math.round(st/mx*100)}%"></i></div></div><div class="isst">${open?st+'/'+mx+'<br><span style="color:#F2A900">★</span>':LOCK}</div></button>`}).join('')}
 function showIsle(k){const I=ISLANDS[k],p=trainer();if(!islOpen(p,k)){speak('Diese Insel ist noch gesperrt. Sammle zuerst Sterne auf der Insel davor.',ISLANDS[k-1].tr);return}
   openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>${I.name}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><p class="ps">${I.desc} · mit ${CPU[I.tr].name}</p>
-  <div class="tiles t3">${I.lessons.map((L,j)=>`<button class="tile${trStars(p,L)?' on':''}" data-act="lesson" data-i="${k}" data-v="${j}"><span style="font-family:var(--font-display);font-size:30px;line-height:1">${j+1}</span>${esc(L.title)}<small style="font-size:17px;letter-spacing:2px">${starRow(trStars(p,L))}</small></button>`).join('')}</div>`)}
-function showTrWho(){openSheet(`<div class="shead"><h2>Wer trainiert?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><div class="plist">${DB.profiles.map(p=>`<div class="pi"><button data-act="trpick" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${ISLANDS.reduce((a,I)=>a+islStars(p,I),0)} Sterne gesammelt</span></span></button></div>`).join('')}
+  <div class="tiles t3 tl">${I.lessons.map((L,j)=>`<button class="tile${trStars(p,L)?' on':''}" data-act="lesson" data-i="${k}" data-v="${j}"><span style="font-family:var(--font-display);font-size:30px;line-height:1">${j+1}</span>${esc(L.title)}<small style="font-size:17px;letter-spacing:2px">${starRow(trStars(p,L))}</small></button>`).join('')}</div>`)}
+function showTrWho(){openSheet(`<div class="shead"><h2>Wer trainiert?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><div class="plist two">${DB.profiles.map(p=>`<div class="pi"><button data-act="trpick" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${ISLANDS.reduce((a,I)=>a+islStars(p,I),0)} Sterne gesammelt</span></span></button></div>`).join('')}
   <div class="pi"><button data-act="trpick" data-id="">${avHTML({av:'n',col:1})}<span><b>Gast</b><br><span class="ps">ohne Profil, nur auf diesem Gerät</span></span></button></div></div>`)}
 const trText=()=>{const T=G.tr;return T.L.t==='quiz'?(T.qi===0?T.L.text+' ':'')+T.L.q[T.qi].text:T.L.text};
 function startLesson(k,j){const I=ISLANDS[k],L=I.lessons[j];closeSheet();trainer();const P=parsePos(L.t==='quiz'?L.q[0].pos:L.pos);
