@@ -207,6 +207,11 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape){.pan .ph:nth-child(2){flex-wrap:wrap;justify-content:flex-end}.pan .ph:nth-child(2) .cap{flex:1 1 100%}}
 @media (orientation:landscape) and (max-height:640px){.pan .pb{width:38px;height:38px;border-radius:12px}.pan .pb svg{width:19px;height:19px}.pan .ph{gap:6px}}
 .mmoves{background:var(--soft);border-radius:18px;padding:12px 14px;flex:1;overflow:auto;min-height:90px}.mmoves .lbl{margin-bottom:8px}.mmoves .mini{max-height:none;font-size:16px;flex-direction:column;flex-wrap:nowrap}
+.sheet.tall{display:flex;flex-direction:column;overflow:hidden;height:min(88vh,760px)}.sheet.tall .mgrid{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto auto}
+.sheet.tall .mcol{min-height:0}.sheet.tall .mcol:first-child{overflow:hidden}.sheet.tall .mmoves{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media (orientation:landscape){.sheet.tall{height:min(80vh,620px)}.sheet.tall .mgrid{grid-template-rows:minmax(0,1fr)}}
+@media (orientation:landscape) and (max-height:640px){.sheet.tall{height:88vh}}
+@media (orientation:portrait){.sheet.tall .mbig{min-height:64px;flex-direction:row;gap:10px}.sheet.tall .mcol:last-child{flex-direction:row}.sheet.tall .mcol:last-child .mbig{flex:1 1 0;min-width:0;padding:8px;font-size:15px;gap:8px}.sheet.tall .mcol:last-child .mbig svg{width:30px;height:30px}.sheet.tall .mdes .tile{min-height:90px}}
 </style>
 </head>
 <body>
