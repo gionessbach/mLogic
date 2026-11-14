@@ -131,6 +131,11 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <div class="seg" id="styleSeg"></div>
       <div class="row" style="margin-top:6px"><div class="grow"><b>Tischmodus</b><div class="ps">Gegenüber sitzen: die Anzeige für Schwarz steht auf dem Kopf</div></div><button class="sw" data-act="table" aria-label="Tischmodus"></button></div>
     </div>
+    <div class="card">
+      <p class="lbl">Spielerprofile</p>
+      <div class="plist" id="profList"></div>
+      <div class="btns" style="margin-top:10px"><button class="btn light" data-act="newp">Neuen Spieler anlegen</button></div>
+    </div>
     <button class="btn dark" data-act="start">Neue Partie starten</button>
     <p class="note">Computergegner mit eigenem Charakter kommen mit dem Auto-Modus.</p>
   </div>
@@ -507,6 +512,7 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
     b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.kid?'Kind':'Erwachsen'}${p.guest?' · Gast':''}</small>`});
   $('#styleSeg').innerHTML=STYLES.map(([k,l])=>`<button class="${DB.style===k?'on':''}" data-act="style" data-v="${k}">${l}</button>`).join('');
   document.querySelector('[data-act="table"]').classList.toggle('on',!!DB.table);
+  $('#profList').innerHTML=DB.profiles.length?DB.profiles.map(p=>`<div class="pi"><button data-act="edit" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button></div>`).join(''):'<p class="ps" style="margin:0">Lege Profile an, damit Hilfen, Bilanz und Abzeichen gespeichert bleiben.</p>';
   const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} Halbzüge`}}
 function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
@@ -543,7 +549,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'pick':showPicker(i);break;
   case'choose':{const o=1-i;if(DB.sel[o]===b.dataset.id)DB.sel[o]=DB.sel[i];DB.sel[i]=b.dataset.id;persist();closeSheet();renderHome();break}
   case'guest':DB.sel[i]=newProfile(b.dataset.kid==='1',true);persist();closeSheet();renderHome();break;
-  case'newp':ED=newProfile(true,false);ED.name='';ED_SLOT=i;ED_DEL=false;showEditor();break;
+  case'newp':ED=newProfile(true,false);ED.name='';ED_SLOT=i==null?-1:i;ED_DEL=false;showEditor();break;
   case'edit':ED=JSON.parse(JSON.stringify(prof(b.dataset.id)));ED_SLOT=-1;ED_DEL=false;showEditor();break;
   case'eav':keepName();ED.av=v;showEditor();break;
   case'ecol':keepName();ED.col=+v;showEditor();break;
