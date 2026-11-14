@@ -197,6 +197,15 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape){.edh .tile{flex-direction:row;justify-content:flex-start;text-align:left;min-height:54px;padding:6px 10px;gap:10px;font-size:15px}.edh .tile small{display:none}.edh .tile svg{width:32px;height:32px}}
 .pair{display:grid;gap:0 18px}.pair>.sec{display:flex;flex-direction:column}.pair>.sec>.tiles,.pair>.sec>.seg{flex:1}
 @media (orientation:landscape){.pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.mgrid{display:grid;gap:12px}.mcol{display:flex;flex-direction:column;gap:10px;min-width:0}.mcol .lbl{margin:0}
+.mplay{flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;text-align:left}.mph{display:flex;align-items:center;gap:10px;font-size:18px}
+.mmv{display:block;margin-top:10px;font-weight:600;color:#e6dec5;flex:1;overflow:auto;min-height:0}.mmv .mini{max-height:none;color:inherit}.mmv .ps{color:#bdb4a0}
+@media (orientation:landscape){.sheet.tall{height:min(80vh,620px);display:flex;flex-direction:column}.sheet.tall .mgrid{flex:1;min-height:0;grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,2fr)}
+  .mbig{flex:1;font-size:18px}.mbig svg{width:52px!important;height:52px!important}.mdes{flex:1}.mdes .tile{flex-direction:column!important;justify-content:center!important;text-align:center!important}.mdes .tile svg{width:56px!important;height:56px!important}
+  .mplay .mph svg{width:34px!important;height:34px!important}}
+@media (orientation:landscape) and (max-height:640px){.sheet.tall{height:88vh}.mbig svg{width:36px!important;height:36px!important}.mdes .tile svg{width:38px!important;height:38px!important}.mph{font-size:16px}}
+@media (orientation:landscape){.pan .ph:nth-child(2){flex-wrap:wrap;justify-content:flex-end}.pan .ph:nth-child(2) .cap{flex:1 1 100%}}
+@media (orientation:landscape) and (max-height:640px){.pan .pb{width:38px;height:38px;border-radius:12px}.pan .pb svg{width:19px;height:19px}.pan .ph{gap:6px}}
 </style>
 </head>
 <body>
@@ -658,6 +667,8 @@ const ICON={undo:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor"
   menu:'<svg viewBox="0 0 24 24" style="fill:currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>',
   prev:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   next:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  offer:'<svg viewBox="0 0 24 24"><text x="12" y="17.5" text-anchor="middle" font-size="15" font-weight="800" font-family="system-ui" fill="currentColor">½</text></svg>',
+  resignask:'<svg viewBox="0 0 24 24"><path d="M6 22V3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4h11l-2.5 3.5L18 11H7z" fill="#d8433a"/></svg>',
   say:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
   x:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
 const avHTML=(p,big)=>`<div class="av${big?' big':''}" style="background:${AC[p.col]||AC[0]}">${p.cpu&&FIG[p.id]?FIG[p.id]:(GL[p.av]||GL.k)+FE}</div>`;
@@ -671,7 +682,7 @@ function panelHTML(i){const p=PL(i),st=view(),n=replay<0?G.hist.length:replay,hs
   let h=`<div class="ph">${avHTML(p)}<div class="grow"><div class="pn">${esc(nm(i))} ${myTurn?'<span class="turn">am Zug</span>':''}</div><div class="ps">${i?'Schwarz':'Weiß'} · ${p.cpu?'Computer · Stufe '+p.lvl:p.kid?'Kind':'Erwachsen'}${p.undo&&running()?' · Rücknahmen: '+(p.undo>=99?'unbegrenzt':Math.max(0,p.undo-G.undo[i])):''}</div></div>${G.clock[i]!=null?`<span class="clk${G.clock[i]<30000?' low':''}" id="clk${i}">${fmt(G.clock[i])}</span>`:''}</div>`;
   h+=`<div class="ph"><div class="cap grow" style="color:${i?'#fffcf0':'#262625'};-webkit-text-stroke:${i?'1px #262625':'0'}">${caps.map(k=>GL[k]+FE).join('')}${mat>0?` <span class="ps" style="letter-spacing:0;-webkit-text-stroke:0;color:var(--ink-soft)">+${mat}</span>`:''}</div>`;
   if(replay>=0&&i===0)h+=`<span class="ps">Zug ${replay}/${G.hist.length}${replay?': '+G.hist[replay-1].san:''}</span>${pbtn('prev',0,'Zurück')}${pbtn('next',0,'Weiter')}${pbtn('x',0,'Nachspielen beenden')}`;
-  else if(!p.cpu)h+=`${canUndo?pbtn('undo',i,'Zug zurücknehmen'):''}${pbtn('help',i,'Hilfen')}${pbtn('menu',i,'Menü')}`;
+  else if(!p.cpu)h+=`${canUndo?pbtn('undo',i,'Zug zurücknehmen'):''}${running()&&G.offer!==i?pbtn('offer',i,'Remis anbieten'):''}${running()?pbtn('resignask',i,'Aufgeben'):''}${pbtn('help',i,'Hilfen')}${pbtn('menu',i,'Menü')}`;
   h+='</div>';if(msgs[i])h+=`<div class="msg">${msgs[i]}</div>`;
   if(G.res&&replay<0)h+=`<div class="msg">${esc(G.res.text)}</div>`;
   return h}
@@ -688,7 +699,7 @@ document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(doc
 
 /* ---------- Blätter ---------- */
 let sheetKind='';
-function openSheet(html,flip,kind){const el=$('#sheetIn'),keep=kind&&kind===sheetKind&&!$('#sheet').hidden,y=el.scrollTop;sheetKind=kind||'';delete el.dataset.end;el.classList.remove('wide');el.innerHTML=html;el.classList.toggle('flip',!!flip);$('#sheet').hidden=false;el.scrollTop=keep?y:0}
+function openSheet(html,flip,kind){const el=$('#sheetIn'),keep=kind&&kind===sheetKind&&!$('#sheet').hidden,y=el.scrollTop;sheetKind=kind||'';delete el.dataset.end;el.classList.remove('wide','tall');el.innerHTML=html;el.classList.toggle('flip',!!flip);$('#sheet').hidden=false;el.scrollTop=keep?y:0}
 function openConfirm(html,flip){$('#confirmIn').innerHTML=html;$('#confirmIn').classList.toggle('flip',!!flip);$('#confirm').hidden=false}
 function closeConfirm(){$('#confirm').hidden=true}
 $('#confirm').addEventListener('click',e=>{if(e.target.id==='confirm')closeConfirm()});
@@ -715,13 +726,12 @@ function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),l
   <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div></div>`,i===1&&DB.table&&st.length===2,'pre'+i)}
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
-  openSheet(`<div class="mcols"><div><div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
-    <button class="tile${confirmResign===i?' warn on':''}" data-act="resign" data-i="${i}">${MICON.aufgabe}${confirmResign===i?'Wirklich aufgeben?':'Aufgeben'}</button>`:
-    `<button class="tile" data-act="replay" style="grid-column:1/-1">${MICON.replay}Partie nachspielen</button>`}</div>
-  <div class="sec"><div class="tiles t3">${STYLES.map(([k,l])=>`<button class="tile${DB.style===k?' on':''}" data-act="gstyle" data-v="${k}">${boardIcon(k)}${l}</button>`).join('')}</div></div>
-  <div class="sec"><button class="tile${DB.table?' on':''}" data-act="gtable" style="width:100%;flex-direction:row;min-height:70px;gap:12px">${MICON.table}<span style="text-align:left">Tischmodus<br><small>Schwarz liest von oben</small></span></button></div>
-  </div><div><div class="sec"><p class="lbl">Züge</p>${movesHTML()}</div>
-  <div class="sec tiles"><button class="tile" data-act="home">${MICON.home}Zur Startseite</button><button class="tile dark" data-act="close">${MICON.play}Weiterspielen</button></div></div></div>`,i===1&&DB.table,'menu')}
+  openSheet(`<div class="mgrid">
+  <div class="mcol">${r?`<button class="tile" data-act="replay">${MICON.replay}Partie nachspielen</button>`:''}<button class="tile mbig" data-act="home">${MICON.home}Zum Hauptmenü</button></div>
+  <div class="mcol"><p class="lbl">Design</p><div class="tiles t3 mdes">${STYLES.map(([k,l])=>`<button class="tile${DB.style===k?' on':''}" data-act="gstyle" data-v="${k}">${boardIcon(k)}${l}</button>`).join('')}</div>
+    <button class="tile${DB.table?' on':''}" data-act="gtable" style="flex-direction:row;gap:12px">${MICON.table}<span style="text-align:left">Tischmodus<br><small>Schwarz liest von oben</small></span></button></div>
+  <div class="mcol"><button class="tile dark mbig mplay" data-act="close"><span class="mph">${MICON.play}${r?'Zurück zum Brett':'Weiterspielen'}</span><span class="mmv">${movesHTML()}</span></button></div>
+  </div>`,i===1&&DB.table,'menu');$('#sheetIn').classList.add('tall')}
 function movesHTML(){if(!G.hist.length)return'<p class="ps" style="margin:0">Noch keine Züge.</p>';let h='<div class="mini">';
   for(let k=0;k<G.hist.length;k+=2)h+=`<span><b>${k/2+1}.</b> ${esc(G.hist[k].san)} ${G.hist[k+1]?esc(G.hist[k+1].san):''}</span>`;return h+'</div>'}
 function showEnd(){if(!G||!G.res||$('#game').hidden)return;const r=G.res;
@@ -892,8 +902,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
     G.offer=i;afterTurn();msgs[i]='Remis angeboten – warte auf die Antwort.';persist();closeSheet();renderPanels();break;
   case'acc':finish({t:'remis',w:null,text:'Remis nach Vereinbarung.'});renderPanels();draw();break;
   case'dec':G.offer=null;msgs=[null,null];afterTurn();persist();renderPanels();break;
-  case'resign':if(confirmResign!==i){confirmResign=i;showMenu(i);break}
-    closeSheet();finish({t:'aufgabe',w:1-i,text:`${nm(i)} gibt auf – ${nm(1-i)} gewinnt.`});renderPanels();draw();break;
+  case'resignask':openConfirm(`<div class="shead">${avHTML(PL(i))}<h2>Wirklich aufgeben?</h2></div><p>${esc(nm(1-i))} gewinnt dann die Partie.</p>
+    <div class="sec tiles"><button class="tile" data-act="cno">${ICON.x}Weiterspielen</button><button class="tile" data-act="resign" data-i="${i}" style="background:#d8433a;color:#fff">${ICON.resignask.replace('#d8433a','#fff')}Aufgeben</button></div>`,i===1&&DB.table);break;
+  case'resign':closeConfirm();closeSheet();finish({t:'aufgabe',w:1-i,text:`${nm(i)} gibt auf – ${nm(1-i)} gewinnt.`});renderPanels();draw();break;
   case'undo':undo(i);break;
   case'say':speak(String(msgs[i]||'').replace(/Nochmal vorlesen|Vorlesen/g,''));break;
   case'promo':{const m=PROMO&&PROMO.find(x=>x.promo===b.dataset.k);closeSheet();if(m)doMove(m);break}
