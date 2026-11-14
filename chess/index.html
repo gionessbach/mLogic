@@ -755,12 +755,13 @@ function showEditor(){const p=ED,isNew=!prof(p.id);
   <div class="sec"><p class="lbl">Bild</p><div class="g6">${AV.map(k=>`<button class="${p.av===k?'on':''}" data-act="eav" data-v="${k}" style="background:${AC[p.col]}">${GL[k]+FE}</button>`).join('')}</div>
   <div class="g6">${AC.map((c,j)=>`<button class="${p.col===j?'on':''}" data-act="ecol" data-v="${j}" style="background:${c}" aria-label="Farbe ${j+1}"></button>`).join('')}</div></div>
   <div class="sec"><p class="lbl">Spielt als</p>${segHTML('ekid',[[1,'Kind'],[0,'Erwachsen']],p.kid?1:0)}</div>
-  <div class="pair"><div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('eundo',p.undo,'')}</div>
-  <div class="sec"><p class="lbl">Schachuhr (Minuten)</p>${segHTML('eclock',[[0,'Aus'],[5,'5'],[10,'10'],[15,'15']],p.clock)}<p class="ps hint" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div></div>
+  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('eundo',p.undo,'')}</div>
   </div><div><div class="sec"><p class="lbl">Hilfen</p>${helpRows(p,'ehelp').replace('tiles h4','tiles edh')}</div>
+  <div class="sec"><p class="lbl">Schachuhr (Minuten)</p>${segHTML('eclock',[[0,'Aus'],[5,'5'],[10,'10'],[15,'15']],p.clock)}<p class="ps hint" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div>
+  </div></div>
   ${isNew?'':`<div class="sec"><p class="lbl">Bilanz</p><p>${p.stats.g} Partien · ${p.stats.w} gewonnen · ${p.stats.d} remis · ${p.stats.l} verloren</p>
   <div class="badges">${BADGES.map(([k,l])=>`<span class="badge${p.badges[k]?'':' off'}">${l}</span>`).join('')}</div></div>`}
-  </div></div><div class="btns" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"><button class="btn dark" data-act="esave">Speichern</button>
+  <div class="btns" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"><button class="btn dark" data-act="esave">Speichern</button>
   ${isNew?'':`<button class="btn light" data-act="edel">Spieler löschen</button>`}
   <button class="btn light" data-act="close">Abbrechen</button></div>`,false,'ed')}
 function keepName(){const el=$('#edName');if(el&&ED)ED.name=el.value}
