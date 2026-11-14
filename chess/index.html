@@ -152,10 +152,14 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .trcard .go{font-size:34px;font-weight:800;color:var(--ink-soft)}
 .startrow{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}.startrow.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (orientation:landscape){
-  #home .wrap{max-width:1100px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 18px;align-content:center;min-height:100%;
-    grid-template-areas:"top top" "hero players" "train start" "note note"}
-  #home .topbar{grid-area:top}#home .hero{grid-area:hero}#home .pcard{grid-area:players}#home .trcard{grid-area:train}#home .startrow{grid-area:start;align-self:stretch}#home .note{grid-area:note}
-  #home .startrow.two{grid-template-columns:minmax(0,1fr)}#home .startrow .btn{height:100%}
+  #home .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,2fr);gap:14px 18px;align-content:center;min-height:100%;
+    grid-template-areas:"back hero night" "train players start" "note note note"}
+  #home .topbar{display:contents}#home .topbar .spacer{display:none}#home .topbar a{grid-area:back;justify-self:start;align-self:center}
+  #home .topbar [data-act=night]{grid-area:night;justify-self:end;align-self:center}
+  #home .hero{grid-area:hero;justify-self:center;align-self:center}
+  #home .pcard{grid-area:players}#home .note{grid-area:note}
+  #home .trcard{grid-area:train;flex-direction:column;justify-content:center;text-align:center;gap:8px}#home .trcard .go{display:none}
+  #home .startrow,#home .startrow.two{grid-area:start;display:flex;flex-direction:column;gap:12px}#home .startrow .btn{flex:1}#home #startBtn{order:-1}
   #train .wrap{max-width:1100px}#train .isles{grid-template-columns:repeat(2,minmax(0,1fr))}#train .isle,#train .isle:nth-child(even){width:100%;margin-left:0}
 }
 @media (orientation:landscape) and (max-height:640px){
