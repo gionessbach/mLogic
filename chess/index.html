@@ -206,6 +206,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape) and (max-height:640px){.sheet.tall{height:88vh}.mbig svg{width:36px!important;height:36px!important}.mdes .tile svg{width:38px!important;height:38px!important}.mph{font-size:16px}}
 @media (orientation:landscape){.pan .ph:nth-child(2){flex-wrap:wrap;justify-content:flex-end}.pan .ph:nth-child(2) .cap{flex:1 1 100%}}
 @media (orientation:landscape) and (max-height:640px){.pan .pb{width:38px;height:38px;border-radius:12px}.pan .pb svg{width:19px;height:19px}.pan .ph{gap:6px}}
+.mmoves{background:var(--soft);border-radius:18px;padding:12px 14px;flex:1;overflow:auto;min-height:90px}.mmoves .lbl{margin-bottom:8px}.mmoves .mini{max-height:none;font-size:16px;flex-direction:column;flex-wrap:nowrap}
 </style>
 </head>
 <body>
@@ -727,10 +728,10 @@ function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),l
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
   openSheet(`<div class="mgrid">
-  <div class="mcol">${r?`<button class="tile" data-act="replay">${MICON.replay}Partie nachspielen</button>`:''}<button class="tile mbig" data-act="home">${MICON.home}Zum Hauptmenü</button></div>
+  <div class="mcol"><div class="mmoves"><p class="lbl">Züge</p>${movesHTML()}</div></div>
   <div class="mcol"><p class="lbl">Design</p><div class="tiles t3 mdes">${STYLES.map(([k,l])=>`<button class="tile${DB.style===k?' on':''}" data-act="gstyle" data-v="${k}">${boardIcon(k)}${l}</button>`).join('')}</div>
     <button class="tile${DB.table?' on':''}" data-act="gtable" style="flex-direction:row;gap:12px">${MICON.table}<span style="text-align:left">Tischmodus<br><small>Schwarz liest von oben</small></span></button></div>
-  <div class="mcol"><button class="tile dark mbig mplay" data-act="close"><span class="mph">${MICON.play}${r?'Zurück zum Brett':'Weiterspielen'}</span><span class="mmv">${movesHTML()}</span></button></div>
+  <div class="mcol"><button class="tile mbig" data-act="home">${MICON.home}Zum Hauptmenü</button>${r?`<button class="tile mbig" data-act="replay">${MICON.replay}Partie nachspielen</button>`:''}<button class="tile dark mbig" data-act="close">${MICON.play}${r?'Zurück zum Brett':'Weiterspielen'}</button></div>
   </div>`,i===1&&DB.table,'menu');$('#sheetIn').classList.add('tall')}
 function movesHTML(){if(!G.hist.length)return'<p class="ps" style="margin:0">Noch keine Züge.</p>';let h='<div class="mini">';
   for(let k=0;k<G.hist.length;k+=2)h+=`<span><b>${k/2+1}.</b> ${esc(G.hist[k].san)} ${G.hist[k+1]?esc(G.hist[k+1].san):''}</span>`;return h+'</div>'}
