@@ -116,6 +116,11 @@ html{overscroll-behavior-y:contain}
       <div class="t"><strong>mSudo</strong><span>6×6-Sudoku: jeden Tag ein Rätsel, dazu freies Spiel in drei Stufen.</span><span class="st" id="sudoStatus"></span></div>
       <span class="go" aria-hidden="true">›</span>
     </a>
+    <a class="game" href="chess/">
+      <div class="ic"><img src="chess/icon-192.png" alt=""></div>
+      <div class="t"><strong>mChess</strong><span>Schach zu zweit am iPad – mit Kinder-Hilfen, Spielerprofilen und 3D-Brett.</span><span class="st" id="chessStatus"></span></div>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
     <a class="game" href="calc/">
       <div class="ic"><img src="calc/icon-192.png" alt=""></div>
       <div class="t"><strong>mCalc</strong><span>Mini-Excel für Kinder: Tabellen füllen, rechnen, Diagramme, Excel-Export.</span></div>
@@ -171,6 +176,7 @@ document.getElementById('coins').textContent=get('coins',500).toLocaleString('de
   try{const mc=JSON.parse(localStorage.getItem('mcode-v1')||'{}'),dn=Object.keys(mc.done||{}).length,cr=Object.keys(mc.crowns||{}).length;document.getElementById('codeStatus').textContent=dn?dn+' Leveln'+(cr?' · '+cr+' Kronen':''):'Neu: einfach loslegen';}catch(e){}
   try{const ax=parseInt(localStorage.getItem('matom_xp')||'0',10)||0;document.getElementById('atomStatus').textContent=ax?ax+' XP':'Neu: einfach loslegen';}catch(e){}
   try{const sd=JSON.parse(localStorage.getItem('msudo')||'{}'),dd=(sd.days||{})[t];document.getElementById('sudoStatus').textContent=!dd?'Heute: offen':dd.s==='won'?'Heute: gelöst in '+Math.floor(dd.t/60)+':'+String(dd.t%60).padStart(2,'0'):'Heute: angefangen';}catch(e){}
+  try{const mc=JSON.parse(localStorage.getItem('mchess')||'{}');document.getElementById('chessStatus').textContent=mc.game&&!mc.game.res?'Partie läuft – weiterspielen':(mc.profiles&&mc.profiles.length?mc.profiles.length+' Spieler angelegt':'Neu: einfach loslegen');}catch(e){}
   document.getElementById('hashStatus').textContent=st+(missed?' · '+missed+' zum Nachholen':'');
 })();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{})}
