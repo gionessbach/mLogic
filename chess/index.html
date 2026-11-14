@@ -130,7 +130,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <span class="spacer"></span>
       <button class="icon-btn" data-act="night" aria-label="Nachtmodus"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg></button>
     </div>
-    <div class="hero"><img src="icon-192.png" alt=""><div><h1>mChess</h1><p>Schach zu zweit an einem Gerät</p></div></div>
+    <div class="hero"><img src="icon-192.png" alt=""><div><h1>mChess</h1><p>Schach zu zweit oder gegen den Computer</p></div></div>
     <div class="card">
       <p class="lbl">Spieler</p>
       <div class="slots">
@@ -148,7 +148,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <button class="btn dark" id="resumeBtn" data-act="resume" hidden>Partie fortsetzen<small id="resumeInfo"></small></button>
       <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
     </div>
-    <p class="note">Computergegner mit eigenem Charakter kommen mit dem Auto-Modus.</p>
+    <p class="note">Gegen den Computer spielen: auf Weiß oder Schwarz tippen und einen Computergegner wählen.</p>
   </div>
 </div>
 
@@ -186,7 +186,7 @@ const HELP=[['ziele','Zugziele zeigen','Punkte zeigen, wohin die Figur ziehen ka
   ['sonder','Sonderregeln erklären','Rochade, en passant und Umwandlung beim ersten Mal'],
   ['werte','Figurenwerte','Beim Schlagen den Wert der Figur zeigen']];
 const BADGES=[['partie1','Erste Partie'],['schach','Erstes Schach'],['rochade','Erste Rochade'],['dame','Dame geschlagen'],
-  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien']];
+  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien'],['cpu','Computer besiegt']];
 const AV=['k','q','r','b','n','p'],AC=['#FDD602','#5DCAA5','#F0997B','#85B7EB','#AFA9EC','#97C459'];
 const STYLES=[['A','3D Staunton'],['1','m-Klassik'],['2','Bauhaus']];
 const SPECIAL={rochade:'<b>Rochade:</b> König und Turm dürfen in einem Zug tauschen – der König zieht zwei Felder zum Turm, der Turm springt über ihn. Tippe dafür den König an.',
@@ -224,7 +224,13 @@ function newProfile(kid,guest){return{id:(guest?'g':'p')+Date.now().toString(36)
   av:kid?'n':'k',col:kid?1:0,kid:!!kid,help:defHelp(!!kid),undo:kid?3:0,clock:0,stats:{g:0,w:0,d:0,l:0},badges:{},seen:{},guest:!!guest}}
 const prof=id=>DB.profiles.find(p=>p.id===id)||null;
 const FALLBACK=newProfile(false,true);
-const refP=r=>typeof r==='string'?(prof(r)||FALLBACK):(r||FALLBACK);
+const CPU={};
+[['cpu1','Igel Ida','p',5,1,'Anfängerin – macht auch mal Fehler',0,{idle:['Hmm …','Mal sehen …','Wohin nur?'],cap:['Oh, die nehme ich!','Hihi, erwischt.'],chk:['Schach! Pass auf deinen König auf.'],lose:['Oh nein, meine Figur!','Huch, die war weg.']}],
+ ['cpu2','Fuchs Fritz','n',2,2,'Frech – greift gern an',40,{idle:['Ich hab da eine Idee …','Angriff!','Hehe …'],cap:['Schnapp!','Meins!'],chk:['Schach! Überraschung!'],lose:['Mist, gut gemacht.','Hey, das war meine!']}],
+ ['cpu3','Eule Olga','b',4,3,'Klug und geduldig',0,{idle:['Lass mich nachdenken …','Interessant …'],cap:['Danke schön.','Das lohnt sich.'],chk:['Schach.'],lose:['Gut gesehen!','Kluger Zug.']}],
+ ['cpu4','Bär Bruno','r',3,4,'Stark – eher für Erwachsene',0,{idle:['Brumm …','Ich rechne …'],cap:['Brumm, gefressen.'],chk:['Schach!'],lose:['Brumm! Nicht schlecht.']}]]
+ .forEach(([id,name,av,col,lvl,desc,aggr,lines])=>CPU[id]=Object.assign(newProfile(false,true),{id,name,av,col,lvl,desc,aggr,lines,cpu:true,clock:0,undo:0}));
+const refP=r=>typeof r==='string'?(CPU[r]||prof(r)||FALLBACK):(r||FALLBACK);
 if(!DB.sel[0])DB.sel[0]=newProfile(false,true);
 if(!DB.sel[1])DB.sel[1]=newProfile(true,true);
 
@@ -288,6 +294,44 @@ function threatened(st){const me=st.turn,op=me==='w'?'b':'w',out=[];
     if(!attackers(st.b,s,me).length||Math.min(...at.map(q=>pv(st.b[q])))<VAL[p.toLowerCase()])out.push(s)}
   return out}
 
+/* ---------- Computergegner ---------- */
+const PV={p:100,n:320,b:330,r:500,q:900,k:0};
+const PST={p:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
+ n:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],
+ b:[-20,-10,-10,-10,-10,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,10,10,5,0,-10,-10,5,5,10,10,5,5,-10,-10,0,10,10,10,10,0,-10,-10,10,10,10,10,10,10,-10,-10,5,0,0,0,0,5,-10,-20,-10,-10,-10,-10,-10,-10,-20],
+ r:[0,0,0,0,0,0,0,0,5,10,10,10,10,10,10,5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,0,0,0,5,5,0,0,0],
+ q:[-20,-10,-10,-5,-5,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,5,5,5,0,-10,-5,0,5,5,5,5,0,-5,0,0,5,5,5,5,0,-5,-10,5,5,5,5,5,0,-10,-10,0,5,0,0,0,0,-10,-20,-10,-10,-5,-5,-10,-10,-20],
+ k:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20]};
+function evalW(b){let s=0;for(let i=0;i<64;i++){const c=b[i];if(!c)continue;const k=c.toLowerCase();if(c<'a')s+=PV[k]+PST[k][i];else s-=PV[k]+PST[k][(7-(i>>3))*8+(i&7)]}return s}
+let NODES=0,DEAD=0,ABORT=false;
+const ordered=ms=>ms.map(m=>({m,o:(m.cap?1000+10*PV[m.cap.toLowerCase()]-PV[m.p.toLowerCase()]/10:0)+(m.promo?PV[m.promo]:0)})).sort((a,b)=>b.o-a.o).map(x=>x.m);
+const tick=()=>{if((++NODES&511)===0&&performance.now()>DEAD)ABORT=true};
+function qs(st,a,b,d){tick();const sp=(st.turn==='w'?1:-1)*evalW(st.b);if(sp>=b)return sp;if(sp>a)a=sp;if(d>5||ABORT)return a;const op=st.turn==='w'?'b':'w';
+  for(const m of ordered(gen(st).filter(m=>m.cap||m.promo))){const n=make(st,m);if(attackers(n.b,kingSq(n.b,st.turn),op).length)continue;const v=-qs(n,-b,-a,d+1);if(ABORT)return a;if(v>=b)return v;if(v>a)a=v}
+  return a}
+function ab(st,d,a,b,ply){tick();if(ABORT)return 0;if(d<=0)return qs(st,a,b,0);const op=st.turn==='w'?'b':'w';let any=false,best=-1e9;
+  for(const m of ordered(gen(st))){const n=make(st,m);if(attackers(n.b,kingSq(n.b,st.turn),op).length)continue;any=true;
+    const v=-ab(n,d-1,-b,-a,ply+1);if(ABORT)return 0;if(v>best)best=v;if(v>a)a=v;if(a>=b)break}
+  return any?best:(inCheck(st)?-100000+ply:0)}
+function cpuPick(st,P){const L=P.lvl,ms=legal(st);if(ms.length===1)return ms[0];
+  if(L===1&&Math.random()<.3)return ms[Math.floor(Math.random()*ms.length)];
+  const maxD=[0,1,2,3,5][L],noise=[0,90,35,12,0][L];DEAD=performance.now()+[0,300,800,1500,2500][L];
+  let sc=ms.map(m=>({m,v:0}));
+  for(let d=1;d<=maxD;d++){ABORT=false;NODES=0;sc.sort((x,y)=>y.v-x.v);const res=[];let best=-1e9;
+    for(const o of sc){const v=-ab(make(st,o.m),d-1,-1e9,-(best-noise-1),1);if(ABORT)break;res.push({m:o.m,v});if(v>best)best=v}
+    if(ABORT){if(res.length)sc=res.concat(sc.filter(o=>!res.some(r=>r.m===o.m)).map(o=>({m:o.m,v:-1e8})));break}sc=res}
+  for(const o of sc){o.f=o.v+(Math.random()*2-1)*noise;if(P.aggr&&(o.m.cap||inCheck(make(st,o.m))))o.f+=P.aggr}
+  sc.sort((x,y)=>y.f-x.f);return sc[0].m}
+let thinking=false;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const isCpu=i=>!!PL(i).cpu;
+const FLIPV=()=>!!(G&&isCpu(0)&&!isCpu(1));
+function maybeCpu(){if(!G||!running()||thinking||$('#game').hidden)return;const i=curI();if(!isCpu(i))return;const P=PL(i);
+  thinking=true;msgs[i]=pick(P.lines.idle)+' <span class="ps">denkt nach …</span>';renderPanels();
+  const go=()=>{if(!G||!running()||curI()!==i||$('#game').hidden){thinking=false;renderPanels();return}if(anim){setTimeout(go,120);return}
+    const m=cpuPick(cur(),P);thinking=false;doMove(m);if(!G.res){const n=cur();msgs[i]=inCheck(n)?pick(P.lines.chk):m.cap?pick(P.lines.cap):null;renderPanels()}};
+  setTimeout(go,650)}
+
 /* ---------- Spielzustand ---------- */
 let G=DB.game,sel=null,explain=null,replay=-1,msgs=[null,null],anim=null,raf=0,confirmResign=-1;
 const cur=()=>G.states[G.states.length-1];
@@ -305,7 +349,7 @@ function startGame(){
 function enterGame(){sel=null;explain=null;anim=null;msgs=[null,null];confirmResign=-1;
   $('#home').hidden=true;$('#game').hidden=false;
   if(DB.style==='A'&&!init3D())DB.style='1';
-  afterTurn();renderPanels();requestAnimationFrame(layout);}
+  thinking=false;afterTurn();renderPanels();requestAnimationFrame(layout);setTimeout(maybeCpu,400);}
 function leaveGame(){$('#game').hidden=true;$('#home').hidden=false;closeSheet();replay=-1;renderHome();}
 
 function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.help||{};msgs[j]=null;
@@ -325,7 +369,8 @@ function doMove(m){const st=cur(),all=legal(st),i=curI(),s=san(st,m,all),n=make(
   anim={p:n.b[m.to],from:m.from,to:m.to,t0:performance.now(),k:0};
   checkEnd();if(G.res&&G.res.t==='matt')award('matt');
   if(nb.length)msgs[i]=(msgs[i]?msgs[i]+'<br>':'')+'Neues Abzeichen: <b>'+nb.map(k=>BADGES.find(b=>b[0]===k)[1]).join(', ')+'</b>';
-  afterTurn();persist();renderPanels();if(is3())sync3D();kick();}
+  if(m.cap&&isCpu(1-i)&&!G.res)msgs[1-i]=pick(PL(1-i).lines.lose);
+  afterTurn();persist();renderPanels();if(is3())sync3D();kick();maybeCpu();}
 function checkEnd(){const st=cur(),ms=legal(st),i=curI();let r=null;
   if(!ms.length)r=inCheck(st)?{t:'matt',w:1-i,text:`Schachmatt! ${nm(1-i)} gewinnt.`}:{t:'patt',w:null,text:`Patt – unentschieden. ${nm(i)} kann nicht ziehen, steht aber nicht im Schach.`};
   else if(insufficient(st.b))r={t:'material',w:null,text:'Remis – niemand kann mehr mattsetzen.'};
@@ -334,9 +379,10 @@ function checkEnd(){const st=cur(),ms=legal(st),i=curI();let r=null;
   if(r)finish(r)}
 function finish(r){G.res=r;G.offer=null;msgs=[null,null];
   for(const i of[0,1]){const p=PL(i);if(p.guest)continue;p.stats.g++;if(r.w===null)p.stats.d++;else if(r.w===i)p.stats.w++;else p.stats.l++;
-    if(!p.badges.partie1)p.badges.partie1=Date.now();if(p.stats.g>=10&&!p.badges.partie10)p.badges.partie10=Date.now()}
+    if(!p.badges.partie1)p.badges.partie1=Date.now();if(r.w===i&&isCpu(1-i)&&!p.badges.cpu)p.badges.cpu=Date.now();if(p.stats.g>=10&&!p.badges.partie10)p.badges.partie10=Date.now()}
   persist();setTimeout(showEnd,700)}
-function undo(i){if(!G.hist.length||anim)return;G.hist.pop();G.states.pop();G.keys.pop();G.undo[i]++;G.offer=null;
+function undo(i){if(!G.hist.length||anim||thinking)return;const k=(isCpu(1-i)&&G.hist[G.hist.length-1].by!==i&&G.hist.length>=2)?2:1;
+  for(let j=0;j<k;j++){G.hist.pop();G.states.pop();G.keys.pop()}G.undo[i]++;G.offer=null;
   sel=null;explain=null;msgs=[null,null];afterTurn();persist();renderPanels();if(is3())sync3D();draw()}
 
 /* ---------- Markierungen ---------- */
@@ -350,14 +396,14 @@ function marks(){const st=view(),M={last:null,sel:null,tg:[],thr:[],chk:null,atk
   if(sel!=null){M.sel=sel;if(H.ziele||H.gefahr){const seen=new Set();
     for(const m of legal(st,sel)){if(seen.has(m.to))continue;seen.add(m.to);M.tg.push({sq:m.to,cap:!!m.cap,risk:H.gefahr?risk(st,m):null})}}}
   return M}
-function drawMarks(x,pad,q,M,sty){
-  const R=(s,c)=>{x.fillStyle=c;x.fillRect(pad+(s&7)*q,pad+(s>>3)*q,q,q)},C=s=>[pad+((s&7)+.5)*q,pad+((s>>3)+.5)*q];
+function drawMarks(x,pad,q,M,sty,F){const D=s=>F?63-s:s;
+  const R=(s,c)=>{s=D(s);x.fillStyle=c;x.fillRect(pad+(s&7)*q,pad+(s>>3)*q,q,q)},C=s=>{s=D(s);return[pad+((s&7)+.5)*q,pad+((s>>3)+.5)*q]};
   const ring=(s,c,w,r)=>{const[cx,cy]=C(s);x.beginPath();x.arc(cx,cy,q*r,0,7);x.lineWidth=q*w;x.strokeStyle=c;x.stroke()};
   if(M.last)M.last.forEach(s=>R(s,sty==='1'?'rgba(38,38,37,.18)':'rgba(253,214,2,.5)'));
   if(M.sel!=null)R(M.sel,sty==='1'?'rgba(38,38,37,.36)':'rgba(253,214,2,.9)');
   if(M.chk!=null){const[cx,cy]=C(M.chk),g=x.createRadialGradient(cx,cy,q*.1,cx,cy,q*.62);g.addColorStop(0,'rgba(216,67,58,.95)');g.addColorStop(1,'rgba(216,67,58,0)');x.fillStyle=g;x.fillRect(cx-q/2,cy-q/2,q,q)}
   M.atk.forEach(s=>ring(s,'#E07A00',.09,.43));
-  M.mov.forEach(s=>{x.lineWidth=q*.07;x.strokeStyle='#2E9E5B';x.strokeRect(pad+(s&7)*q+q*.06,pad+(s>>3)*q+q*.06,q*.88,q*.88)});
+  M.mov.forEach(s=>{s=D(s);x.lineWidth=q*.07;x.strokeStyle='#2E9E5B';x.strokeRect(pad+(s&7)*q+q*.06,pad+(s>>3)*q+q*.06,q*.88,q*.88)});
   M.thr.forEach(s=>ring(s,'#D8433A',.07,.46));
   for(const t of M.tg){const c=M.exp?'#3A7BD5':t.risk==='g'?'#2E9E5B':t.risk==='y'?'#F2A900':t.risk==='r'?'#D8433A':'rgba(38,38,37,.42)';
     if(t.cap)ring(t.sq,c,.1,.42);else{const[cx,cy]=C(t.sq);x.beginPath();x.arc(cx,cy,q*(t.risk?.19:.15),0,7);x.fillStyle=c;x.fill();
@@ -367,11 +413,11 @@ function drawMarks(x,pad,q,M,sty){
 function draw2D(M){const c=$('#bc'),x=c.getContext('2d'),S=c.width,sty=DB.style,st=view();let pad=0,L='#F1EFE8',D='#D3D1C7';
   if(sty==='1'){pad=S*.035;x.fillStyle='#262625';x.fillRect(0,0,S,S);L='#FFF3B0';D='#FDD602'}
   const q=(S-2*pad)/8;for(let i=0;i<64;i++){x.fillStyle=((i>>3)+(i&7))%2?D:L;x.fillRect(pad+(i&7)*q,pad+(i>>3)*q,q+.5,q+.5)}
-  drawMarks(x,pad,q,M,sty);
-  for(let s=0;s<64;s++){const p=st.b[s];if(!p||(anim&&s===anim.to))continue;piece2D(x,p,pad+((s&7)+.5)*q,pad+((s>>3)+.5)*q,q,sty)}
-  if(anim){const a=[(anim.from&7)+.5,(anim.from>>3)+.5],b=[(anim.to&7)+.5,(anim.to>>3)+.5],k=anim.k;
+  const F=FLIPV(),DS=s=>F?63-s:s;drawMarks(x,pad,q,M,sty,F);
+  for(let s=0;s<64;s++){const p=st.b[s];if(!p||(anim&&s===anim.to))continue;const t=DS(s);piece2D(x,p,pad+((t&7)+.5)*q,pad+((t>>3)+.5)*q,q,sty)}
+  if(anim){const af=DS(anim.from),at=DS(anim.to),a=[(af&7)+.5,(af>>3)+.5],b=[(at&7)+.5,(at>>3)+.5],k=anim.k;
     piece2D(x,anim.p,pad+(a[0]+(b[0]-a[0])*k)*q,pad+(a[1]+(b[1]-a[1])*k)*q,q,sty)}}
-function piece2D(x,p,cx,cy,q,sty){const w=p<'a',k=p.toLowerCase();x.save();x.translate(cx,cy);if(!w&&DB.table)x.rotate(Math.PI);
+function piece2D(x,p,cx,cy,q,sty){const w=p<'a',k=p.toLowerCase();x.save();x.translate(cx,cy);if(!w&&DB.table&&!G.p.some((r,j)=>isCpu(j)))x.rotate(Math.PI);
   if(sty==='1'){x.font=`${q*.8}px "Apple Symbols","Segoe UI Symbol",serif`;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
     x.lineWidth=q*.07;x.strokeStyle=w?'#262625':'#FFF3B0';x.strokeText(GL[k]+FE,0,q*.05);x.fillStyle=w?'#FFFFFF':'#262625';x.fillText(GL[k]+FE,0,q*.05)}
   else{const c=w?'#FDD602':'#262625';x.fillStyle=c;x.beginPath();
@@ -436,7 +482,7 @@ const is3=()=>DB.style==='A'&&!!T3.r;
 
 /* ---------- Zeichnen, Layout, Animation ---------- */
 function draw(){if(!G||$('#game').hidden)return;const M=marks();
-  if(is3()){tex3D(M);for(const o of T3.objs)if(!o.userData.anim)o.position.y=(o.userData.sq===M.sel&&!M.exp)?1.2:0;T3.r.render(T3.sc,T3.cam)}
+  if(is3()){const up=FLIPV()?1:-1;if(T3.cam.up.z!==up){T3.cam.up.set(0,0,up);T3.cam.lookAt(0,0,0)}tex3D(M);for(const o of T3.objs)if(!o.userData.anim)o.position.y=(o.userData.sq===M.sel&&!M.exp)?1.2:0;T3.r.render(T3.sc,T3.cam)}
   else draw2D(M)}
 function layout(){if(!G||$('#game').hidden)return;const bw=$('#bw'),s=Math.floor(Math.min(bw.clientWidth,bw.clientHeight));if(s<=0)return;
   const three=is3(),c=three?$('#b3'):$('#bc');$('#bc').hidden=three;$('#b3').hidden=!three;c.style.width=c.style.height=s+'px';
@@ -455,7 +501,7 @@ function pickSq(e){if(is3()){const rc=$('#b3').getBoundingClientRect(),v=new THR
     if(h){let o=h.object;while(o&&o.userData.sq==null)o=o.parent;if(o)return o.userData.sq}
     const h2=T3.ray.intersectObject(T3.plane)[0];if(!h2)return-1;const f=Math.floor((h2.point.x+20)/5),r=Math.floor((h2.point.z+20)/5);return on(r,f)?r*8+f:-1}
   const c=$('#bc'),rc=c.getBoundingClientRect(),pad=DB.style==='1'?rc.width*.035:0,q=(rc.width-2*pad)/8,f=Math.floor((e.clientX-rc.left-pad)/q),r=Math.floor((e.clientY-rc.top-pad)/q);
-  return on(r,f)?r*8+f:-1}
+  return on(r,f)?(FLIPV()?63-(r*8+f):r*8+f):-1}
 let pd=null;
 for(const id of['#bc','#b3']){const c=$(id);
   c.addEventListener('pointerdown',e=>{e.preventDefault();const sq=pickSq(e);pd={sq,used:false};clearTimeout(pd.tm);
@@ -467,7 +513,7 @@ function showExplain(sq){const p=cur().b[sq],k=p.toLowerCase(),i=curI();explain=
   const v=k==='k'?'Wert: unbezahlbar – ohne König ist die Partie verloren.':`Wert: ${VAL[k]} ${VAL[k]===1?'Punkt':'Punkte'}.`;
   msgs[i]=`<b>${NAME[k]}</b> (${col(p)==='w'?'weiß':'schwarz'}) – ${RULE[k]} ${v} Blaue Punkte zeigen seine Ziele. <button data-act="say" data-i="${i}">Nochmal vorlesen</button>`;
   speak(RULE[k]+' '+v);renderPanels();draw()}
-function tap(sq){if(!running()||anim||sq<0)return;const st=cur();
+function tap(sq){if(!running()||anim||sq<0||thinking||isCpu(curI()))return;const st=cur();
   if(explain!=null){explain=null;msgs[curI()]=null;afterTurn();renderPanels()}
   if(sel!=null){const ms=legal(st,sel).filter(m=>m.to===sq);if(ms.length){if(ms.length>1)promoPick(ms);else doMove(ms[0]);return}}
   const p=st.b[sq];sel=(p&&col(p)===st.turn&&sq!==sel)?sq:null;draw()}
@@ -490,15 +536,15 @@ function panelHTML(i){const p=PL(i),st=view(),n=replay<0?G.hist.length:replay,hs
   const myTurn=running()&&(st.turn==='w')===(i===0);
   const caps=hs.filter(h=>h.by===i&&h.cap).map(h=>h.cap.toLowerCase()).sort((a,b)=>VAL[b]-VAL[a]);
   const mat=caps.reduce((s,k)=>s+VAL[k],0)-hs.filter(h=>h.by!==i&&h.cap).reduce((s,h)=>s+VAL[h.cap.toLowerCase()],0);
-  const canUndo=running()&&!anim&&G.hist.length&&G.hist[G.hist.length-1].by===i&&G.undo[i]<p.undo;
-  let h=`<div class="ph">${avHTML(p)}<div class="grow"><div class="pn">${esc(nm(i))} ${myTurn?'<span class="turn">am Zug</span>':''}</div><div class="ps">${i?'Schwarz':'Weiß'} · ${p.kid?'Kind':'Erwachsen'}${p.undo&&running()?' · Rücknahmen: '+(p.undo>=99?'unbegrenzt':Math.max(0,p.undo-G.undo[i])):''}</div></div>${G.clock[i]!=null?`<span class="clk${G.clock[i]<30000?' low':''}" id="clk${i}">${fmt(G.clock[i])}</span>`:''}</div>`;
+  const lb=G.hist.length?G.hist[G.hist.length-1].by:-1,canUndo=running()&&!anim&&!thinking&&!p.cpu&&G.undo[i]<p.undo&&(lb===i||(lb===1-i&&isCpu(1-i)&&G.hist.length>=2));
+  let h=`<div class="ph">${avHTML(p)}<div class="grow"><div class="pn">${esc(nm(i))} ${myTurn?'<span class="turn">am Zug</span>':''}</div><div class="ps">${i?'Schwarz':'Weiß'} · ${p.cpu?'Computer · Stufe '+p.lvl:p.kid?'Kind':'Erwachsen'}${p.undo&&running()?' · Rücknahmen: '+(p.undo>=99?'unbegrenzt':Math.max(0,p.undo-G.undo[i])):''}</div></div>${G.clock[i]!=null?`<span class="clk${G.clock[i]<30000?' low':''}" id="clk${i}">${fmt(G.clock[i])}</span>`:''}</div>`;
   h+=`<div class="ph"><div class="cap grow" style="color:${i?'#fffcf0':'#262625'};-webkit-text-stroke:${i?'1px #262625':'0'}">${caps.map(k=>GL[k]+FE).join('')}${mat>0?` <span class="ps" style="letter-spacing:0;-webkit-text-stroke:0;color:var(--ink-soft)">+${mat}</span>`:''}</div>`;
   if(replay>=0&&i===0)h+=`<span class="ps">Zug ${replay}/${G.hist.length}${replay?': '+G.hist[replay-1].san:''}</span>${pbtn('prev',0,'Zurück')}${pbtn('next',0,'Weiter')}${pbtn('x',0,'Nachspielen beenden')}`;
-  else h+=`${canUndo?pbtn('undo',i,'Zug zurücknehmen'):''}${pbtn('help',i,'Hilfen')}${pbtn('menu',i,'Menü')}`;
+  else if(!p.cpu)h+=`${canUndo?pbtn('undo',i,'Zug zurücknehmen'):''}${pbtn('help',i,'Hilfen')}${pbtn('menu',i,'Menü')}`;
   h+='</div>';if(msgs[i])h+=`<div class="msg">${msgs[i]}</div>`;
   if(G.res&&replay<0)h+=`<div class="msg">${esc(G.res.text)}</div>`;
   return h}
-function renderPanels(){if(!G)return;$('#pW').innerHTML=panelHTML(0);$('#pB').innerHTML=panelHTML(1);$('#pB').classList.toggle('flip',!!DB.table)}
+function renderPanels(){if(!G)return;const F=FLIPV();$('#pW').innerHTML=panelHTML(F?1:0);$('#pB').innerHTML=panelHTML(F?0:1);$('#pB').classList.toggle('flip',!!DB.table&&!isCpu(0)&&!isCpu(1))}
 
 /* ---------- Uhr ---------- */
 let lastT=performance.now(),saveT=0;
@@ -523,13 +569,15 @@ function showHelp(i){const p=PL(i);
   openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(nm(i))}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div>
   ${helpRows(p,'ghelp',` data-i="${i}"`)}
   <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('gundo',p.undo,` data-i="${i}"`)}</div>`,i===1&&DB.table)}
-function showPreHelp(i){const p=refP(DB.sel[i]);
-  openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(p.name||'Spieler')}</h2><span class="ps">${i+1} / 2</span></div>
+const preSteps=()=>[0,1].filter(j=>!refP(DB.sel[j]).cpu);
+function startFlow(){const h=preSteps();if(!h.length){startGame();return}showPreHelp(h[0])}
+function showPreHelp(i){const p=refP(DB.sel[i]),st=preSteps(),ix=st.indexOf(i),last=ix===st.length-1;
+  openSheet(`<div class="shead">${avHTML(p)}<h2>Hilfen für ${esc(p.name||'Spieler')}</h2><span class="ps">${ix+1} / ${st.length}</span></div>
   <p class="ps">${i?'Schwarz':'Weiß'} · ${p.kid?'Kind':'Erwachsen'} – tippe an, was helfen soll. Im Spiel geht das jederzeit über die Glühbirne.</p>
   ${helpRows(p,'phelp',` data-i="${i}"`)}
   <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('pundo',p.undo,` data-i="${i}"`)}</div>
-  <div class="sec tiles"><button class="tile" data-act="${i?'pback':'close'}">${MICON[i?'replay':'home']}${i?'Zurück':'Abbrechen'}</button>
-  <button class="tile dark" data-act="${i?'start2':'pnext'}">${MICON.play}${i?'Los geht’s':'Weiter'}</button></div>`,i===1&&DB.table)}
+  <div class="sec tiles"><button class="tile" data-act="${ix?'pback':'close'}" data-to="${st[ix-1]}">${MICON[ix?'replay':'home']}${ix?'Zurück':'Abbrechen'}</button>
+  <button class="tile dark" data-act="${last?'start2':'pnext'}" data-to="${st[ix+1]}">${MICON.play}${last?'Los geht’s':'Weiter'}</button></div>`,i===1&&DB.table&&st.length===2)}
 let menuI=0;
 function showMenu(i){menuI=i;const r=G.res;
   openSheet(`<div class="tiles">${!r?`<button class="tile" data-act="offer" data-i="${i}">${MICON.remis}Remis anbieten</button>
@@ -552,7 +600,7 @@ function showEnd(){if(!G||!G.res||$('#game').hidden)return;const r=G.res;
 function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB.night);
   document.querySelector('meta[name="theme-color"]').content=DB.night?'#12110d':'#FDD602';
   document.querySelectorAll('.slot').forEach(b=>{const i=+b.dataset.i,p=refP(DB.sel[i]);
-    b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.kid?'Kind':'Erwachsen'}${p.guest?' · Gast':''}</small>`});
+    b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.cpu?'Computer · '+'★'.repeat(p.lvl):(p.kid?'Kind':'Erwachsen')+(p.guest?' · Gast':'')}</small>`});
   $('#profList').innerHTML=DB.profiles.length?DB.profiles.map(p=>`<div class="pi"><button data-act="edit" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button></div>`).join(''):'<p class="ps" style="margin:0">Lege Profile an, damit Hilfen, Bilanz und Abzeichen gespeichert bleiben.</p>';
   const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
@@ -560,6 +608,7 @@ function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button da
   openSheet(`<h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><div class="plist">${rows||'<p class="ps">Noch keine Spieler angelegt.</p>'}
   <div class="pi"><button data-act="guest" data-kid="1" data-i="${i}"><div class="av" style="background:${AC[1]}">${GL.n+FE}</div><span><b>Gast-Kind</b><br><span class="ps">ohne Speichern, alle Hilfen an</span></span></button></div>
   <div class="pi"><button data-act="guest" data-kid="0" data-i="${i}"><div class="av" style="background:${AC[0]}">${GL.k+FE}</div><span><b>Gast</b><br><span class="ps">Erwachsen, ohne Speichern</span></span></button></div></div>
+  <div class="sec"><p class="lbl">Computer</p><div class="plist">${Object.values(CPU).map(c=>`<div class="pi"><button data-act="choose" data-id="${c.id}" data-i="${i}">${avHTML(c)}<span><b>${c.name}</b> <span class="ps">${'★'.repeat(c.lvl)}</span><br><span class="ps">${c.desc}</span></span></button></div>`).join('')}</div></div>
   <div class="btns"><button class="btn dark" data-act="newp" data-i="${i}">Neuer Spieler</button></div>`)}
 let ED=null,ED_SLOT=-1,ED_DEL=false;
 function showEditor(){const p=ED,isNew=!prof(p.id);
@@ -588,10 +637,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'start':{const g=DB.game;if(g&&!g.res&&g.hist.length){openSheet(`<div class="shead">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 12v15" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="35" r="2.8" fill="#262625"/>')}<h2>Laufende Partie abbrechen?</h2></div>
     <p>${esc(refP(g.p[0]).name||'Weiß')} gegen ${esc(refP(g.p[1]).name||'Schwarz')} ist noch nicht beendet (${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}). Wenn du eine neue Partie startest, wird sie abgebrochen und kann nicht fortgesetzt werden.</p>
     <div class="sec tiles"><button class="tile" data-act="close">${MICON.replay}Zurück</button><button class="tile dark" data-act="newok">${MICON.play}Neue Partie</button></div>`);break}
-    showPreHelp(0);break}
-  case'newok':DB.game=null;G=null;persist();renderHome();showPreHelp(0);break;
-  case'pnext':showPreHelp(1);break;
-  case'pback':showPreHelp(0);break;
+    startFlow();break}
+  case'newok':DB.game=null;G=null;persist();renderHome();startFlow();break;
+  case'pnext':case'pback':showPreHelp(+b.dataset.to);break;
   case'start2':closeSheet();startGame();break;
   case'phelp':{const p=refP(DB.sel[i]);p.help[b.dataset.k]=!p.help[b.dataset.k];persist();showPreHelp(i);break}
   case'phelpall':{const p=refP(DB.sel[i]);HELP.forEach(([k])=>p.help[k]=v==='1');persist();showPreHelp(i);break}
@@ -623,7 +671,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'gundo':{PL(i).undo=+v;persist();showHelp(i);renderPanels();break}
   case'menu':confirmResign=-1;showMenu(i);break;
   case'gstyle':DB.style=v;if(v==='A'&&!init3D()){DB.style='1'}persist();showMenu(menuI);requestAnimationFrame(layout);break;
-  case'offer':G.offer=i;afterTurn();msgs[i]='Remis angeboten – warte auf die Antwort.';persist();closeSheet();renderPanels();break;
+  case'offer':if(isCpu(1-i)){const v=(i===0?-1:1)*evalW(cur().b);closeSheet();if(v<=-200){finish({t:'remis',w:null,text:`${nm(1-i)} nimmt das Remis an.`});renderPanels();draw()}else{msgs[1-i]='Nein danke, ich spiele weiter!';renderPanels()}break}
+    G.offer=i;afterTurn();msgs[i]='Remis angeboten – warte auf die Antwort.';persist();closeSheet();renderPanels();break;
   case'acc':finish({t:'remis',w:null,text:'Remis nach Vereinbarung.'});renderPanels();draw();break;
   case'dec':G.offer=null;msgs=[null,null];afterTurn();persist();renderPanels();break;
   case'resign':if(confirmResign!==i){confirmResign=i;showMenu(i);break}
