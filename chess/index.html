@@ -213,6 +213,13 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape) and (max-height:640px){.sheet.tall{height:88vh}}
 @media (orientation:portrait){.sheet.tall .mbig{min-height:64px;flex-direction:row;gap:10px}.sheet.tall .mcol:last-child{flex-direction:row}.sheet.tall .mcol:last-child .mbig{flex:1 1 0;min-width:0;padding:8px;font-size:15px;gap:8px}.sheet.tall .mcol:last-child .mbig svg{width:30px;height:30px}.sheet.tall .mdes .tile{min-height:90px}}
 @media (orientation:portrait){.sheet.tall .mgrid{grid-template-rows:auto minmax(0,1fr) auto}.sheet.tall .mcol:nth-child(2){order:-1}.sheet.tall .mcol:nth-child(2) [data-act=gtable]{min-height:60px}}
+.trbtns{display:flex;gap:7px;margin-left:auto;flex:none}.trst{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:20px;letter-spacing:2px}.trst .ps{letter-spacing:0}
+.lst{font-size:17px;letter-spacing:2px;display:block}
+@media (orientation:landscape){.trh{flex-wrap:wrap}.trh .trbtns{flex-basis:100%;justify-content:flex-end;margin-top:4px}
+  .sheet.tall2{display:flex;flex-direction:column;height:min(80vh,620px)}.sheet.tall2 .tl{flex:1;grid-auto-rows:1fr;min-height:0}
+  .sheet.tall2 .tl .tile{flex-direction:column!important;justify-content:center!important;text-align:center!important;gap:4px!important;font-size:15px}}
+@media (orientation:landscape) and (max-height:640px){.sheet.tall2{height:88vh}.sheet.tall2 .ps{display:none}.lst{font-size:15px}}
+.pan .pn{white-space:normal;overflow:visible}
 </style>
 </head>
 <body>
@@ -244,7 +251,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 <div id="train" class="screen" hidden>
   <div class="wrap">
     <div class="topbar">
-      <button class="icon-btn" data-act="trhome" aria-label="Zurück zur Startseite"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="icon-btn" data-act="trhome" aria-label="Zum Hauptmenü"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-5h-6v5H4z"/></svg></button>
       <span class="spacer"></span>
       <button class="who" id="trWho" data-act="trwho"></button>
     </div>
@@ -677,6 +684,8 @@ const ICON={undo:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor"
   next:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
   offer:'<svg viewBox="0 0 24 24"><text x="12" y="17.5" text-anchor="middle" font-size="15" font-weight="800" font-family="system-ui" fill="currentColor">½</text></svg>',
   resignask:'<svg viewBox="0 0 24 24"><path d="M6 22V3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4h11l-2.5 3.5L18 11H7z" fill="#d8433a"/></svg>',
+  home:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-5h-6v5H4z"/></svg>',
+  map:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
   say:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
   x:'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
 const avHTML=(p,big)=>`<div class="av${big?' big':''}" style="background:${AC[p.col]||AC[0]}">${p.cpu&&FIG[p.id]?FIG[p.id]:(GL[p.av]||GL.k)+FE}</div>`;
@@ -707,7 +716,7 @@ document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(doc
 
 /* ---------- Blätter ---------- */
 let sheetKind='';
-function openSheet(html,flip,kind){const el=$('#sheetIn'),keep=kind&&kind===sheetKind&&!$('#sheet').hidden,y=el.scrollTop;sheetKind=kind||'';delete el.dataset.end;el.classList.remove('wide','tall');el.innerHTML=html;el.classList.toggle('flip',!!flip);$('#sheet').hidden=false;el.scrollTop=keep?y:0}
+function openSheet(html,flip,kind){const el=$('#sheetIn'),keep=kind&&kind===sheetKind&&!$('#sheet').hidden,y=el.scrollTop;sheetKind=kind||'';delete el.dataset.end;el.classList.remove('wide','tall','tall2');el.innerHTML=html;el.classList.toggle('flip',!!flip);$('#sheet').hidden=false;el.scrollTop=keep?y:0}
 function openConfirm(html,flip){$('#confirmIn').innerHTML=html;$('#confirmIn').classList.toggle('flip',!!flip);$('#confirm').hidden=false}
 function closeConfirm(){$('#confirm').hidden=true}
 $('#confirm').addEventListener('click',e=>{if(e.target.id==='confirm')closeConfirm()});
@@ -801,7 +810,7 @@ function renderTrain(){const p=trainer();$('#trWho').innerHTML=`${avHTML(p)}<spa
     return`<button class="isle${open?'':' locked'}" data-act="isle" data-v="${k}"><div class="av big" style="background:${AC[I.col]}">${GL[I.av]+FE}</div><div class="grow"><b>${k+1}. ${I.name}</b><div class="ps">${open?I.desc+' · mit '+CPU[I.tr].name:'Gesperrt – sammle erst Sterne auf der Insel davor'}</div><div class="bar"><i style="width:${Math.round(st/mx*100)}%"></i></div></div><div class="isst">${open?st+'/'+mx+'<br><span style="color:#F2A900">★</span>':LOCK}</div></button>`}).join('')}
 function showIsle(k){const I=ISLANDS[k],p=trainer();if(!islOpen(p,k)){speak('Diese Insel ist noch gesperrt. Sammle zuerst Sterne auf der Insel davor.',ISLANDS[k-1].tr);return}
   openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>${I.name}</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><p class="ps">${I.desc} · mit ${CPU[I.tr].name}</p>
-  <div class="tiles t3 tl">${I.lessons.map((L,j)=>`<button class="tile${trStars(p,L)?' on':''}" data-act="lesson" data-i="${k}" data-v="${j}"><span style="font-family:var(--font-display);font-size:30px;line-height:1">${j+1}</span>${esc(L.title)}<small style="font-size:17px;letter-spacing:2px">${starRow(trStars(p,L))}</small></button>`).join('')}</div>`)}
+  <div class="tiles t3 tl">${I.lessons.map((L,j)=>`<button class="tile${trStars(p,L)?' on':''}" data-act="lesson" data-i="${k}" data-v="${j}"><span style="font-family:var(--font-display);font-size:30px;line-height:1">${j+1}</span>${esc(L.title)}<span class="lst">${starRow(trStars(p,L))}</span></button>`).join('')}</div>`);$('#sheetIn').classList.add('tall2')}
 function showTrWho(){openSheet(`<div class="shead"><h2>Wer trainiert?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><div class="plist two">${DB.profiles.map(p=>`<div class="pi"><button data-act="trpick" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${ISLANDS.reduce((a,I)=>a+islStars(p,I),0)} Sterne gesammelt</span></span></button></div>`).join('')}
   <div class="pi"><button data-act="trpick" data-id="">${avHTML({av:'n',col:1})}<span><b>Gast</b><br><span class="ps">ohne Profil, nur auf diesem Gerät</span></span></button></div></div>`)}
 const trText=()=>{const T=G.tr;return T.L.t==='quiz'?(T.qi===0?T.L.text+' ':'')+T.L.q[T.qi].text:T.L.text};
@@ -810,10 +819,10 @@ function startLesson(k,j){const I=ISLANDS[k],L=I.lessons[j];closeSheet();trainer
     tr:{L,isl:k,idx:j,moves:0,mist:0,stars:P.stars,hint:[],hl:0,qi:0,qmark:L.t==='quiz'&&L.q[0].mark?[sqIdx(L.q[0].mark)]:[]}};
   replay=-1;enterGame();speak(trText(),I.tr)}
 function trPanels(){const T=G.tr,L=T.L,I=ISLANDS[T.isl],tp=PL(1),me=PL(0),b2=(a,ic,l)=>`<button class="pb" data-act="${a}" aria-label="${l}">${ic}</button>`;
-  let top=`<div class="ph">${avHTML(tp,1)}<div class="grow"><div class="pn">${esc(L.title)}</div><div class="ps">${tp.name} · ${I.name} ${T.idx+1}/${I.lessons.length}</div></div>${b2('trsay',ICON.say,'Vorlesen')}${L.t==='puzzle'&&!G.res?b2('trhint',ICON.help,'Tipp'):''}${b2('trrestart',ICON.undo,'Neu starten')}${b2('trx',ICON.x,'Zur Inselkarte')}</div><div class="msg">${msgs[1]||esc(trText())}</div>`;
+  let top=`<div class="ph trh">${avHTML(tp,1)}<div class="grow"><div class="pn">${esc(L.title)}</div><div class="ps">${tp.name} · ${I.name} ${T.idx+1}/${I.lessons.length}</div></div><div class="trbtns">${b2('trsay',ICON.say,'Vorlesen')}${L.t==='puzzle'&&!G.res?b2('trhint',ICON.help,'Tipp'):''}${b2('trrestart',ICON.undo,'Neu starten')}${b2('trx',ICON.map,'Zur Inselkarte')}${b2('trmain',ICON.home,'Zum Hauptmenü')}</div></div><div class="msg">${msgs[1]||esc(trText())}</div>`;
   if(L.t==='quiz'&&!G.res){const Q=L.q[T.qi];top+=`<div class="tiles${Q.opts.length>2?' t3':''}">${Q.opts.map((o,n)=>`<button class="tile" data-act="qans" data-v="${n}" style="min-height:64px;font-size:19px">${o[0]}</button>`).join('')}</div>`}
   const stat=L.t==='solo'?`Züge: ${T.moves} · Ziel: ${L.par}`:L.t==='puzzle'?`Fehlversuche: ${T.mist}`:L.t==='quiz'?`Frage ${T.qi+1} von ${L.q.length}`:'Bring einen Bauern ganz nach oben!';
-  const bot=`<div class="ph">${avHTML(me)}<div class="grow"><div class="pn">${esc(me.name||'Du')}${running()&&curI()===0&&L.t!=='quiz'?' <span class="turn">am Zug</span>':''}</div><div class="ps">${stat}</div></div><span class="clk" style="letter-spacing:2px">${starRow(trStars(me,L))}</span></div>`;
+  const bot=`<div class="trst"><span class="ps">Bestes Ergebnis</span> ${starRow(trStars(me,L))}</div><div class="ph">${avHTML(me)}<div class="grow"><div class="pn">${esc(me.name||'Du')}${running()&&curI()===0&&L.t!=='quiz'?' <span class="turn">am Zug</span>':''}</div><div class="ps">${stat}</div></div></div>`;
   return[top,bot]}
 function trCheck(L,st,m){const n=make(st,m),q=L.sq?sqIdx(L.sq):-1;switch(L.goal){
   case'mate':return inCheck(n)&&!legal(n).length;case'ok':return L.ok.includes(uci(m));
@@ -855,6 +864,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'isle':showIsle(+v);break;
   case'lesson':startLesson(i,+v);break;
   case'trx':leaveGame();break;
+  case'trmain':leaveGame();$('#train').hidden=true;$('#home').hidden=false;renderHome();break;
   case'trrestart':if(G&&G.tr){const T=G.tr;startLesson(T.isl,T.idx)}break;
   case'trnext':if(G&&G.tr){const T=G.tr;startLesson(T.isl,T.idx+1)}break;
   case'trsay':if(G&&G.tr)speak(msgs[1]||trText(),ISLANDS[G.tr.isl].tr);break;
