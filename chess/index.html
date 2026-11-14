@@ -212,6 +212,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape){.sheet.tall{height:min(80vh,620px)}.sheet.tall .mgrid{grid-template-rows:minmax(0,1fr)}}
 @media (orientation:landscape) and (max-height:640px){.sheet.tall{height:88vh}}
 @media (orientation:portrait){.sheet.tall .mbig{min-height:64px;flex-direction:row;gap:10px}.sheet.tall .mcol:last-child{flex-direction:row}.sheet.tall .mcol:last-child .mbig{flex:1 1 0;min-width:0;padding:8px;font-size:15px;gap:8px}.sheet.tall .mcol:last-child .mbig svg{width:30px;height:30px}.sheet.tall .mdes .tile{min-height:90px}}
+@media (orientation:portrait){.sheet.tall .mgrid{grid-template-rows:auto minmax(0,1fr) auto}.sheet.tall .mcol:nth-child(2){order:-1}.sheet.tall .mcol:nth-child(2) [data-act=gtable]{min-height:60px}}
 </style>
 </head>
 <body>
