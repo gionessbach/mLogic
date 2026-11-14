@@ -176,6 +176,21 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
   #home .slot{gap:8px}#home .slot .av{width:92px;height:92px;font-size:54px}#home .slot b{font-size:28px}#home .slot small{font-size:16px}
   #home .startrow .btn{font-size:24px}#home .startrow .btn small{font-size:15px}#home .note{font-size:15px}
 }
+.prow{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.ptile{position:relative;flex:0 0 140px;scroll-snap-align:start;display:flex}
+.ptile>button:first-child{flex:1;background:var(--soft);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border:3px solid transparent;min-height:140px;line-height:1.15}
+.ptile>button:first-child:active{transform:translateY(2px)}
+.ptile.on>button:first-child{border-color:var(--ink);background:var(--card)}
+.ptile b{font-family:var(--font-display);font-size:18px}.ptile small{font-size:12px;color:var(--ink-soft)}
+.ptile .av,.ptile .av.big{width:66px;height:66px;font-size:40px}.ptile svg{width:56px;height:56px}
+.pedit{position:absolute;top:6px;right:6px;width:38px;height:38px;border-radius:12px;background:var(--card);display:grid;place-items:center;box-shadow:0 2px 0 rgba(38,38,36,.12)}.pedit svg{width:18px;height:18px}
+.ptile.plus>button:first-child{background:var(--ink);color:var(--on-ink)}.ptile.plus.wide{flex:1 1 auto}.ptile.plus.wide>button{flex-direction:row;gap:14px;min-height:76px}
+.prow2{display:flex;gap:10px;margin-top:10px;align-items:stretch}.pgrp{display:flex;gap:10px;min-width:0}.pgrp .ptile{flex:1 1 0;min-width:0}
+.pgrp.g2{flex:2}.pgrp.g4{flex:4}.vdiv{width:3px;border-radius:2px;background:var(--line);flex:none;margin:6px 2px}
+@media (orientation:portrait){.prow{flex-wrap:wrap;overflow:visible}.ptile{flex:1 1 140px}.prow2{flex-direction:column}.vdiv{width:auto;height:3px;margin:2px 6px}.pgrp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (orientation:landscape){.sheet.wide{max-width:min(1100px,96vw)}}
+@media (orientation:landscape) and (max-height:640px){.ptile{flex-basis:118px}.ptile>button:first-child{min-height:104px;padding:8px 6px;gap:2px}.ptile .av,.ptile .av.big{width:46px;height:46px;font-size:28px}.ptile svg{width:40px;height:40px}
+  .ptile b{font-size:15px}.ptile small{font-size:10.5px}.pedit{width:30px;height:30px;top:4px;right:4px}.ptile.plus.wide>button{min-height:56px}.prow2{margin-top:6px}}
 </style>
 </head>
 <body>
@@ -665,7 +680,7 @@ setInterval(()=>{const now=performance.now(),dt=now-lastT;lastT=now;if(!G||!runn
 document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(document.hidden)persist()});
 
 /* ---------- Blätter ---------- */
-function openSheet(html,flip){delete $('#sheetIn').dataset.end;$('#sheetIn').innerHTML=html;$('#sheetIn').classList.toggle('flip',!!flip);$('#sheet').hidden=false;$('#sheetIn').scrollTop=0}
+function openSheet(html,flip){delete $('#sheetIn').dataset.end;$('#sheetIn').classList.remove('wide');$('#sheetIn').innerHTML=html;$('#sheetIn').classList.toggle('flip',!!flip);$('#sheet').hidden=false;$('#sheetIn').scrollTop=0}
 function closeSheet(){$('#sheet').hidden=true;PROMO=null}
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet'&&!PROMO&&!(G&&G.res&&$('#sheetIn').dataset.end))closeSheet()});
 const segHTML=(act,opts,v,extra)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${String(k)===String(v)?'on':''}" data-act="${act}" data-v="${k}"${extra||''}>${l}</button>`).join('')}</div>`;
@@ -713,12 +728,17 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
   $('#homeCrew').innerHTML=Object.values(CPU).slice(0,2).map(c=>avHTML(c)).join('');
   const g=DB.game,res=g&&!g.res&&g.hist.length>0;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
   if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
-function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
-  openSheet(`<div class="shead"><h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><button class="tile dark" data-act="newp" data-i="${i}" style="width:100%;flex-direction:row;min-height:64px;gap:12px;margin-bottom:10px">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 14v20M14 24h20" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/>')}Neuen Spieler anlegen</button><div class="plist two">${rows}
-  <div class="pi"><button data-act="guest" data-kid="1" data-i="${i}"><div class="av" style="background:${AC[1]}">${GL.n+FE}</div><span><b>Gast-Kind</b><br><span class="ps">ohne Speichern, alle Hilfen an</span></span></button></div>
-  <div class="pi"><button data-act="guest" data-kid="0" data-i="${i}"><div class="av" style="background:${AC[0]}">${GL.k+FE}</div><span><b>Gast</b><br><span class="ps">Erwachsen, ohne Speichern</span></span></button></div></div>
-  <div class="sec"><p class="lbl">Computer</p><div class="plist two">${Object.values(CPU).map(c=>`<div class="pi"><button data-act="choose" data-id="${c.id}" data-i="${i}">${avHTML(c)}<span><b>${c.name}</b> <span class="ps">${'★'.repeat(c.lvl)}</span><br><span class="ps">${c.desc}</span></span></button></div>`).join('')}</div></div>
-  `)}
+const PEN='<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>';
+function showPicker(i){const cur=DB.sel[i],curId=typeof cur==='string'?cur:null,curG=typeof cur==='object'&&cur?cur:null;
+  const tile=(act,attrs,av,name,sub,on,extra)=>`<div class="ptile${on?' on':''}"><button data-act="${act}" data-i="${i}" ${attrs}>${av}<b>${name}</b><small>${sub}</small></button>${extra||''}</div>`;
+  const plusSvg=SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 14v20M14 24h20" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/>');
+  const prof=DB.profiles.map(p=>tile('choose',`data-id="${p.id}"`,avHTML(p,1),esc(p.name),p.kid?'Kind':'Erwachsen',p.id===curId,`<button class="pedit" data-act="edit" data-id="${p.id}" aria-label="${esc(p.name)} bearbeiten">${PEN}</button>`)).join('');
+  const plus=`<div class="ptile plus${DB.profiles.length?'':' wide'}"><button data-act="newp" data-i="${i}">${plusSvg}<b>Neuen Spieler hinzufügen</b></button></div>`;
+  const guests=tile('guest','data-kid="1"',`<div class="av big" style="background:${AC[1]}">${GL.n+FE}</div>`,'Gast-Kind','ohne Speichern',curG&&curG.kid)+tile('guest','data-kid="0"',`<div class="av big" style="background:${AC[0]}">${GL.k+FE}</div>`,'Gast','ohne Speichern',curG&&!curG.kid);
+  const cpus=Object.values(CPU).map(c=>tile('choose',`data-id="${c.id}"`,avHTML(c,1),c.name,'★'.repeat(c.lvl)+' · '+({cpu1:'Anfängerin',cpu2:'Frech',cpu3:'Klug',cpu4:'Stark'}[c.id]||''),c.id===curId)).join('');
+  openSheet(`<div class="shead"><h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div>
+  <div class="prow">${prof}${plus}</div>
+  <div class="prow2"><div class="pgrp g2">${guests}</div><div class="vdiv"></div><div class="pgrp g4">${cpus}</div></div>`,false);$('#sheetIn').classList.add('wide')}
 let ED=null,ED_SLOT=-1,ED_DEL=false;
 function showEditor(){const p=ED,isNew=!prof(p.id);
   openSheet(`<h2>${isNew?'Neuer Spieler':'Spieler bearbeiten'}</h2>
