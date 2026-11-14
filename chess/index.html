@@ -106,6 +106,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .promo button span{font-size:12px;font-family:var(--font-body);font-weight:800}
 .moves{font-size:16px;line-height:1.8;column-count:2;font-variant-numeric:tabular-nums}
 .sec{margin-top:16px}
+.startrow{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}.startrow.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .tile{background:var(--soft);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
@@ -118,7 +119,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .tile.warn{color:#d8433a}
 .tile:active{transform:translateY(2px)}
 .mini{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14px;max-height:84px;overflow-y:auto;font-variant-numeric:tabular-nums}
-.shead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.shead h2{margin:0;flex:1}
+.shead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.shead h2{margin:0;flex:1}.shead>svg{width:48px;height:48px;flex:none}
 </style>
 </head>
 <body>
@@ -130,7 +131,6 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <button class="icon-btn" data-act="night" aria-label="Nachtmodus"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg></button>
     </div>
     <div class="hero"><img src="icon-192.png" alt=""><div><h1>mChess</h1><p>Schach zu zweit an einem Gerät</p></div></div>
-    <button class="btn dark" id="resumeBtn" data-act="resume" hidden>Partie fortsetzen<small id="resumeInfo"></small></button>
     <div class="card">
       <p class="lbl">Spieler</p>
       <div class="slots">
@@ -144,7 +144,10 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <div class="plist" id="profList"></div>
       <div class="btns" style="margin-top:10px"><button class="btn light" data-act="newp">Neuen Spieler anlegen</button></div>
     </div>
-    <button class="btn dark" data-act="start">Neue Partie starten</button>
+    <div class="startrow" id="startRow">
+      <button class="btn dark" id="resumeBtn" data-act="resume" hidden>Partie fortsetzen<small id="resumeInfo"></small></button>
+      <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
+    </div>
     <p class="note">Computergegner mit eigenem Charakter kommen mit dem Auto-Modus.</p>
   </div>
 </div>
@@ -551,8 +554,8 @@ function renderHome(){document.documentElement.toggleAttribute('data-night',!!DB
   document.querySelectorAll('.slot').forEach(b=>{const i=+b.dataset.i,p=refP(DB.sel[i]);
     b.innerHTML=`<small>${i?'Schwarz':'Weiß'}</small>${avHTML(p)}<b>${esc(p.name||'Spieler')}</b><small>${p.kid?'Kind':'Erwachsen'}${p.guest?' · Gast':''}</small>`});
   $('#profList').innerHTML=DB.profiles.length?DB.profiles.map(p=>`<div class="pi"><button data-act="edit" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button></div>`).join(''):'<p class="ps" style="margin:0">Lege Profile an, damit Hilfen, Bilanz und Abzeichen gespeichert bleiben.</p>';
-  const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;
-  if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} Halbzüge`}}
+  const g=DB.game,res=g&&!g.res;$('#resumeBtn').hidden=!res;$('#startRow').classList.toggle('two',!!res);$('#startBtn').className='btn '+(res?'light':'dark');
+  if(res){$('#resumeInfo').textContent=`${refP(g.p[0]).name||'Weiß'} gegen ${refP(g.p[1]).name||'Schwarz'} · ${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}`}}
 function showPicker(i){const rows=DB.profiles.map(p=>`<div class="pi"><button data-act="choose" data-id="${p.id}" data-i="${i}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${p.kid?'Kind':'Erwachsen'} · ${p.stats.g} Partien · ${Object.keys(p.badges).length} Abzeichen</span></span></button><button class="pb" data-act="edit" data-id="${p.id}" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`).join('');
   openSheet(`<h2>Wer spielt ${i?'Schwarz':'Weiß'}?</h2><div class="plist">${rows||'<p class="ps">Noch keine Spieler angelegt.</p>'}
   <div class="pi"><button data-act="guest" data-kid="1" data-i="${i}"><div class="av" style="background:${AC[1]}">${GL.n+FE}</div><span><b>Gast-Kind</b><br><span class="ps">ohne Speichern, alle Hilfen an</span></span></button></div>
@@ -582,7 +585,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'style':DB.style=v;persist();renderHome();break;
   case'table':DB.table=!DB.table;persist();renderHome();break;
   case'swap':DB.sel.reverse();persist();renderHome();break;
-  case'start':showPreHelp(0);break;
+  case'start':{const g=DB.game;if(g&&!g.res&&g.hist.length){openSheet(`<div class="shead">${SV('<circle cx="24" cy="24" r="21" fill="#FDD602"/><path d="M24 12v15" stroke="#262625" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="35" r="2.8" fill="#262625"/>')}<h2>Laufende Partie abbrechen?</h2></div>
+    <p>${esc(refP(g.p[0]).name||'Weiß')} gegen ${esc(refP(g.p[1]).name||'Schwarz')} ist noch nicht beendet (${g.hist.length} ${g.hist.length===1?'Halbzug':'Halbzüge'}). Wenn du eine neue Partie startest, wird sie abgebrochen und kann nicht fortgesetzt werden.</p>
+    <div class="sec tiles"><button class="tile" data-act="close">${MICON.replay}Zurück</button><button class="tile dark" data-act="newok">${MICON.play}Neue Partie</button></div>`);break}
+    showPreHelp(0);break}
+  case'newok':DB.game=null;G=null;persist();renderHome();showPreHelp(0);break;
   case'pnext':showPreHelp(1);break;
   case'pback':showPreHelp(0);break;
   case'start2':closeSheet();startGame();break;
