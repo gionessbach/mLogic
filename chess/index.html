@@ -191,6 +191,9 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape){.sheet.wide{max-width:min(1100px,96vw)}}
 @media (orientation:landscape) and (max-height:640px){.ptile{flex-basis:118px}.ptile>button:first-child{min-height:104px;padding:8px 6px;gap:2px}.ptile .av,.ptile .av.big{width:46px;height:46px;font-size:28px}.ptile svg{width:40px;height:40px}
   .ptile b{font-size:15px}.ptile small{font-size:10.5px}.pedit{width:30px;height:30px;top:4px;right:4px}.ptile.plus.wide>button{min-height:56px}.prow2{margin-top:6px}}
+.pedit svg,.ptile .pedit svg{width:18px!important;height:18px!important}
+@media (orientation:landscape){.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px}.pair .tiles.t3{gap:6px}.pair .tile{padding:6px 4px;font-size:13px}.pair .seg button{padding:0 4px}}
+@media (orientation:landscape) and (max-height:640px){.pair .tile{flex-direction:column;justify-content:center;text-align:center;gap:0;font-size:11px;min-height:54px;padding:4px 2px}.pair .tile svg{width:24px;height:24px}}
 </style>
 </head>
 <body>
@@ -751,8 +754,8 @@ function showEditor(){const p=ED,isNew=!prof(p.id);
   <div class="sec"><p class="lbl">Bild</p><div class="g6">${AV.map(k=>`<button class="${p.av===k?'on':''}" data-act="eav" data-v="${k}" style="background:${AC[p.col]}">${GL[k]+FE}</button>`).join('')}</div>
   <div class="g6">${AC.map((c,j)=>`<button class="${p.col===j?'on':''}" data-act="ecol" data-v="${j}" style="background:${c}" aria-label="Farbe ${j+1}"></button>`).join('')}</div></div>
   <div class="sec"><p class="lbl">Spielt als</p>${segHTML('ekid',[[1,'Kind'],[0,'Erwachsen']],p.kid?1:0)}</div>
-  <div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('eundo',p.undo,'')}</div>
-  <div class="sec"><p class="lbl">Schachuhr</p>${segHTML('eclock',[[0,'Aus'],[5,'5 Min'],[10,'10 Min'],[15,'15 Min']],p.clock)}<p class="ps hint" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div>
+  <div class="pair"><div class="sec"><p class="lbl">Zug zurücknehmen</p>${undoTiles('eundo',p.undo,'')}</div>
+  <div class="sec"><p class="lbl">Schachuhr (Minuten)</p>${segHTML('eclock',[[0,'Aus'],[5,'5'],[10,'10'],[15,'15']],p.clock)}<p class="ps hint" style="margin-top:6px">Tipp: Spielt ein Erwachsener gegen ein Kind, bekommt nur der Erwachsene eine Uhr.</p></div></div>
   ${isNew?'':`<div class="sec"><p class="lbl">Bilanz</p><p>${p.stats.g} Partien · ${p.stats.w} gewonnen · ${p.stats.d} remis · ${p.stats.l} verloren</p>
   <div class="badges">${BADGES.map(([k,l])=>`<span class="badge${p.badges[k]?'':' off'}">${l}</span>`).join('')}</div></div>`}
   </div><div><div class="sec"><p class="lbl">Hilfen</p>${helpRows(p,'ehelp').replace('tiles h4','tiles')}</div>
