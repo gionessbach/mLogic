@@ -19,7 +19,8 @@
   --font-display:"Baloo 2","Arial Rounded MT Bold",system-ui,sans-serif;--font-body:"Nunito",system-ui,-apple-system,sans-serif;
   --r:22px;--shadow:0 6px 0 rgba(38,38,36,.16);color-scheme:light}
 :root[data-night]{--bg:#12110d;--card:#1c1a15;--ink:#a8977a;--ink-soft:#7d705a;--line:#2f2b22;--soft:#25221b;--on-ink:#12110d;--shadow:0 4px 0 rgba(0,0,0,.45);color-scheme:dark}
-html,body{height:100%;margin:0}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+.screen,.sheet,.mmoves,.prow,#isles{overscroll-behavior:contain}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;-webkit-user-select:none;user-select:none;
   -webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%}
 [hidden]{display:none!important}
@@ -496,7 +497,8 @@ function enterGame(){sel=null;explain=null;anim=null;msgs=[null,null];confirmRes
   $('#home').hidden=true;$('#train').hidden=true;$('#game').hidden=false;
   if(DB.style==='A'&&!init3D())DB.style='1';
   thinking=false;afterTurn();renderPanels();requestAnimationFrame(layout);setTimeout(maybeCpu,400);}
-function leaveGame(){const wasTr=!!(G&&G.tr);$('#game').hidden=true;closeSheet();replay=-1;thinking=false;if(wasTr){G=DB.game;$('#train').hidden=false;renderTrain()}else{$('#home').hidden=false;renderHome()}}
+const hush=()=>{try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}};
+function leaveGame(){hush();const wasTr=!!(G&&G.tr);$('#game').hidden=true;closeSheet();replay=-1;thinking=false;if(wasTr){G=DB.game;$('#train').hidden=false;renderTrain()}else{$('#home').hidden=false;renderHome()}}
 
 function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.help||{};msgs[j]=null;
   if(inCheck(st))msgs[j]=H.schach?'<b>Schach!</b> Dein König wird angegriffen (orange Ring). Grün umrandete Figuren können ihn retten.':'<b>Schach!</b>';
@@ -713,7 +715,7 @@ setInterval(()=>{const now=performance.now(),dt=now-lastT;lastT=now;if(!G||!runn
   if(G.clock[i]<=0){G.clock[i]=0;finish({t:'zeit',w:1-i,text:`Zeit abgelaufen – ${nm(1-i)} gewinnt.`});renderPanels();draw();return}
   const el=$('#clk'+i);if(el){el.textContent=fmt(G.clock[i]);el.classList.toggle('low',G.clock[i]<30000)}
   if((saveT+=dt)>5000){saveT=0;persist()}},250);
-document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(document.hidden)persist()});
+document.addEventListener('visibilitychange',()=>{lastT=performance.now();if(document.hidden){persist();hush()}});
 
 /* ---------- Blätter ---------- */
 let sheetKind='';
@@ -859,7 +861,7 @@ function trFail(text){const T=G.tr,I=ISLANDS[T.isl];G.res={t:'tr',w:null,text:''
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,i=b.dataset.i!=null?+b.dataset.i:null,v=b.dataset.v;
   switch(a){
   case'train':$('#home').hidden=true;$('#train').hidden=false;renderTrain();break;
-  case'trhome':$('#train').hidden=true;$('#home').hidden=false;renderHome();break;
+  case'trhome':hush();$('#train').hidden=true;$('#home').hidden=false;renderHome();break;
   case'trwho':showTrWho();break;
   case'trpick':DB.trainer=b.dataset.id||(DB.trainer&&typeof DB.trainer==='object'?DB.trainer:newProfile(true,true));persist();closeSheet();renderTrain();break;
   case'isle':showIsle(+v);break;
