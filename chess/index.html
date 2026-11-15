@@ -648,7 +648,7 @@ function init3D(){if(T3.r)return true;if(!window.THREE)return false;
     plane.rotation.x=-Math.PI/2;plane.receiveShadow=true;sc.add(plane);
     ensureGeo();Object.assign(T3,{r,sc,cam,tc,tex,plane,ray:new THREE.Raycaster()});
     return true}catch(e){console.warn(e);T3.r=null;return false}}
-function ensureGeo(){if(T3.geo)return;T3.geo=buildGeo();T3.mat={w:new THREE.MeshPhysicalMaterial({color:0xF1E9D8,roughness:.38,clearcoat:.5,clearcoatRoughness:.35}),b:new THREE.MeshPhysicalMaterial({color:0x2a2a28,roughness:.3,clearcoat:.8,clearcoatRoughness:.25}),
+function ensureGeo(){if(T3.geo)return;T3.geo=buildGeo();T3.mat={g:new THREE.MeshPhysicalMaterial({color:0xF2C14E,metalness:.4,roughness:.25,clearcoat:.7,clearcoatRoughness:.15,emissive:0x5a3c00,emissiveIntensity:.45}),w:new THREE.MeshPhysicalMaterial({color:0xF1E9D8,roughness:.38,clearcoat:.5,clearcoatRoughness:.35}),b:new THREE.MeshPhysicalMaterial({color:0x2a2a28,roughness:.3,clearcoat:.8,clearcoatRoughness:.25}),
         sw:new THREE.MeshStandardMaterial({color:0x8a826f,roughness:.6}),sb:new THREE.MeshStandardMaterial({color:0x0e0e0d,roughness:.6})}}
 function smoothN(g){g.computeVertexNormals();const p=g.attributes.position,n=g.attributes.normal,m=new Map(),K=i=>Math.round(p.getX(i)*500)+','+Math.round(p.getY(i)*500)+','+Math.round(p.getZ(i)*500);
   for(let i=0;i<p.count;i++){const k=K(i);let a=m.get(k);if(!a){a=[0,0,0];m.set(k,a)}a[0]+=n.getX(i);a[1]+=n.getY(i);a[2]+=n.getZ(i)}
@@ -665,18 +665,18 @@ function buildGeo(){const V=THREE.Vector2;
     b:[[lath(BASE.concat([[1.05,1.12],[4.5,.55],[4.65,.98],[4.8,1.02],[4.95,.6],[5.1,.55],[5.45,.84],[6.1,1.02],[6.8,.82],[7.3,.42],[7.45,.2],[7.5,0]])),'m',[0,0,0]],
       [sph(.3),'m',[0,7.7,0]],[new THREE.BoxGeometry(.15,.7,1.7),'s',[0,6.75,0],Math.PI/4]],
     q:[[lath(BASE.concat([[1.05,1.26],[5.6,.68],[5.75,1.08],[5.9,1.12],[6.05,.78],[6.25,.7],[7.05,1.08],[7.4,1.34],[7.48,1.3],[7.3,.7],[7.25,0]])),'m',[0,0,0]],
-      [sph(.6),'m',[0,7.3,0]],[sph(.3),'m',[0,8.1,0]]],
-    k:[[lath(BASE.concat([[1.05,1.28],[6.0,.72],[6.15,1.12],[6.3,1.16],[6.45,.82],[6.65,.72],[7.7,1.12],[7.95,1.15],[8.1,.9],[8.4,.45],[8.5,0]])),'m',[0,0,0]]],
+      [sph(.6),'m',[0,7.3,0]],[sph(.3),'g',[0,8.1,0]]],
+    k:[[lath(BASE.concat([[1.05,1.28],[6.0,.72],[6.15,1.12],[6.3,1.16],[6.45,.82],[6.5,0]])),'m',[0,0,0]],[lath([[6.42,0],[6.42,.78],[6.65,.72],[7.7,1.12],[7.95,1.15],[8.1,.9],[8.4,.45],[8.5,0]]),'g',[0,0,0]]],
     n:[[lath(BASE.concat([[1.05,1.16],[1.9,.98],[2.1,1.14],[2.3,1.12],[2.4,0]])),'m',[0,0,0]]]};
   /* Turm: sechs Zinnen als Ringsegmente */
   for(let a=0;a<6;a++){const t0=a*Math.PI/3+.12,t1=t0+Math.PI/3-.4,sh=new THREE.Shape();sh.absarc(0,0,1.46,t0,t1,false);sh.absarc(0,0,.98,t1,t0,true);
     const g=ext(sh,{depth:.5,bevelThickness:.08,bevelSize:.06,curveSegments:8});g.rotateX(-Math.PI/2);G.r.push([g,'m',[0,4.8,0]])}
   /* Dame: Krone mit acht Perlen */
-  for(let a=0;a<8;a++){const t=a*Math.PI/4;G.q.push([sph(.21),'m',[Math.cos(t)*1.24,7.62,Math.sin(t)*1.24]])}
+  for(let a=0;a<8;a++){const t=a*Math.PI/4;G.q.push([sph(.21),'g',[Math.cos(t)*1.24,7.62,Math.sin(t)*1.24]])}
   /* König: Tatzenkreuz, zweifach gekreuzt – von der Seite ein Kreuz, von oben ein Plus */
   const cs=new THREE.Shape(),cp=[[-.15,0],[.15,0],[.15,.52],[.6,.4],[.6,1.04],[.15,.92],[.24,1.5],[-.24,1.5],[-.15,.92],[-.6,1.04],[-.6,.4],[-.15,.52]];
   cs.moveTo(...cp[0]);cp.slice(1).forEach(q=>cs.lineTo(...q));cs.closePath();
-  for(const ry of[0,Math.PI/2]){const g=ext(cs,{depth:.3,bevelThickness:.07,bevelSize:.06,curveSegments:4});g.translate(0,0,-.15);G.k.push([g,'m',[0,8.38,0],ry])}
+  for(const ry of[0,Math.PI/2]){const g=ext(cs,{depth:.3,bevelThickness:.07,bevelSize:.06,curveSegments:4});g.translate(0,0,-.15);G.k.push([g,'g',[0,8.38,0],ry])}
   /* Springer: modellierter Pferdekopf mit gewölbtem Hals, Ohren, Mähne, verjüngtem Maul */
   const sh=new THREE.Shape();sh.moveTo(-1.15,2.2);sh.quadraticCurveTo(-1.6,3.4,-1.28,4.6);sh.quadraticCurveTo(-1.18,5.8,-.72,6.4);sh.lineTo(-.55,6.95);sh.lineTo(-.25,6.35);
   sh.quadraticCurveTo(.45,6.3,1.15,5.2);sh.quadraticCurveTo(1.62,4.85,1.55,4.25);sh.quadraticCurveTo(1.45,3.85,.95,3.9);sh.quadraticCurveTo(.6,3.82,.38,4.3);sh.quadraticCurveTo(.15,3.3,.85,2.2);sh.closePath();
@@ -687,7 +687,7 @@ function buildGeo(){const V=THREE.Vector2;
   for(const z of[-1,1]){G.n.push([sph(.12),'s',[z*.86,5.4,-.45]]);G.n.push([sph(.09),'s',[z*.42,4.45,-1.48]]);G.n.push([new THREE.ConeGeometry(.2,.62,16),'m',[z*.3,6.95,.48]])}
   return G}
 function mkPiece(p){const k=p.toLowerCase(),w=p<'a',g=new THREE.Group();
-  for(const[geo,mk,pos,ry,sc]of T3.geo[k]){const m=new THREE.Mesh(geo,T3.mat[mk==='m'?(w?'w':'b'):(w?'sw':'sb')]);
+  for(const[geo,mk,pos,ry,sc]of T3.geo[k]){const m=new THREE.Mesh(geo,T3.mat[mk==='g'?'g':mk==='m'?(w?'w':'b'):(w?'sw':'sb')]);
     m.position.set(...pos);if(ry)m.rotation.y=ry;if(sc)m.scale.set(...sc);m.castShadow=true;m.receiveShadow=true;g.add(m)}
   if(!w)g.rotation.y=Math.PI;return g}
 function sync3D(){for(const o of T3.objs)T3.sc.remove(o);T3.objs=[];const st=view();
