@@ -253,6 +253,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape){#home .learn .card{flex-direction:row;justify-content:flex-start;text-align:left;gap:12px;padding:12px 14px;overflow:hidden}#home .learn .grow{flex:1 1 auto;min-width:0}#home .learn .crew{flex:none}#home .learn .crew .av{width:48px;height:48px;margin-right:-14px}#home .learn .hbic{width:56px;height:56px}#home .learn .hbic span{font-size:34px}#home .learn .card b{font-size:21px}#home .learn .ps{font-size:13px}}
 @media (orientation:landscape) and (min-height:641px){#home .learn .crew .av{width:72px;height:72px}#home .learn .hbic{width:80px;height:80px}#home .learn .hbic span{font-size:48px}#home .learn .card b{font-size:28px}#home .learn .ps{font-size:15px}}
 .hbchip em{font-style:normal}.hbchip span{display:grid;place-items:center;line-height:1;height:28px}
+.pan{transition:opacity .25s,filter .25s}.pan.idle{opacity:.5;filter:grayscale(1)}
 </style>
 </head>
 <body>
@@ -615,7 +616,7 @@ function draw2D(M){const c=$('#bc'),x=c.getContext('2d'),S=c.width,sty=DB.style,
   if(sty==='1'){pad=S*.035;x.fillStyle='#262625';x.fillRect(0,0,S,S);L='#FFF3B0';D='#FDD602'}
   const q=(S-2*pad)/8;for(let i=0;i<64;i++){x.fillStyle=((i>>3)+(i&7))%2?D:L;x.fillRect(pad+(i&7)*q,pad+(i>>3)*q,q+.5,q+.5)}
   const F=FLIPV(),DS=s=>F?63-s:s;drawMarks(x,pad,q,M,sty,F);
-  for(let s=0;s<64;s++){const p=st.b[s];if(!p||(anim&&s===anim.to))continue;const t=DS(s);piece2D(x,p,pad+((t&7)+.5)*q,pad+((t>>3)+.5)*q,q,sty)}
+  const dt=dimTurn();for(let s=0;s<64;s++){const p=st.b[s];if(!p||(anim&&s===anim.to))continue;const t=DS(s);x.globalAlpha=dt&&col(p)!==dt?.4:1;piece2D(x,p,pad+((t&7)+.5)*q,pad+((t>>3)+.5)*q,q,sty)}x.globalAlpha=1;
   if(anim){const af=DS(anim.from),at=DS(anim.to),a=[(af&7)+.5,(af>>3)+.5],b=[(at&7)+.5,(at>>3)+.5],k=anim.k;
     piece2D(x,anim.p,pad+(a[0]+(b[0]-a[0])*k)*q,pad+(a[1]+(b[1]-a[1])*k)*q,q,sty)}}
 function piece2D(x,p,cx,cy,q,sty,noRot){const w=p<'a',k=p.toLowerCase();x.save();x.translate(cx,cy);if(!w&&DB.table&&!noRot&&G&&!G.p.some((r,j)=>isCpu(j)))x.rotate(Math.PI);
@@ -688,7 +689,7 @@ function buildGeo(){const V=THREE.Vector2;
   return G}
 function mkPiece(p){const k=p.toLowerCase(),w=p<'a',g=new THREE.Group();
   for(const[geo,mk,pos,ry,sc]of T3.geo[k]){const m=new THREE.Mesh(geo,T3.mat[mk==='g'?'g':mk==='m'?(w?'w':'b'):(w?'sw':'sb')]);
-    m.position.set(...pos);if(ry)m.rotation.y=ry;if(sc)m.scale.set(...sc);m.castShadow=true;m.receiveShadow=true;g.add(m)}
+    m.userData.mat=m.material;m.position.set(...pos);if(ry)m.rotation.y=ry;if(sc)m.scale.set(...sc);m.castShadow=true;m.receiveShadow=true;g.add(m)}
   if(!w)g.rotation.y=Math.PI;return g}
 function sync3D(){for(const o of T3.objs)T3.sc.remove(o);T3.objs=[];const st=view();
   for(let s=0;s<64;s++){const p=st.b[s];if(!p)continue;const g=mkPiece(p),[x,z]=sqXZ(s);g.userData.sq=s;g.position.set(x,0,z);
@@ -700,8 +701,10 @@ function tex3D(M){const x=T3.tc.getContext('2d'),S=1024,u=S/46,pad=3*u,q=5*u;
 const is3=()=>DB.style==='A'&&!!T3.r;
 
 /* ---------- Zeichnen, Layout, Animation ---------- */
+const dimTurn=()=>G&&running()&&!G.tr&&!anim?cur().turn:null;
+const DIM=new Map();function dimMat(m){if(!DIM.has(m)){const d=m.clone();d.transparent=true;d.opacity=.45;d.color=m.color.clone().lerp(new THREE.Color(0x9a958a),.55);DIM.set(m,d)}return DIM.get(m)}
 function draw(){if(!G||$('#game').hidden)return;const M=marks();
-  if(is3()){const up=FLIPV()?1:-1;if(T3.cam.up.z!==up){T3.cam.up.set(0,0,up);T3.cam.lookAt(0,0,0)}tex3D(M);for(const o of T3.objs)if(!o.userData.anim)o.position.y=(o.userData.sq===M.sel&&!M.exp)?1.2:0;T3.r.render(T3.sc,T3.cam)}
+  if(is3()){const up=FLIPV()?1:-1;if(T3.cam.up.z!==up){T3.cam.up.set(0,0,up);T3.cam.lookAt(0,0,0)}tex3D(M);const dt=dimTurn();for(const o of T3.objs){if(!o.userData.anim)o.position.y=(o.userData.sq===M.sel&&!M.exp)?1.2:0;const dim=dt&&col(view().b[o.userData.sq])!==dt;o.children.forEach(m=>{m.material=dim?dimMat(m.userData.mat):m.userData.mat})}T3.r.render(T3.sc,T3.cam)}
   else draw2D(M)}
 function layout(){if(!G||$('#game').hidden)return;const bw=$('#bw'),s=Math.floor(Math.min(bw.clientWidth,bw.clientHeight));if(s<=0)return;
   const three=is3(),c=three?$('#b3'):$('#bc');$('#bc').hidden=three;$('#b3').hidden=!three;c.style.width=c.style.height=s+'px';
@@ -772,7 +775,7 @@ function panelHTML(i){const p=PL(i),st=view(),n=replay<0?G.hist.length:replay,hs
   h+='</div>';if(msgs[i])h+=`<div class="msg">${msgs[i]}</div>`;
   if(G.res&&replay<0)h+=`<div class="msg">${esc(G.res.text)}</div>`;
   return h}
-function renderPanels(){if(!G)return;if(G.tr){const[a,b]=trPanels();$('#pB').innerHTML=a;$('#pW').innerHTML=b;$('#pB').classList.remove('flip');return}const F=FLIPV();$('#pW').innerHTML=panelHTML(F?1:0);$('#pB').innerHTML=panelHTML(F?0:1);$('#pB').classList.toggle('flip',!!DB.table&&!isCpu(0)&&!isCpu(1))}
+function renderPanels(){if(!G)return;if(G.tr){const[a,b]=trPanels();$('#pB').innerHTML=a;$('#pW').innerHTML=b;$('#pB').classList.remove('flip','idle');$('#pW').classList.remove('idle');return}const F=FLIPV();$('#pW').innerHTML=panelHTML(F?1:0);$('#pB').innerHTML=panelHTML(F?0:1);$('#pB').classList.toggle('flip',!!DB.table&&!isCpu(0)&&!isCpu(1));const tu=G&&running()?cur().turn:null;$('#pW').classList.toggle('idle',!!tu&&(tu==='w')!==!F);$('#pB').classList.toggle('idle',!!tu&&(tu==='w')!==!!F)}
 
 /* ---------- Uhr ---------- */
 let lastT=performance.now(),saveT=0;
