@@ -66,7 +66,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--ink);outline-offset
 .gl{flex:1;display:grid;grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);gap:8px;min-height:0;min-width:0}
 .pan,.ph{min-width:0}
 @media (max-width:520px){.pn{white-space:normal}.turn{font-size:11px;padding:1px 6px}.pb{width:44px;height:44px;border-radius:13px}.pb svg{width:21px;height:21px}.ph{gap:7px;min-height:44px}.ph .av,.ph .av.big{width:44px;height:44px;font-size:26px}.pn{font-size:18px}.msg{font-size:15px;padding:8px 10px}.pan{padding:8px 10px;border-radius:16px}.clk{font-size:20px;padding:2px 8px}}
-.bw{display:grid;place-items:center;min-height:0;min-width:0}
+.bw{position:relative;min-height:0;min-width:0;overflow:hidden}.bw canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
 #bc,#b3{display:block;border-radius:12px;touch-action:none}
 .pan{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-width:700px;width:100%;box-sizing:border-box;justify-self:center}
 .pan.flip{transform:rotate(180deg)}
