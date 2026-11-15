@@ -1,5 +1,5 @@
 // mLogic – Offline-Speicher für alle Spiele. Bei Änderungen an einer Datei die Versionsnummer erhöhen.
-const CACHE = "mlogic-v84";
+const CACHE = "mlogic-v85";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "hash/", "hash/index.html", "hash/icon-180.png", "hash/icon-192.png", "hash/icon-512.png",
@@ -17,7 +17,8 @@ const FILES = [
 ];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  // nur eigene alte Speicher löschen – mRead (KI-Stimmen) und andere Apps unter github.io teilen sich den Speicher
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => /^mlogic-/.test(k) && k !== CACHE).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 // Startseite „nach unten ziehen“: alle Dateien frisch vom Server holen
@@ -43,6 +44,14 @@ self.addEventListener("fetch", e => {
     return;
   }
   if (url.origin !== location.origin) return;
+  // KI-Stimmen aus mRead: gespeicherte Fassung (auch die von mRead selbst), sonst laden und für beide Apps speichern
+  if (/\/mread\/(voices|vendor\/piper|vendor\/ort)\//i.test(url.pathname)) {
+    e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(r => {
+      if (r.ok && r.status === 200) { const copy = r.clone(); caches.open("mread-voices-1").then(c => c.put(e.request, copy)); }
+      return r;
+    })));
+    return;
+  }
   // Eigene Dateien: erst Netz (für Updates), sonst Speicher
   e.respondWith(fetch(e.request, { cache: "no-cache" }).then(r => {
     if (r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }

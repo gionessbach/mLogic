@@ -417,6 +417,48 @@ if(window.speechSynthesis){loadV();if(speechSynthesis.addEventListener)speechSyn
 function voiceFor(f){const sc=v=>(/premium|enhanced|erweitert|neural|natural|siri|google|online|wavenet/i.test(v.name)?6:0)+((f?FEM:MAL).test(v.name)?3:0)-((f?MAL:FEM).test(v.name)?3:0)+(/de-DE/i.test(v.lang)?1:0);
   return VV.slice().sort((a,b)=>sc(b)-sc(a))[0]||null}
 let vUnlocked=false;document.addEventListener('pointerdown',()=>{if(vUnlocked||!window.speechSynthesis)return;vUnlocked=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{capture:true});
+/* KI-Stimmen aus mRead (Piper): klingen natürlich, laufen im Browser. Die großen Dateien liegen in mRead
+   (gleiche Adresse github.io) und werden nur einmal geladen; bis dahin spricht die iPad-Stimme. */
+const MR=new URL('../../mread/',location.href).href;
+const KIV={def:{m:'kerstin',k:1},cpu1:{m:'kerstin',k:1.17},cpu2:{m:'thorsten',k:1.13},cpu3:{m:'kerstin',k:.9},cpu4:{m:'thorsten',k:.84}};
+const PI={sess:{},cfg:{},load:{},mod:null,ctx:null,src:null,gen:0,fail:0,chain:Promise.resolve(),line:null};
+function piScript(s){return new Promise((res,rej)=>{const e=document.createElement('script');e.src=s;e.onload=res;e.onerror=()=>{e.remove();rej(new Error(s))};document.head.appendChild(e)})}
+function piMod(){if(!PI.mod)PI.mod=(typeof createPiperPhonemize==='undefined'?piScript(MR+'vendor/piper/piper_phonemize.js'):Promise.resolve())
+  .then(()=>createPiperPhonemize({print:l=>{if(PI.line)PI.line(l)},printErr:()=>{},locateFile:f=>MR+'vendor/piper/'+f})).catch(e=>{PI.mod=null;throw e});return PI.mod}
+function piLoad(m){if(PI.sess[m])return Promise.resolve();if(PI.load[m])return PI.load[m];
+  const p=PI.load[m]=(typeof ort==='undefined'?piScript(MR+'vendor/ort/ort.wasm.min.js'):Promise.resolve()).then(()=>{ort.env.wasm.numThreads=1;ort.env.wasm.wasmPaths=MR+'vendor/ort/';
+    return Promise.all([fetch(MR+'voices/'+m+'.json').then(r=>{if(!r.ok)throw 0;return r.json()}),fetch(MR+'voices/'+m+'.onnx').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}),piMod()])})
+   .then(([c,b])=>ort.InferenceSession.create(b).then(s=>{PI.cfg[m]=c;PI.sess[m]=s}))
+   .catch(e=>{PI.fail++;throw e}).finally(()=>{PI.load[m]=null});
+  return p}
+function piIds(ph,m){const map=PI.cfg[m].phoneme_id_map;let ids=map['^'].concat(map['_']);let s=ph.join('').replace(/\?\?/g,'ʊɾ').normalize('NFC');
+  if(m==='thorsten')s=s.replace(/ç/g,'x');Array.from(s).forEach(c=>{if(map[c])ids=ids.concat(map[c],map['_'])});return ids.concat(map['$'])}
+function piPhon(t,m){return piMod().then(mod=>{let ph=[];PI.line=l=>{try{ph=ph.concat(JSON.parse(l).phonemes||[],[' '])}catch(e){}};
+  try{mod.callMain(['-l','de','--input',JSON.stringify([{text:t}]),'--espeak_data','/espeak-ng-data'])}finally{PI.line=null}return piIds(ph,m)})}
+function piRun(ids,m,ls){const c=PI.cfg[m].inference,job=PI.chain.then(()=>PI.sess[m].run({
+  input:new ort.Tensor('int64',BigInt64Array.from(ids.map(v=>BigInt(v))),[1,ids.length]),input_lengths:new ort.Tensor('int64',BigInt64Array.from([BigInt(ids.length)]),[1]),
+  scales:new ort.Tensor('float32',Float32Array.from([c.noise_scale,c.length_scale*ls,c.noise_w]),[3])})).then(r=>r.output.data);PI.chain=job.catch(()=>{});return job}
+function piCtx(){if(!PI.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;PI.ctx=new AC();
+  try{const b=PI.ctx.createBufferSource();b.buffer=PI.ctx.createBuffer(1,1,22050);b.connect(PI.ctx.destination);b.start(0)}catch(e){}}
+  if(PI.ctx.state==='suspended')PI.ctx.resume();return PI.ctx}
+/* Klang wie in mRead: Brummen weg, Verständlichkeit anheben, gleiche Lautstärke, Spitzen begrenzen */
+function piBq(t,f0,q,g,sr){const A=Math.pow(10,g/40),w=2*Math.PI*f0/sr,cs=Math.cos(w),al=Math.sin(w)/(2*q);const c=t==='hp'?[(1+cs)/2,-(1+cs),(1+cs)/2,1+al,-2*cs,1-al]:[1+al*A,-2*cs,1-al*A,1+al/A,-2*cs,1-al/A];return[c[0]/c[3],c[1]/c[3],c[2]/c[3],c[4]/c[3],c[5]/c[3]]}
+function piF(x,c){let x1=0,x2=0,y1=0,y2=0;for(let n=0;n<x.length;n++){const v=c[0]*x[n]+c[1]*x1+c[2]*x2-c[3]*y1-c[4]*y2;x2=x1;x1=x[n];y2=y1;y1=v;x[n]=v}}
+function piKlang(pcm,sr){const o=new Float32Array(pcm);let i,pk=0;for(i=0;i<o.length;i++)pk=Math.max(pk,Math.abs(o[i]));if(pk<1e-4)return o;for(i=0;i<o.length;i++)o[i]*=.9/pk;
+  piF(o,piBq('hp',110,.707,0,sr));piF(o,piBq('pk',3000,1,4,sr));
+  const thr=Math.pow(10,-24/20),atk=Math.exp(-1/(.004*sr)),rel=Math.exp(-1/(.1*sr));let env=0;
+  for(i=0;i<o.length;i++){const a=Math.abs(o[i]);env=a>env?atk*env+(1-atk)*a:rel*env+(1-rel)*a;if(env>thr)o[i]*=Math.pow(env/thr,-2/3)}
+  const fr=Math.max(1,Math.round(.02*sr)),fs=[];let mx=0,sum=0,cnt=0;for(i=0;i+fr<=o.length;i+=fr){let e=0;for(let k=i;k<i+fr;k++)e+=o[k]*o[k];e/=fr;fs.push(e);mx=Math.max(mx,e)}
+  fs.forEach(e=>{if(e>mx*.001){sum+=e;cnt++}});const g=Math.min(.2/Math.max(cnt?Math.sqrt(sum/cnt):.1,1e-4),30);
+  for(i=0;i<o.length;i++){const z=o[i]*g;o[i]=Math.tanh(z/.95)*.95}
+  const f=Math.min(80,o.length>>2);for(i=0;i<f;i++){o[i]*=i/f;o[o.length-1-i]*=i/f}return o}
+function piSay(t,who){const c=KIV[who]||KIV.def,v=VOICE[who]||VOICE.def,g=PI.gen,sr=PI.cfg[c.m].audio.sample_rate;
+  return piPhon(t,c.m).then(ids=>piRun(ids,c.m,1.05*c.k/v.r)).then(pcm=>{if(g!==PI.gen)return;const ctx=piCtx();if(!ctx)return;
+    const o=piKlang(pcm,sr),b=ctx.createBuffer(1,o.length,sr);b.getChannelData(0).set(o);const s=ctx.createBufferSource();s.buffer=b;s.playbackRate.value=c.k;s.connect(ctx.destination);
+    s.onended=()=>{if(PI.src===s)PI.src=null};PI.src=s;s.start()})}
+const piOk=who=>{const m=(KIV[who]||KIV.def).m;return !!PI.sess[m]};
+const piWant=who=>{if(PI.fail<3&&(window.AudioContext||window.webkitAudioContext)&&typeof BigInt64Array!=='undefined')piLoad((KIV[who]||KIV.def).m).catch(()=>{})};
+document.addEventListener('pointerdown',()=>{piCtx();piWant('def')},{capture:true});
 const CPU={};
 [['cpu1','Igel Ida','p',5,1,'Anfängerin – macht auch mal Fehler',0,{idle:['Hmm …','Mal sehen …','Wohin nur?'],cap:['Oh, die nehme ich!','Hihi, erwischt.'],chk:['Schach! Pass auf deinen König auf.'],lose:['Oh nein, meine Figur!','Huch, die war weg.']}],
  ['cpu2','Fuchs Fritz','n',2,2,'Frech – greift gern an',40,{idle:['Ich hab da eine Idee …','Angriff!','Hehe …'],cap:['Schnapp!','Meins!'],chk:['Schach! Überraschung!'],lose:['Mist, gut gemacht.','Hey, das war meine!']}],
@@ -534,7 +576,8 @@ const curI=()=>cur().turn==='w'?0:1;
 const PL=i=>refP(G.p[i]);
 const nm=i=>PL(i).name||(i?'Schwarz':'Weiß');
 const running=()=>G&&!G.res&&replay<0;
-function speak(t,who){try{if(!window.speechSynthesis||!t)return;if(!VV.length)loadV();const c=VOICE[who]||VOICE.def,u=new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g,' ').replace(/Rochade/g,'Rochhade').replace(/rochieren/g,'rochhieren').replace(/[★☆]/g,'').replace(/\s+/g,' ').trim());
+function speak(t,who){try{if(!t)return;const kt=String(t).replace(/<[^>]+>/g,' ').replace(/\bRemis\b/g,'Remie').replace(/[★☆]/g,'').replace(/\s+/g,' ').trim();hush();
+  if(piOk(who)){piSay(kt,who).catch(()=>{});return}piWant(who);if(!window.speechSynthesis)return;if(!VV.length)loadV();const c=VOICE[who]||VOICE.def,u=new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g,' ').replace(/Rochade/g,'Rochhade').replace(/rochieren/g,'rochhieren').replace(/[★☆]/g,'').replace(/\s+/g,' ').trim());
   u.lang='de-DE';const v=voiceFor(c.f);if(v)u.voice=v;u.pitch=c.p;u.rate=c.r;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 
 function startGame(){
@@ -544,8 +587,8 @@ function startGame(){
 function enterGame(){sel=null;explain=null;anim=null;msgs=[null,null];confirmResign=-1;
   $('#home').hidden=true;$('#train').hidden=true;$('#game').hidden=false;
   if(DB.style==='A'&&!init3D())DB.style='1';
-  thinking=false;afterTurn();renderPanels();requestAnimationFrame(layout);setTimeout(maybeCpu,400);}
-const hush=()=>{try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}};
+  thinking=false;try{[0,1].forEach(i=>piWant(PL(i).id));if(G.tr)piWant(ISLANDS[G.tr.isl].tr)}catch(e){}afterTurn();renderPanels();requestAnimationFrame(layout);setTimeout(maybeCpu,400);}
+const hush=()=>{PI.gen++;if(PI.src){try{PI.src.onended=null;PI.src.stop()}catch(e){}PI.src=null}try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}};
 function leaveGame(){hush();const wasTr=!!(G&&G.tr);$('#game').hidden=true;closeSheet();replay=-1;thinking=false;if(wasTr){G=DB.game;$('#train').hidden=false;renderTrain()}else{$('#home').hidden=false;renderHome()}}
 
 function afterTurn(){if(!G||G.res)return;const st=cur(),j=curI(),p=PL(j),H=p.help||{};msgs[j]=null;
