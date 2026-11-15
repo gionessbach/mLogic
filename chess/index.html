@@ -263,6 +263,31 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 @media (orientation:landscape) and (min-height:641px){#home .learn .crew .av{width:72px;height:72px}#home .learn .hbic{width:80px;height:80px}#home .learn .hbic span{font-size:48px}#home .learn .card b{font-size:28px}#home .learn .ps{font-size:15px}}
 .hbchip em{font-style:normal}.hbchip span{display:grid;place-items:center;line-height:1;height:28px}
 .pan{transition:opacity .25s,filter .25s}.pan.idle{opacity:.5;filter:grayscale(1)}
+.learn{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:560px){.learn .ps{display:none}}
+#ach .wrap{max-width:1100px;min-height:100%;box-sizing:border-box}
+.achttl{flex:1;margin:0;font-family:var(--font-display);font-size:30px;text-align:center}
+.achgrid{flex:1;min-height:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"ov vs" "bd bd";grid-template-rows:auto minmax(0,1fr)}
+.achc{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-height:0;box-sizing:border-box}
+.achc:nth-child(1){grid-area:ov}.achc:nth-child(2){grid-area:bd}.achc:nth-child(3){grid-area:vs}.achempty{grid-area:1/1/-1/-1!important;justify-content:center;text-align:center}
+.achc h3{margin:0;font-family:var(--font-display);font-size:22px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.achst{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.achs{background:var(--soft);border-radius:14px;padding:8px 4px;text-align:center}.achs b{display:block;font-family:var(--font-display);font-size:30px;line-height:1.1}.achs span{font-size:12px;color:var(--ink-soft)}
+.achrow{display:flex;justify-content:space-between;gap:8px;font-size:15px;margin-top:6px}
+.medals{flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:12px 8px;align-content:space-evenly;overflow:auto}
+.medal{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;opacity:.42}
+.medal i{width:58px;height:58px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-style:normal;font-size:30px;font-weight:800;border:3px dashed var(--line);box-sizing:border-box;font-family:"Apple Symbols","Segoe UI Symbol",var(--font-display)}
+.medal.on{opacity:1}.medal.on i{background:#FDD602;color:#262625;border:3px solid #F2A900;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.medal span{font-size:12px;font-weight:800;line-height:1.15}.medal small{font-size:11px;color:var(--ink-soft)}
+.achvs{display:flex;align-items:center;gap:10px;flex:1;min-height:0}.achvs .av{width:46px;height:46px;flex:none}.achvs b{font-size:16px}
+.chip{border-radius:10px;padding:4px 8px;font-weight:800;font-size:13px;white-space:nowrap;color:#262625}.chip.w{background:#C8EBC0}.chip.d{background:#EFE6C8}.chip.l{background:#F6C9C4}
+.hxmom{display:flex;gap:6px;flex-basis:100%}.hxctl .hxmom button{background:#FFE3F1;font-size:15px}.hxctl .hxmom button.on{background:#F06EB0;color:#fff}
+.hxmom em{font-style:normal;width:24px;height:24px;border-radius:50%;background:#F06EB0;color:#fff;display:grid;place-items:center;font-size:14px}.hxmom .on em{background:#fff;color:#F06EB0}
+@media (orientation:landscape){#home .learn{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:repeat(3,minmax(0,1fr))!important}
+ .achgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);grid-template-areas:"ov bd vs";grid-template-rows:minmax(0,1fr)}}
+@media (orientation:portrait) and (min-width:601px){.medals{align-content:center;gap:26px 8px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.medal i{width:76px;height:76px;font-size:40px}.medal span{font-size:14px}}
+@media (max-width:440px){#trCrew{display:none}}
+@media (orientation:portrait) and (max-width:600px){.achgrid{grid-template-columns:minmax(0,1fr);grid-template-areas:"ov" "vs" "bd";grid-template-rows:auto}.medals{overflow:visible}}
+
 </style>
 </head>
 <body>
@@ -275,8 +300,9 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
     </div>
     <div class="hero"><img src="icon-192.png" alt=""><div><h1>mChess</h1><p>Schach zu zweit oder gegen den Computer</p></div></div>
     <div class="learn">
-    <div class="card trcard" data-act="train" role="button" tabindex="0"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">5 Inseln, 28 Lektionen mit Igel Ida und ihren Freunden</div></div><span class="go" aria-hidden="true">›</span></div>
+    <div class="card trcard" data-act="train" role="button" tabindex="0"><div class="crew" id="homeCrew"></div><div class="grow"><b>Training</b><div class="ps">8 Inseln, 43 Lektionen mit Igel Ida und ihren Freunden</div></div><span class="go" aria-hidden="true">›</span></div>
     <div class="card trcard hbcard" data-act="hb" role="button" tabindex="0"><div class="hbic" aria-hidden="true"><i></i><i></i><span>&#9822;&#xFE0E;</span></div><div class="grow"><b>Handbuch</b><div class="ps">Figuren, Eröffnungen und Taktiken – animiert und zum Nachspielen</div></div><span class="go" aria-hidden="true">›</span></div>
+    <div class="card trcard hbcard achcard" data-act="ach" role="button" tabindex="0"><div class="hbic" aria-hidden="true"><i></i><i></i><span>&#9733;&#xFE0E;</span></div><div class="grow"><b>Erfolge</b><div class="ps">Abzeichen, Sterne und Siege gegen die Tiere</div></div><span class="go" aria-hidden="true">›</span></div>
     </div>
     <div class="card pcard">
       <p class="lbl">Spieler</p>
@@ -291,6 +317,17 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
       <button class="btn dark" id="startBtn" data-act="start">Neue Partie starten</button>
     </div>
     <p class="note">Gegen den Computer spielen: auf Weiß oder Schwarz tippen und einen Computergegner wählen.</p>
+  </div>
+</div>
+
+<div id="ach" class="screen" hidden>
+  <div class="wrap achw">
+    <div class="topbar">
+      <button class="icon-btn" data-act="achhome" aria-label="Zum Hauptmenü"><svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-5h-6v5H4z"/></svg></button>
+      <h1 class="achttl">Erfolge</h1>
+      <button class="who" id="achWho" data-act="achwho"></button>
+    </div>
+    <div class="achgrid" id="achGrid"></div>
   </div>
 </div>
 
@@ -339,6 +376,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 <script src="training.js"></script>
 <script src="handbuch.js"></script>
 <script src="taktik.js"></script>
+<script src="daily.js"></script>
 <script>
 "use strict";
 const $=s=>document.querySelector(s);
@@ -362,7 +400,7 @@ const HELP=[['ziele','Zugziele zeigen','Punkte zeigen, wohin die Figur ziehen ka
   ['sonder','Sonderregeln erklären','Rochade, en passant und Umwandlung beim ersten Mal'],
   ['werte','Figurenwerte','Beim Schlagen den Wert der Figur zeigen']];
 const BADGES=[['partie1','Erste Partie'],['schach','Erstes Schach'],['rochade','Erste Rochade'],['dame','Dame geschlagen'],
-  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien'],['cpu','Computer besiegt'],['figurenprofi','Figuren-Profi'],['matt1','Erstes Matt in 1'],['schachabwehr','Schach-Abwehr']];
+  ['umwandlung','Umwandlung'],['enpassant','En passant'],['matt','Erstes Schachmatt'],['partie10','10 Partien'],['cpu','Computer besiegt'],['figurenprofi','Figuren-Profi'],['matt1','Erstes Matt in 1'],['schachabwehr','Schach-Abwehr'],['taktiker','Taktik-Profi'],['meister','Matt-Meister']];
 const AV=['k','q','r','b','n','p'],AC=['#FDD602','#5DCAA5','#F0997B','#85B7EB','#AFA9EC','#97C459'];
 const STYLES=[['A','3D Staunton'],['1','m-Klassik'],['2','Bauhaus']];
 const SPECIAL={rochade:'<b>Rochade:</b> König und Turm dürfen in einem Zug tauschen – der König zieht zwei Felder zum Turm, der Turm springt über ihn. Tippe dafür den König an.',
@@ -633,8 +671,9 @@ function checkEnd(){const st=cur(),ms=legal(st),i=curI();let r=null;
   else if(st.half>=100)r={t:'50',w:null,text:'Remis nach der 50-Züge-Regel: 50 Züge ohne Schlagen und ohne Bauernzug.'};
   else{const k=G.keys[G.keys.length-1];if(G.keys.filter(x=>x===k).length>=3)r={t:'wdh',w:null,text:'Remis – dieselbe Stellung kam dreimal vor.'}}
   if(r)finish(r)}
+const r0=(x,i)=>G.res.w===null?'d':G.res.w===i?'w':'l';
 function finish(r){G.res=r;G.offer=null;msgs=[null,null];if([0,1].some(k=>{const q=PL(k);return !q.cpu&&q.help&&(q.help.erklaeren||q.help.schach)}))speak(r.text);
-  for(const i of[0,1]){const p=PL(i);if(p.guest)continue;p.stats.g++;if(r.w===null)p.stats.d++;else if(r.w===i)p.stats.w++;else p.stats.l++;
+  for(const i of[0,1]){const p=PL(i);if(p.guest)continue;p.stats.g++;if(isCpu(1-i)){const o=PL(1-i).id;p.vs=p.vs||{};const r=p.vs[o]=p.vs[o]||{w:0,d:0,l:0};r[r0(r,i)]++}if(r.w===null)p.stats.d++;else if(r.w===i)p.stats.w++;else p.stats.l++;
     if(!p.badges.partie1)p.badges.partie1=Date.now();if(r.w===i&&isCpu(1-i)&&!p.badges.cpu)p.badges.cpu=Date.now();if(p.stats.g>=10&&!p.badges.partie10)p.badges.partie10=Date.now()}
   persist();setTimeout(showEnd,700)}
 function undo(i){if(!G.hist.length||anim||thinking)return;const k=(isCpu(1-i)&&G.hist[G.hist.length-1].by!==i&&G.hist.length>=2)?2:1;
@@ -886,7 +925,7 @@ function showEnd(){if(!G||!G.res||$('#game').hidden)return;const r=G.res;
   const win=r.w!=null?`<div class="hero" style="margin:8px 0">${avHTML(PL(r.w))}<div><b style="font-family:var(--font-display);font-size:22px">${esc(nm(r.w))}</b><div class="ps">gewinnt</div></div></div>`:'';
   openSheet(`<h2>${r.w==null?'Unentschieden':'Partie vorbei'}</h2>${win}<p>${esc(r.text)}</p>
   <div class="btns"><button class="btn dark" data-act="rematch">Revanche<small>Farben werden getauscht</small></button>
-  <button class="btn light" data-act="replay">Partie nachspielen</button><button class="btn light" data-act="home">Zur Startseite</button></div>`,false);
+  <button class="btn light" data-act="review">Rückblick<small>Die wichtigsten Momente</small></button><button class="btn light" data-act="replay">Partie nachspielen</button><button class="btn light" data-act="home">Zur Startseite</button></div>`,false);
   $('#sheetIn').dataset.end='1';renderPanels();draw()}
 
 /* ---------- Startseite und Profile ---------- */
@@ -977,7 +1016,7 @@ function trMove(m){const T=G.tr,L=T.L,st=cur(),i=curI(),n=make(st,m);if(L.t==='s
   renderPanels();if(is3())sync3D();kick();maybeCpu()}
 function trDone(stars,text){const T=G.tr,L=T.L,p=PL(0),I=ISLANDS[T.isl];G.res={t:'tr',w:null,text:''};p.training=p.training||{};p.training[L.id]=Math.max(p.training[L.id]||0,stars);
   const nb=[],aw=(k,ok)=>{if(ok&&!p.guest&&!p.badges[k]){p.badges[k]=Date.now();nb.push(k)}};
-  aw('figurenprofi',ISLANDS[0].lessons.every(l=>trStars(p,l)));aw('matt1',L.goal==='mate');aw('schachabwehr',ISLANDS[3].lessons.every(l=>trStars(p,l)));
+  aw('figurenprofi',ISLANDS[0].lessons.every(l=>trStars(p,l)));aw('matt1',L.goal==='mate');aw('schachabwehr',ISLANDS[3].lessons.every(l=>trStars(p,l)));aw('taktiker',[5,6].every(k=>ISLANDS[k].lessons.every(l=>trStars(p,l))));aw('meister',ISLANDS[7].lessons.every(l=>trStars(p,l)));
   persist();const next=T.idx<I.lessons.length-1,praise=stars>=3?'Super!':stars===2?'Gut gemacht!':'Geschafft!';speak(praise+' '+text,I.tr);
   setTimeout(()=>{if(!G||G.tr!==T)return;openSheet(`<div class="shead">${avHTML(CPU[I.tr],1)}<h2>${praise}</h2></div><div class="bigstars">${starRow(stars)}</div><p>${esc(text)}</p>
     ${nb.length?`<p><b>Neues Abzeichen:</b> ${nb.map(k=>BADGES.find(b=>b[0]===k)[1]).join(', ')}</p>`:''}
@@ -990,7 +1029,7 @@ const HBL=()=>HB.ru===1?TACTICS:HANDBOOK;
 const HB={ru:-1,r:null,ci:0,pg:0,act:-1,t0:0,raf:0,rx:-.15,ry:.5,idle:0,drag:null};
 function hbFlat(){const out=[];HBL().forEach((c,ci)=>c.pages.forEach((p,pg)=>out.push([ci,pg])));return out}
 function parseWin(w){const[a,b]=w.split(':');return{f0:'abcdefgh'.indexOf(a[0]),f1:'abcdefgh'.indexOf(b[0]),rk0:+a[1],rk1:+b[1]}}
-function hbStates(it){const ss=it.pos==='start';let st=ss?initState():parsePos(it.pos).st;st.turn=it.turn||'w';st.cast=it.cast||(ss?'KQkq':'');const S=[st],M=[];
+function hbStates(it){if(it.D)return it.D;const ss=it.pos==='start';let st=it.st?Object.assign({},it.st,{b:it.st.b.slice()}):ss?initState():parsePos(it.pos).st;st.turn=it.turn||'w';if(!it.st)st.cast=it.cast||(ss?'KQkq':'');const S=[st],M=[];
   for(const u of it.seq||[]){const ms=legal(st).filter(m=>uci(m)===u.slice(0,4)&&(!m.promo||m.promo===(u[4]||'q')));const m=ms[0];if(!m)break;
     let n=make(st,m);if(!it.alt){n.turn=st.turn;n.ep=-1}M.push(m);S.push(n);st=n}
   const dots=it.show?legal(Object.assign({},S[0],{turn:col(S[0].b[sqIdx(it.show)])}),sqIdx(it.show)).map(m=>({sq:m.to,cap:!!m.cap})):[];
@@ -1040,15 +1079,17 @@ function hbGo(d){const fl=hbFlat(),ix=fl.findIndex(([a,b])=>a===HB.ci&&b===HB.pg
 const PLAYI='<svg viewBox="0 0 24 24" width="18" height="18" style="fill:currentColor"><path d="M7 4l13 8-13 8z"/></svg>';
 const HX={it:null,D:null,k:0,mode:'view',sel:null,dots:[],miss:0,hint:[],anim:null,msg:'',raf:0};
 const hxMe=()=>HX.it.me||HX.it.turn||'w',hxN=()=>HX.D.M.length;
-function hxOpen(i){const it=HBL()[HB.ci].pages[HB.pg][i];HB.act=-1;hush();hbRender();Object.assign(HX,{it,D:hbStates(it),k:0,mode:'view',sel:null,dots:[],miss:0,hint:[],anim:null,msg:''});
+function hxOpen(i){HB.act=-1;hbRender();hxShow(HBL()[HB.ci].pages[HB.pg][i])}
+function hxShow(it,back){hush();Object.assign(HX,{it,back:back||null,D:hbStates(it),k:0,mode:'view',sel:null,dots:[],miss:0,tot:0,hint:[],anim:null,msg:'',mj:-1});
   $('#hxT').textContent=it.t;$('#hxX').textContent=it.x;document.querySelector('[data-act="hxclose"]').innerHTML=ICON.x;document.querySelector('[data-act="hxsay"]').innerHTML=ICON.say;
-  $('#hbx').hidden=false;hxRender();requestAnimationFrame(hxLayout);if(DB.hbSpeak!==false)speak(it.t+'. '+it.x)}
-function hxClose(){hush();HX.anim=null;HX.mode='view';$('#hbx').hidden=true;HX.it=null}
+  $('#hbx').hidden=false;hxRender();requestAnimationFrame(hxLayout);if(DB.hbSpeak!==false&&!it.moments)speak(it.t+'. '+it.x)}
+function hxClose(){hush();HX.anim=null;HX.mode='view';$('#hbx').hidden=true;const bk=HX.back;HX.it=null;if(bk)location.href=bk}
 function hxSay(){if(HX.it)speak(HX.msg||HX.it.t+'. '+HX.it.x)}
 function hxNote(k){const n=HX.it.notes;return n&&n[k]||''}
 function hxRender(){const v=HX.mode==='view',n=hxN(),k=HX.k,b=(a,val,l,dis,cls)=>`<button data-act="${a}"${val!=null?` data-v="${val}"`:''}${dis?' disabled':''}${cls?` class="${cls}"`:''}>${l}</button>`;
   $('#hxMsg').innerHTML=HX.msg?esc(HX.msg):'';
-  $('#hxCtl').innerHTML=v?b('hxstep',-99,'⏮',k===0)+b('hxstep',-1,'◀',k===0)+`<span style="flex:1 1 60px;align-self:center;text-align:center;font-weight:800">${k}/${n}</span>`+b('hxstep',1,'▶',k>=n)+b('hxstep',99,'⏭',k>=n)+b('hxplay',null,PLAYI+'Selbst nachspielen',0,'dark')
+  const it=HX.it,mo=it.moments;
+  $('#hxCtl').innerHTML=HX.mode==='done'?(HX.back?b('hxclose',null,'Zur Übersicht',0,'dark'):'')+b('hxhome',null,'Zu mChess')+b('hxview',null,'Lösung ansehen'):v?(mo&&mo.length?`<div class="hxmom">${mo.map((m,j)=>b('hxmom',j,`<em>${j+1}</em>Zug ${Math.floor(m.i/2)+1} · ${m.i%2?'Schwarz':'Weiß'}`,0,HX.mj===j?'on':'')).join('')}</div>`:'')+b('hxstep',-99,'⏮',k===0)+b('hxstep',-1,'◀',k===0)+`<span style="flex:1 1 60px;align-self:center;text-align:center;font-weight:800">${k}/${n}</span>`+b('hxstep',1,'▶',k>=n)+b('hxstep',99,'⏭',k>=n)+(mo?'':b('hxplay',null,PLAYI+(it.daily!=null?'Nochmal lösen':'Selbst nachspielen'),0,'dark'))
     :b('hxhint',null,ICON.help+'Tipp',k>=n||HX.D.S[k].turn!==hxMe())+b('hxplay',null,ICON.undo+'Neu')+b('hxview',null,'Ansehen');requestAnimationFrame(hxLayout)}
 function hxLayout(){if($('#hbx').hidden)return;const W=parseWin(HX.it.win),w=W.f1-W.f0+1,h=W.rk1-W.rk0+1,box=$('#hxbw'),q=Math.max(10,Math.floor(Math.min(box.clientWidth/w,box.clientHeight/h))),c=$('#hxc'),d=Math.min(devicePixelRatio||1,3);
   c.style.width=q*w+'px';c.style.height=q*h+'px';c.width=Math.round(q*w*d);c.height=Math.round(q*h*d);hxDraw()}
@@ -1069,17 +1110,17 @@ function hxDraw(){const c=$('#hxc'),it=HX.it;if(!it)return;const x=c.getContext(
   if(A&&p<1){const a=pos(A.m.from),b=pos(A.m.to),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;piece2D(x,A.m.p,a[0]+(b[0]-a[0])*e,a[1]+(b[1]-a[1])*e-Math.sin(Math.PI*e)*q*.25,q,sty,true)}}
 function hxAnim(cb){HX.anim={m:HX.D.M[HX.k],t0:performance.now()};HX.k++;cancelAnimationFrame(HX.raf);const step=()=>{if(!HX.anim||!HX.it)return;hxDraw();
   if(performance.now()-HX.anim.t0<450)HX.raf=requestAnimationFrame(step);else{HX.anim=null;hxDraw();cb&&cb()}};HX.raf=requestAnimationFrame(step)}
-function hxStep(d){if(HX.anim)return;const n=hxN();if(d===1&&HX.k<n){hxAnim(()=>{HX.msg=hxNote(HX.k-1);hxRender();if(HX.msg&&DB.hbSpeak!==false)speak(HX.msg)})}
+function hxStep(d){if(HX.anim)return;HX.hint=[];HX.mj=-1;const n=hxN();if(d===1&&HX.k<n){hxAnim(()=>{HX.msg=hxNote(HX.k-1);hxRender();if(HX.msg&&DB.hbSpeak!==false)speak(HX.msg)})}
   else{HX.k=Math.max(0,Math.min(n,d<0?(d<-1?0:HX.k-1):n));HX.msg=HX.k?hxNote(HX.k-1):'';hush();hxDraw()}hxRender()}
-function hxView(){HX.mode='view';HX.sel=null;HX.dots=[];HX.hint=[];HX.k=0;HX.msg='';hush();hxRender();hxDraw()}
+function hxView(){HX.mode='view';HX.tot=HX.tot||0;HX.sel=null;HX.dots=[];HX.hint=[];HX.k=0;HX.msg='';hush();hxRender();hxDraw()}
 const SIDE={w:'Weiß',b:'Schwarz'};
 function hxPlay(){Object.assign(HX,{mode:'play',k:0,sel:null,dots:[],hint:[],miss:0,anim:null});HX.msg=`Du spielst ${SIDE[hxMe()]}. `+(HX.D.S[0].turn===hxMe()?'Finde den ersten Zug!':'Warte auf den Zug von '+SIDE[HX.D.S[0].turn]+'.');
   hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg);hxAuto()}
 function hxAuto(){if(HX.mode!=='play')return;const n=hxN();
-  if(HX.k>=n){HX.msg='Geschafft! '+(HX.it.done||hxNote(n-1));hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg);return}
+  if(HX.k>=n){HX.msg='Geschafft! '+(HX.it.done||hxNote(n-1));if(HX.it.daily!=null)dailyDone();hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg);return}
   if(HX.D.S[HX.k].turn!==hxMe()){const it=HX.it;setTimeout(()=>{if(HX.it!==it||HX.mode!=='play')return;hxAnim(()=>{HX.msg=(hxNote(HX.k-1)?hxNote(HX.k-1)+' ':'')+(HX.k<n?'Jetzt du!':'');hxRender();hxAuto()})},700)}
   else hxRender()}
-function hxHint(){const m=HX.D.M[HX.k];if(!m||HX.mode!=='play')return;HX.miss=Math.max(HX.miss,1)+1;HX.hint=HX.hint.length?[m.from,m.to]:[m.from];HX.sel=null;HX.dots=[];
+function hxHint(){const m=HX.D.M[HX.k];if(!m||HX.mode!=='play')return;HX.tot++;HX.miss=Math.max(HX.miss,1)+1;HX.hint=HX.hint.length?[m.from,m.to]:[m.from];HX.sel=null;HX.dots=[];
   HX.msg=HX.hint.length>1?'Tipp: Zieh die markierte Figur auf das markierte Feld.':'Tipp: Mit der rosa markierten Figur geht es.';hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg)}
 $('#hxc').addEventListener('pointerdown',e=>{if(HX.mode!=='play'||HX.anim||!HX.it||HX.k>=hxN())return;const st=HX.D.S[HX.k],me=hxMe();if(st.turn!==me)return;
   const c=$('#hxc'),r=c.getBoundingClientRect(),W=parseWin(HX.it.win),q=r.width/(W.f1-W.f0+1),f=W.f0+Math.floor((e.clientX-r.left)/q),rk=W.rk1-Math.floor((e.clientY-r.top)/q);if(f<0||f>7||rk<1||rk>8)return;
@@ -1087,9 +1128,61 @@ $('#hxc').addEventListener('pointerdown',e=>{if(HX.mode!=='play'||HX.anim||!HX.i
   if(pc&&col(pc)===me){HX.sel=s;HX.dots=legal(st).filter(m=>m.from===s);hxDraw();return}
   if(HX.sel==null)return;const mv=HX.dots.find(m=>m.to===s);HX.sel=null;HX.dots=[];
   if(!mv){hxDraw();return}
-  const want=HX.D.M[HX.k];if(mv.from===want.from&&mv.to===want.to){HX.hint=[];HX.miss=0;hxAnim(()=>{HX.msg=hxNote(HX.k-1)||'Richtig!';hxRender();if(HX.k<hxN()||!HX.it.done)if(DB.hbSpeak!==false&&HX.k<hxN())speak(HX.msg);hxAuto()});return}
-  HX.miss++;HX.msg=HX.miss>=2?'Noch nicht. Tipp: Mit der rosa markierten Figur geht es.':'Der Zug ist erlaubt, aber hier gibt es einen besseren. Probier es nochmal!';if(HX.miss>=2)HX.hint=[want.from];
+  const want=HX.D.M[HX.k];if(HX.it.anyMate&&HX.k===hxN()-1&&!(mv.from===want.from&&mv.to===want.to)&&isMate(make(st,mv))){HX.D.M[HX.k]=mv;HX.D.S[HX.k+1]=make(st,mv)}
+  else if(mv.from===want.from&&mv.to===want.to){}else{HX.miss++;HX.tot++;HX.msg=HX.miss>=2?'Noch nicht. Tipp: Mit der rosa markierten Figur geht es.':'Der Zug ist erlaubt, aber hier gibt es einen besseren. Probier es nochmal!';if(HX.miss>=2)HX.hint=[want.from];hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg);return}
+  {HX.hint=[];HX.miss=0;hxAnim(()=>{HX.msg=hxNote(HX.k-1)||'Richtig!';hxRender();if(HX.k<hxN()||!HX.it.done)if(DB.hbSpeak!==false&&HX.k<hxN())speak(HX.msg);hxAuto()});return}
+  HX.miss++;HX.tot++;HX.msg=HX.miss>=2?'Noch nicht. Tipp: Mit der rosa markierten Figur geht es.':'Der Zug ist erlaubt, aber hier gibt es einen besseren. Probier es nochmal!';if(HX.miss>=2)HX.hint=[want.from];
   hxRender();hxDraw();if(DB.hbSpeak!==false)speak(HX.msg)});
+/* ---------- Tagesaufgabe (auch in der mLogic-Übersicht) ---------- */
+const D0=Date.UTC(2026,10,1),dayIdx=()=>{const n=new Date();return Math.round((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-D0)/864e5)};
+const isMate=n=>inCheck(n)&&!legal(n).length;
+function dailyItem(t){const wd=new Date(D0+t*864e5).getUTCDay(),two=wd===0||wd===6,L=two?DAILY.m2:DAILY.m1,e=L[((t*7)%L.length+L.length)%L.length].split('|');
+  const turn=e[1],who=SIDE[turn],seq=e[2].split(' ');
+  return{t:two?'Tagesaufgabe · Matt in 2':'Tagesaufgabe · Matt in 1',x:`${who} ist am Zug und setzt ${two?'in zwei Zügen':'mit einem Zug'} matt. Findest du den Weg?`,
+    st:{b:e[0].split('').map(c=>c==='.'?null:c),turn,cast:'',ep:-1,half:0,full:1},win:'a1:h8',alt:1,seq,me:turn,anyMate:1,daily:t,
+    notes:two?['Stark! Darauf gibt es keine Rettung mehr.',SIDE[turn==='w'?'b':'w']+' wehrt sich, so gut es geht.','Schachmatt!']:['Schachmatt!']}}
+function dailyStreak(){const d=(DB.daily||{}).days||{};let t=dayIdx(),n=0;if(!d[t])t--;while(d[t]){n++;t--}return n}
+function dailyOpen(){const t=dayIdx(),it=dailyItem(t),done=((DB.daily||{}).days||{})[t];hxShow(it,'../');
+  if(done){HX.msg=`Heute schon gelöst ${'★'.repeat(done.st)} – morgen gibt es eine neue Aufgabe. Du kannst sie aber nochmal spielen.`;hxRender()}else hxPlay()}
+function dailyDone(){const it=HX.it,t=it.daily;DB.daily=DB.daily||{days:{}};const st=HX.tot===0?3:HX.tot===1?2:1;
+  if(!DB.daily.days[t])DB.daily.days[t]={s:'won',st};else DB.daily.days[t].st=Math.max(DB.daily.days[t].st,st);persist();
+  const n=dailyStreak();HX.msg=`Geschafft! ${'★'.repeat(st)} · Serie: ${n} ${n===1?'Tag':'Tage'} am Stück.`;HX.mode='done'}
+/* ---------- Rückblick nach der Partie ---------- */
+function reviewGame(){const S=G.states,H=G.hist,n=H.length;if(n<2)return;openSheet('<h2>Rückblick</h2><p>Die Partie wird angeschaut …</p>',false);
+  setTimeout(()=>{DEAD=performance.now()+1e9;ABORT=false;const mom=[];
+    for(let i=0;i<n;i++){const st=S[i],ms=legal(st),h=H[i];const act=ms.find(m=>m.from===h.from&&m.to===h.to&&make(st,m).b[m.to]===S[i+1].b[m.to]);if(!act)continue;
+      const mates=ms.filter(m=>isMate(make(st,m))),who=nm(h.by);
+      if(isMate(S[i+1])){mom.push({i,loss:-1,best:null,text:`${who} setzt mit ${san(st,act,ms)} matt – die Partie ist entschieden.`});continue}
+      if(mates.length){mom.push({i,loss:1e6,best:mates[0],text:`${who} spielte ${san(st,act,ms)}. Hier ging sofort Schachmatt: ${san(st,mates[0],ms)}!`});continue}
+      const sc=m=>-ab(make(st,m),1,-1e9,1e9,1);let best=null,bv=-1e9;for(const m of ms){const v=sc(m);if(v>bv){bv=v;best=m}}
+      const allows=m=>{const q=make(st,m);return legal(q).some(r=>isMate(make(q,r)))};
+      if(allows(act)){const alt=ms.map(m=>({m,v:sc(m)})).sort((a,b)=>b.v-a.v).find(x=>!allows(x.m));if(alt){mom.push({i,loss:5e5,best:alt.m,text:`${who} spielte ${san(st,act,ms)}. Danach konnte ${nm(1-h.by)} sofort matt setzen – besser war ${san(st,alt.m,ms)}.`});continue}}
+      const loss=bv-sc(act);if(loss>=250&&best){const what=loss>=800?'die Dame':loss>=450?'einen Turm':'einen Springer oder Läufer';
+        mom.push({i,loss,best,text:`${who} spielte ${san(st,act,ms)}. Besser war ${san(st,best,ms)} – das war etwa ${what} wert.`})}}
+    const end=mom.filter(m=>m.loss<0),top=mom.filter(m=>m.loss>=0).sort((a,b)=>b.loss-a.loss).slice(0,3-end.length);
+    const pick=top.concat(end).sort((a,b)=>a.i-b.i);closeSheet();
+    const it={t:'Rückblick',x:pick.length?`Die ${pick.length===1?'wichtigste Stelle':pick.length+' wichtigsten Stellen'} der Partie – tipp sie an!`:'Eine saubere Partie – keine großen Fehler gefunden. Du kannst sie Zug für Zug ansehen.',win:'a1:h8',
+      D:{S:S.slice(),M:H.map((h,i)=>({from:h.from,to:h.to,p:S[i].b[h.from]})),dots:[]},notes:H.map((h,i)=>`${Math.floor(i/2)+1}. ${nm(h.by)}: ${h.san||''}`),moments:pick};
+    hxShow(it);HX.k=n;HX.msg='';hxRender();if(pick.length)hxMoment(0)},60)}
+function hxMoment(j){const m=HX.it.moments[j];if(!m)return;HX.k=m.i;HX.mj=j;HX.hint=m.best?[m.best.from,m.best.to]:[];HX.msg=m.text;hxRender();hxDraw();if(DB.hbSpeak!==false)speak(m.text)}
+/* ---------- Erfolge ---------- */
+const BGL={partie1:'♟',schach:'+',rochade:'♜',dame:'♛',umwandlung:'♕',enpassant:'♙',matt:'♚',partie10:'10',cpu:'★',figurenprofi:'♞',matt1:'1',schachabwehr:'♝',taktiker:'⚔',meister:'♔',serie7:'7'};
+const achP=()=>{const ps=DB.profiles;return ps.find(p=>p.id===DB.achSel)||ps.find(p=>p.id===DB.trainer)||ps[0]||null};
+function achOpen(){hush();$('#home').hidden=true;$('#ach').hidden=false;achRender()}
+function achRender(){const p=achP(),g=$('#achGrid');
+  if(!p){$('#achWho').innerHTML='';g.innerHTML=`<div class="card achc achempty"><b>Noch keine Spieler</b><p class="ps">Leg im Hauptmenü bei „Weiß“ oder „Schwarz“ einen Spieler an – dann sammelt er hier Abzeichen, Sterne und Siege.</p></div>`;return}
+  $('#achWho').innerHTML=`${avHTML(p)}<span><b>${esc(p.name||'Spieler')}</b><br><span class="ps">${DB.profiles.length>1?'wechseln':'Erfolge'}</span></span>`;
+  const s=p.stats||{g:0,w:0,d:0,l:0},stars=ISLANDS.reduce((a,I)=>a+islStars(p,I),0),mx=ISLANDS.reduce((a,I)=>a+I.lessons.length*3,0),dd=Object.keys((DB.daily||{}).days||{}).length,sk=dailyStreak();
+  const tile=(n,l)=>`<div class="achs"><b>${n}</b><span>${l}</span></div>`;
+  const ov=`<div class="card achc"><h3>Überblick</h3><div class="achst">${tile(s.g,'Partien')}${tile(s.w,'Siege')}${tile(s.d,'Remis')}${tile(s.l,'Niederlagen')}</div>
+    <div class="achrow"><span>Training</span><b>${stars} / ${mx} <span style="color:#F2A900">★</span></b></div><div class="bar"><i style="width:${Math.round(stars/mx*100)}%"></i></div>
+    <div class="achrow"><span>Tagesaufgaben</span><b>${dd} gelöst · Serie ${sk}</b></div></div>`;
+  const bd=`<div class="card achc achbd"><h3>Abzeichen <span class="ps">${BADGES.filter(b=>p.badges[b[0]]).length} von ${BADGES.length}</span></h3><div class="medals">${BADGES.map(([k,l])=>{const on=p.badges[k];
+    return`<div class="medal${on?' on':''}"><i>${(BGL[k]||'★')+(/^\d/.test(BGL[k]||'')?'':FE)}</i><span>${l}</span><small>${on?new Date(on).toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'noch offen'}</small></div>`}).join('')}</div></div>`;
+  const vs=`<div class="card achc"><h3>Gegen die Tiere</h3>${Object.values(CPU).map(c=>{const r=(p.vs||{})[c.id]||{w:0,d:0,l:0};
+    return`<div class="achvs">${avHTML(c)}<div class="grow"><b>${c.name}</b><div class="ps">${'★'.repeat(c.lvl)}</div></div><span class="chip w">${r.w} S</span><span class="chip d">${r.d} R</span><span class="chip l">${r.l} N</span></div>`}).join('')}</div>`;
+  g.innerHTML=ov+bd+vs}
+function achWho(){openSheet(`<div class="shead"><h2>Wessen Erfolge?</h2><button class="pb" data-act="close" aria-label="Schließen">${ICON.x}</button></div><div class="plist two">${DB.profiles.map(p=>`<div class="pi"><button data-act="achpick" data-id="${p.id}">${avHTML(p)}<span><b>${esc(p.name)}</b><br><span class="ps">${Object.keys(p.badges||{}).length} Abzeichen</span></span></button></div>`).join('')}</div>`)}
 function hbInit3D(){if(HB.r)return true;if(!window.THREE)return false;try{ensureGeo();const r=new THREE.WebGLRenderer({canvas:$('#hb3'),antialias:true,alpha:true});
   r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0x000000,0);const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,1,300);
   sc.add(new THREE.HemisphereLight(0xfff8ec,0x6b5a2a,1.3));const d1=new THREE.DirectionalLight(0xffffff,2.4);d1.position.set(-20,30,25);sc.add(d1);const d2=new THREE.DirectionalLight(0xfff1c0,1.1);d2.position.set(25,10,-20);sc.add(d2);
@@ -1111,7 +1204,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'hb':hbOpen();break;
   case'hbhome':if(HB.ru>=0){hush();HB.act=-1;HB.ru=-1;hbRender()}else hbClose();break;
   case'hbru':HB.ru=+v;HB.ci=0;HB.pg=0;HB.act=-1;HB.k=null;hbRender();requestAnimationFrame(hbLayout);break;
-  case'hbx':hxOpen(+v);break;case'hxclose':hxClose();break;case'hxsay':hxSay();break;case'hxstep':hxStep(+v);break;case'hxplay':hxPlay();break;case'hxview':hxView();break;case'hxhint':hxHint();break;
+  case'hbx':hxOpen(+v);break;case'hxmom':hxMoment(+v);break;case'hxhome':HX.back=null;hxClose();break;case'review':delete $('#sheetIn').dataset.end;reviewGame();break;
+  case'ach':achOpen();break;case'achhome':$('#ach').hidden=true;$('#home').hidden=false;renderHome();break;case'achwho':if(DB.profiles.length>1)achWho();break;case'achpick':DB.achSel=b.dataset.id;persist();closeSheet();achRender();break;case'hxclose':hxClose();break;case'hxsay':hxSay();break;case'hxstep':hxStep(+v);break;case'hxplay':hxPlay();break;case'hxview':hxView();break;case'hxhint':hxHint();break;
   case'hbci':hush();HB.act=-1;HB.ci=+v;HB.pg=0;hbRender();break;
   case'hbprev':hbGo(-1);break;
   case'hbnext':hbGo(1);break;
@@ -1194,6 +1288,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   }});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 renderHome();
+if(location.hash==='#daily'){history.replaceState(null,'',location.pathname);dailyOpen()}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('../sw.js').catch(()=>{});
 </script>
 </body>

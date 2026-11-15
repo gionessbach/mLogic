@@ -46,5 +46,23 @@ const ISLANDS=[
  {id:'i5l3',t:'puzzle',goal:'mate',title:'Turm-Leiter',pos:'K@a1 R@a7 R@b6 k@h8',text:'Zwei Türme arbeiten zusammen wie eine Leiter. Matt in einem Zug!'},
  {id:'i5l4',t:'puzzle',goal:'mate',title:'Dame und König',pos:'K@g6 Q@d1 k@h8',text:'Der schwarze König ist in der Ecke gefangen. Wo setzt die Dame matt?'},
  {id:'i5l5',t:'puzzle',goal:'mate',title:'Ersticktes Matt',pos:'K@g1 N@e5 k@h8 r@g8 p@g7 p@h7',text:'Der schwarze König ist von seinen eigenen Figuren eingesperrt. Der Springer setzt matt!'},
- {id:'i5l6',t:'puzzle',goal:'mate',title:'Schäfermatt',pos:'K@g1 Q@h5 B@c4 k@e8 q@d8 b@f8 n@g8 p@d7 p@e7 p@f7 p@g7',text:'Ein berühmtes Matt: Dame und Läufer zielen auf dasselbe Feld. Finde es!'}]}
+ {id:'i5l6',t:'puzzle',goal:'mate',title:'Schäfermatt',pos:'K@g1 Q@h5 B@c4 k@e8 q@d8 b@f8 n@g8 p@d7 p@e7 p@f7 p@g7',text:'Ein berühmtes Matt: Dame und Läufer zielen auf dasselbe Feld. Finde es!'}]},
+{id:'i6',name:'Gabel-Bucht',av:'n',col:3,tr:'cpu2',desc:'Zwei Figuren auf einmal angreifen',lessons:[
+ {id:'i6l1',t:'puzzle',goal:'ok',ok:['b5c7'],title:'Springergabel',pos:'K@g1 N@b5 k@e8 r@a8 p@f7 p@g7 p@h7',text:'Der Springer kann König und Turm gleichzeitig angreifen. Finde das Feld!',why:'Such ein Feld, von dem der Springer Schach gibt und den Turm angreift.'},
+ {id:'i6l2',t:'puzzle',goal:'ok',ok:['e4f6'],title:'Königsgabel',pos:'K@g1 N@e4 k@g8 q@d7 p@f7 p@h7',text:'Schach und gleichzeitig die Dame angreifen – wohin springt der Springer?',why:'Der Springer soll Schach geben und dabei die Dame angreifen.'},
+ {id:'i6l3',t:'puzzle',goal:'ok',ok:['d1d5'],title:'Damengabel',pos:'K@g1 Q@d1 k@g8 r@a8 p@g7 p@h7',text:'Die Dame greift in viele Richtungen an. Gib Schach und greif dabei den Turm an!',why:'Such ein Feld, von dem die Dame Schach gibt und den Turm in der Ecke sieht.'},
+ {id:'i6l4',t:'puzzle',goal:'ok',ok:['d4d5'],title:'Bauerngabel',pos:'K@g1 P@d4 k@g8 n@c6 n@e6',text:'Auch ein kleiner Bauer kann zwei Figuren auf einmal angreifen. Zieh ihn richtig!',why:'Der Bauer schlägt schräg nach vorn – stell ihn zwischen die beiden Springer.'},
+ {id:'i6l5',t:'puzzle',goal:'ok',ok:['f1c4'],title:'Läufergabel',pos:'K@h1 B@f1 k@g8 r@a2 p@g7 p@h7',text:'Der Läufer kann Schach geben und dabei den Turm angreifen. Wohin zieht er?',why:'Such ein Feld, von dem der Läufer Schach gibt und den Turm auf a2 sieht.'}]},
+{id:'i7',name:'Fesselfelsen',av:'b',col:5,tr:'cpu3',desc:'Fesseln, Spieße und Abzüge',lessons:[
+ {id:'i7l1',t:'puzzle',goal:'ok',ok:['d4d5'],title:'Gefesselt!',pos:'K@g1 B@b5 P@d4 k@e8 n@c6 p@b7 p@h7',text:'Der Springer ist an seinen König gefesselt – er darf nicht wegziehen. Greif ihn an!',why:'Greif den gefesselten Springer mit dem Bauern an.'},
+ {id:'i7l2',t:'puzzle',goal:'ok',ok:['f2f4'],title:'Turm fesselt Läufer',pos:'K@g1 R@e1 P@f2 k@e8 b@e5 p@d6 p@a7',text:'Der schwarze Läufer darf die e-Linie nicht verlassen, sonst steht sein König im Schach. Nutz das aus!',why:'Greif den gefesselten Läufer mit einem Bauern an.'},
+ {id:'i7l3',t:'puzzle',goal:'ok',ok:['f1c4'],title:'Läufer-Spieß',pos:'K@b1 B@f1 k@e6 q@g8',text:'König und Dame stehen auf einer Diagonale. Gib Schach – danach ist die Dame dran!',why:'Gib mit dem Läufer Schach, sodass die Dame hinter dem König steht.'},
+ {id:'i7l4',t:'puzzle',goal:'ok',ok:['a1a4'],title:'Turm-Spieß',pos:'K@g1 R@a1 k@d4 q@h4',text:'König und Dame stehen auf derselben Reihe. Wie gewinnt der Turm die Dame?',why:'Gib mit dem Turm Schach auf der Reihe von König und Dame.'},
+ {id:'i7l5',t:'puzzle',goal:'ok',ok:['e4c5','e4f6'],title:'Abzugsschach',pos:'K@g1 R@e1 N@e4 k@e8 q@d7',text:'Der Springer versperrt dem Turm den Weg. Zieht er weg, gibt der Turm Schach – und der Springer greift dabei die Dame an!',why:'Der Springer soll wegziehen und dabei die Dame angreifen.'}]},
+{id:'i8',name:'Meistergipfel',av:'k',col:4,tr:'cpu4',desc:'Berühmte Mattbilder',lessons:[
+ {id:'i8l1',t:'puzzle',goal:'mate',title:'Dame auf der Grundreihe',pos:'K@g1 Q@d1 k@g8 p@f7 p@g7 p@h7',text:'Die eigenen Bauern sperren den König ein. Matt in einem Zug!'},
+ {id:'i8l2',t:'puzzle',goal:'mate',title:'Arabisches Matt',pos:'K@g1 R@b7 N@f6 k@h8',text:'Turm und Springer arbeiten zusammen. Wo setzt der Turm matt?'},
+ {id:'i8l3',t:'puzzle',goal:'mate',title:'Dame und Läufer',pos:'K@g1 Q@h5 B@d3 k@g8 r@f8 p@f7 p@g7',text:'Der Läufer zielt auf h7. Die Dame setzt matt!'},
+ {id:'i8l4',t:'puzzle',goal:'mate',title:'Dame und Springer',pos:'K@g1 Q@h5 N@g5 k@g8 r@f8 p@f7 p@g7',text:'Der Springer deckt das wichtige Feld. Wo setzt die Dame matt?'},
+ {id:'i8l5',t:'puzzle',goal:'mate',title:'Epaulettenmatt',pos:'K@g1 Q@a2 k@e8 r@d8 r@f8',text:'Die eigenen Türme stehen dem König im Weg wie Schulterklappen. Matt in einem Zug!'}]}
 ];
