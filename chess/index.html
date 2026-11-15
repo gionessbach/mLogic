@@ -713,6 +713,7 @@ function frame(now){raf=0;if(anim){const t=Math.min(1,(now-anim.t0)/280);anim.k=
     if(t>=1){if(o){o.userData.anim=0;o.position.y=0}anim=null;renderPanels()}else kick()}
   draw()}
 addEventListener('resize',()=>requestAnimationFrame(layout));
+let lastBW='';if(window.ResizeObserver)new ResizeObserver(()=>{const b=$('#bw'),k=b.clientWidth+'x'+b.clientHeight;if(k!==lastBW){lastBW=k;requestAnimationFrame(layout)}}).observe($('#bw'));
 
 /* ---------- Eingabe am Brett ---------- */
 function pickSq(e){if(is3()){const rc=$('#b3').getBoundingClientRect(),v=new THREE.Vector2((e.clientX-rc.left)/rc.width*2-1,-(e.clientY-rc.top)/rc.height*2+1);
