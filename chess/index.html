@@ -160,7 +160,7 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
   #home .hero{grid-area:hero;justify-self:center;align-self:center}
   #home .pcard{grid-area:players;display:flex;flex-direction:column}#home .pcard .slots{flex:1;align-items:stretch}#home .pcard .swapc{align-self:center}#home .slot{height:100%;box-sizing:border-box}
   #home .slot .av{width:64px;height:64px;font-size:38px}#home .note{grid-area:note;align-self:end}
-  #home .learn{grid-area:train;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,3fr) minmax(0,2fr);gap:14px;min-height:0}#home .trcard{flex-direction:column;justify-content:center;text-align:center;gap:8px}#home .trcard .go{display:none}#home .trcard{height:100%;box-sizing:border-box}#home .trcard .grow{flex:0 0 auto}
+  #home .learn{grid-area:train;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:14px;min-height:0}#home .trcard{flex-direction:column;justify-content:center;text-align:center;gap:8px}#home .trcard .go{display:none}#home .trcard{height:100%;box-sizing:border-box}#home .trcard .grow{flex:0 0 auto}
   #home .startrow,#home .startrow.two{grid-area:start;display:flex;flex-direction:column;gap:12px}#home .startrow .btn{flex:1}#home #startBtn{order:-1}
   #train .wrap{max-width:1100px}#train .isles{grid-template-columns:repeat(2,minmax(0,1fr))}#train .isle,#train .isle:nth-child(even){width:100%;margin-left:0}
 }
@@ -250,6 +250,8 @@ input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14p
 .hbitem{overflow:hidden}.hbtx{max-height:100%;overflow-y:auto;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
 @media (orientation:portrait){.hbmain{grid-template-rows:minmax(0,1.25fr) minmax(0,3fr)}.hbbook{padding:10px 34px 20px}.hbitem{gap:10px;padding:6px}}
 @media (orientation:portrait) and (max-width:520px){.hbtx b{font-size:15px}.hbtx p{font-size:12.5px;line-height:1.3}.hbplay{font-size:11px}.hbname b{font-size:16px}}
+@media (orientation:landscape){#home .learn .card{flex-direction:row;justify-content:flex-start;text-align:left;gap:12px;padding:12px 14px;overflow:hidden}#home .learn .grow{flex:1 1 auto;min-width:0}#home .learn .crew{flex:none}#home .learn .crew .av{width:48px;height:48px;margin-right:-14px}#home .learn .hbic{width:56px;height:56px}#home .learn .hbic span{font-size:34px}#home .learn .card b{font-size:21px}#home .learn .ps{font-size:13px}}
+@media (orientation:landscape) and (min-height:641px){#home .learn .crew .av{width:72px;height:72px}#home .learn .hbic{width:80px;height:80px}#home .learn .hbic span{font-size:48px}#home .learn .card b{font-size:28px}#home .learn .ps{font-size:15px}}
 </style>
 </head>
 <body>
