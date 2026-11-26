@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="mWend">
+<meta name="theme-color" content="#262625">
+<link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.json">
+<title>mWend</title>
+<style>
+:root{--bg:#262625;--f1:#31312F;--f0:#1D1D1C;--ln:#3A3A38;--ln2:#5A5955;--y:#FDD602;--tx:#ECECE8;--mu:#9A9992}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;overflow:hidden;touch-action:manipulation}
+#app{height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(12px,env(safe-area-inset-left))}
+header{display:flex;align-items:center;gap:10px;height:54px;flex:none}
+header a{color:var(--tx);text-decoration:none;font-size:26px;width:44px;height:44px;display:grid;place-items:center}
+.logo{width:34px;height:34px;flex:none}
+h1{font-size:22px;margin:0;flex:1;letter-spacing:.2px}
+#timer{font-variant-numeric:tabular-nums;font-size:18px;color:var(--mu)}
+.bar{display:flex;gap:8px;flex:none;margin-bottom:8px;flex-wrap:wrap}
+.seg{display:flex;background:var(--f0);border-radius:12px;padding:3px;gap:2px}
+.seg button,.btn{font:inherit;border:0;color:var(--tx);background:transparent;min-height:40px;padding:0 14px;border-radius:10px;font-weight:600;font-size:15px}
+.seg button.on{background:var(--y);color:#262625}
+.btn{background:var(--f1);border:1px solid var(--ln2)}
+.btn.pri{background:var(--y);color:#262625;border-color:var(--y)}
+.btn:disabled{opacity:.4}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:8px;--b:min(100vw - 24px,100dvh - 400px)}
+.side{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+#boardwrap{width:var(--b);height:var(--b);position:relative;flex:none;border-radius:14px;overflow:hidden;border:3px solid var(--ln2);background:var(--f0)}
+#svg{position:absolute;inset:0;width:100%;height:100%}
+#grid{position:absolute;inset:0;display:grid;touch-action:none}
+.c{display:grid;place-items:center;font-weight:800;font-size:calc(var(--b)/var(--n)*.46);color:var(--tx)}
+.c.d{color:#262625}
+.c.sh{animation:sh .35s}
+@keyframes sh{20%{transform:translateX(-5px)}50%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+#cur{height:38px;display:flex;gap:5px;align-items:center;justify-content:center}
+#cur i{font-style:normal;background:var(--y);color:#262625;font-weight:800;border-radius:8px;min-width:28px;height:36px;display:grid;place-items:center;font-size:20px;padding:0 4px}
+#cur span{color:var(--mu);font-size:14px}
+#msg{height:18px;font-size:14px;color:var(--y);text-align:center}
+#slots{display:flex;flex-direction:column;gap:5px;align-items:flex-start;--s:min(30px,calc((100vw - 90px)/10.5))}
+.row{display:flex;gap:3px;align-items:center}
+.row b{width:var(--s);height:calc(var(--s)*1.05);background:var(--f1);border-radius:6px;display:grid;place-items:center;font-size:calc(var(--s)*.58);color:#262625;font-weight:800}
+.row u{color:#2DBE7E;text-decoration:none;font-weight:800;margin-left:4px}
+.btns{display:flex;gap:10px;width:var(--b);max-width:100%}
+.btns .btn{flex:1}
+#ov{position:fixed;inset:0;background:rgba(20,20,19,.78);display:none;place-items:center;z-index:9}
+#ov.on{display:grid}
+.card{background:var(--f1);border:1px solid var(--ln2);border-radius:20px;padding:24px;width:min(86vw,360px);text-align:center}
+.card h2{margin:0 0 6px;font-size:26px;color:var(--y)}
+.card p{margin:6px 0 18px;color:var(--tx);font-size:17px;line-height:1.5}
+.card .btn{width:100%;margin-top:8px;min-height:48px}
+@media (orientation:landscape){
+ .main{flex-direction:row;align-items:flex-start;justify-content:center;gap:20px;--b:min(100dvh - 150px,56vw)}
+ .side{width:auto;align-items:flex-start;max-width:calc(44vw - 24px)}
+ #slots{--s:min(30px,calc((44vw - 70px)/10.5))}
+ .btns{width:auto;align-self:stretch}
+}
+@media (max-height:680px) and (orientation:portrait){.main{--b:min(100vw - 24px,100dvh - 340px)}}
+@media (prefers-reduced-motion:reduce){.c.sh{animation:none}}
+@keyframes pu{50%{opacity:.35}}
+.ring{animation:pu 1.2s infinite}
+</style></head><body>
+<div id="app">
+<header>
+ <a href="../" aria-label="Zurück zu mLogic">‹</a>
+ <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#FDD602"/><path d="M14 18H34V32H18V46H50" fill="none" stroke="#262625" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+ <h1>mWend</h1><span id="timer">0:00</span>
+</header>
+<div class="bar">
+ <div class="seg" id="lv"><button data-l="leicht">Leicht</button><button data-l="mittel">Mittel</button><button data-l="schwer">Schwer</button></div>
+ <button class="btn" id="bNeu">Neues Rätsel</button><button class="btn" id="bTag">Tagesrätsel</button>
+</div>
+<div class="main">
+ <div id="boardwrap"><svg id="svg"></svg><div id="grid"></div></div>
+ <div class="side">
+  <div id="cur"></div><div id="msg"></div>
+  <div id="slots"></div>
+  <div class="btns"><button class="btn" id="bUndo">Widerrufen</button><button class="btn" id="bHint">Tipp</button></div>
+ </div>
+</div>
+</div>
+<div id="ov"><div class="card"><h2>Geschafft!</h2><p id="ovt"></p><button class="btn pri" id="bAgain">Neues Rätsel</button><button class="btn" id="bClose">Schließen</button></div></div>
+<script>
+const WORDS=`bär ohr arm eis uhr tür tee see zoo kuh hut tag ast fuß wal aal sau mai rad rat rot tau ton tor zug lob mut gas gut hof bus bar süß maß
+baum haus wald berg meer sand wind mond bach eule gans hase igel wolf lamm brot kuss kern lied tanz buch bild mehl salz reis kohl obst nuss dach hand bein kopf herz mund nase haar zahn bett löwe möwe käse koch spaß füße groß weiß heiß gruß soße müde böse kühl
+apfel tisch stuhl lampe wiese regen sonne stern fuchs pferd küche käfer fisch vogel blume gabel birne wolke reise brief zebra tiger kamel mäuse stein strom nacht licht feuer schaf honig torte nudel pizza suppe salat bohne erbse maler bauer pilot traum glück größe grüße fleiß vater nebel sturm bälle äpfel decke übung ärger schön malen essen lesen bauen
+straße tasche kinder zucker butter wasser blumen banane messer löffel schule brücke bäcker garten kirche mutter winter sommer herbst schnee wetter donner wolken himmel spinne kuchen orange tomate eisbär lehrer tunnel gemüse kissen zimmer balkon treppe keller bruder tänzer hüpfen laufen singen lachen weinen kochen backen denken fragen lernen rennen tanzen suchen finden teilen wissen zeigen öffnen
+fenster gewitter elefant giraffe telefon schrank teppich spiegel wohnung nachbar freunde familie fahrrad rutsche polizei gewürze zwiebel paprika überall lächeln träumen fliegen trinken spielen rechnen antwort
+kaninchen schlange krokodil computer kartoffel geschenk frühling schlüssel flugzeug motorrad schaukel erdbeere himbeere kirschen bäckerei weinberg änderung fröhlich springen klettern schlafen
+schwester großvater dachboden eisenbahn lastwagen bauernhof spielzeug apfelsaft abenteuer sonnenuhr vogelnest feuerwehr gemeinsam eiszapfen wanderweg marmelade spaghetti knoblauch gemütlich glücklich schwimmen schreiben
+großmutter schildkröte blumenvase sandkasten geburtstag schokolade bibliothek regenbogen wasserfall supermarkt schneemann lagerfeuer freundlich`;
+const up=s=>s.replace(/ß/g,'\u0001').toUpperCase().replace(/\u0001/g,'ß');
+const POOL=[...new Set(WORDS.split(/\s+/).filter(Boolean).map(w=>up(w.normalize('NFC'))))].filter(w=>w.length>=3&&w.length<=10);
+const LEVELS={leicht:{n:6,count:4,min:3,max:6,tmin:20,tmax:28},mittel:{n:7,count:5,min:3,max:8,tmin:28,tmax:38},schwer:{n:8,count:6,min:4,max:10,tmin:40,tmax:52}};
+const COL=['#0090E8','#FC4F35','#ECB400','#2DBE7E','#A98BF0','#FF8FAE'];
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nb(i,N){const x=i%N,y=(i/N)|0,o=[];if(x>0)o.push(i-1);if(x<N-1)o.push(i+1);if(y>0)o.push(i-N);if(y<N-1)o.push(i+N);return o}
+const adj=(a,b)=>nb(a,P.N).includes(b);
+function walk(r,N,free,start,L){let budget=3000;const path=[start],used=new Set([start]);
+ (function dfs(){})();
+ function d(){if(path.length===L)return true;if(--budget<0)return false;const last=path[path.length-1];
+  for(const n of shuffle(r,nb(last,N))){if(!free[n]||used.has(n))continue;path.push(n);used.add(n);if(d())return true;path.pop();used.delete(n)}return false}
+ return d()?path:null}
+function straight(p){if(p.length<3)return false;const d=p[1]-p[0];return p.every((c,k)=>k===0||c-p[k-1]===d)}
+function makePuzzle(seed,lv){const r=mulberry(seed),C=LEVELS[lv],N=C.n;const pool=POOL.filter(w=>w.length>=C.min&&w.length<=C.max);
+ for(let a=0;a<600;a++){const ws=[],seen=new Set();
+  while(ws.length<C.count){const w=pool[Math.floor(r()*pool.length)];if(!seen.has(w)){seen.add(w);ws.push(w)}}
+  const tot=ws.reduce((s,w)=>s+w.length,0);if(tot<C.tmin||tot>C.tmax)continue;
+  const free=new Array(N*N).fill(true),paths=[];let ok=true;
+  const order=ws.map((w,i)=>i).sort((x,y)=>ws[y].length-ws[x].length);
+  for(const wi of order){let p=null;
+   for(let t=0;t<60&&!p;t++){let fr=[];for(let i=0;i<N*N;i++)if(free[i])fr.push(i);
+    if(paths.length&&r()<.65){const aj=fr.filter(i=>nb(i,N).some(n=>!free[n]));if(aj.length)fr=aj}
+    const q=walk(r,N,free,fr[Math.floor(r()*fr.length)],ws[wi].length);
+    if(q&&!(ws[wi].length>=4&&straight(q)))p=q}
+   if(!p){ok=false;break}p.forEach(i=>free[i]=false);paths[wi]=p}
+  if(!ok)continue;
+  const letters=new Array(N*N).fill(null);ws.forEach((w,wi)=>paths[wi].forEach((c,k)=>letters[c]=w[k]));
+  return{N,letters,words:ws.map((w,wi)=>({text:w,cells:paths[wi]})).sort((a,b)=>a.text.length-b.text.length)}}
+ return makePuzzle(seed+1,lv)}
+/* ---------- Zustand ---------- */
+let P,lv='mittel',mode='frei',sel=[],drag=false,gNew=false,added=0,found=[],owner=[],order=[],hint=[],hints=0,secs=0,tm=null,won=false,dayIdx=0;
+let DB={solved:0,daily:{},best:{}};try{DB=Object.assign(DB,JSON.parse(localStorage.getItem('mwend')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('mwend',JSON.stringify(DB))}catch(e){}};
+const $=id=>document.getElementById(id),grid=$('grid'),svg=$('svg');
+function todayIdx(){const d=new Date(),t=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());return Math.floor((t-Date.UTC(2026,10,1))/864e5)}
+function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function startGame(m){mode=m;stopTimer();secs=0;won=false;$('timer').textContent='0:00';
+ if(m==='tag'){dayIdx=todayIdx();lv='mittel';P=makePuzzle(dayIdx*7919+13,'mittel')}
+ else P=makePuzzle((Math.random()*2**31)|0,lv);
+ sel=[];found=P.words.map(()=>false);owner=new Array(P.N*P.N).fill(-1);order=[];hint=P.words.map(()=>0);hints=0;
+ const N=P.N;grid.style.gridTemplateColumns=`repeat(${N},1fr)`;grid.style.gridTemplateRows=`repeat(${N},1fr)`;
+ document.documentElement.style.setProperty('--n',N);grid.innerHTML='';
+ P.letters.forEach((l,i)=>{const d=document.createElement('div');d.className='c';d.textContent=l||'';grid.appendChild(d)});
+ svg.setAttribute('viewBox',`0 0 ${N} ${N}`);
+ document.querySelectorAll('#lv button').forEach(b=>b.classList.toggle('on',b.dataset.l===lv&&m==='frei'));
+ $('bTag').classList.toggle('pri',m==='tag');msg('');draw()}
+function startTimer(){if(tm||won)return;tm=setInterval(()=>{secs++;$('timer').textContent=fmt(secs)},1000)}
+function stopTimer(){clearInterval(tm);tm=null}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopTimer();else if(secs>0&&!won)startTimer()});
+let mt;function msg(t){$('msg').textContent=t;clearTimeout(mt);if(t)mt=setTimeout(()=>$('msg').textContent='',2600)}
+/* ---------- Zeichnen ---------- */
+const pt=i=>`${(i%P.N)+.5},${((i/P.N)|0)+.5}`;
+function draw(){const N=P.N;let s='';
+ for(let i=0;i<N*N;i++){const x=i%N,y=(i/N)|0;let f=P.letters[i]?'#31312F':'#1D1D1C';
+  s+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${f}" stroke="#3A3A38" stroke-width=".02"/>`;
+  if(owner[i]>=0)s+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${COL[owner[i]%6]}" opacity=".22"/>`}
+ P.words.forEach((w,wi)=>{if(!found[wi])return;const c=COL[wi%6];
+  s+=`<polyline points="${w.cells.map(pt).join(' ')}" fill="none" stroke="${c}" stroke-width=".62" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s+=`<circle cx="${pt(w.cells[0]).split(',')[0]}" cy="${pt(w.cells[0]).split(',')[1]}" r=".12" fill="#262625" opacity=".5"/>`});
+ if(sel.length){s+=sel.length>1?`<polyline points="${sel.map(pt).join(' ')}" fill="none" stroke="#FDD602" stroke-width=".6" stroke-linecap="round" stroke-linejoin="round"/>`:`<circle cx="${pt(sel[0]).split(',')[0]}" cy="${pt(sel[0]).split(',')[1]}" r=".3" fill="#FDD602"/>`}
+ P.words.forEach((w,wi)=>{if(found[wi])return;for(let k=0;k<hint[wi];k++){const [cx,cy]=pt(w.cells[k]).split(',');s+=`<circle class="ring" cx="${cx}" cy="${cy}" r=".42" fill="none" stroke="#FDD602" stroke-width=".06"/>`}});
+ svg.innerHTML=s;
+ [...grid.children].forEach((d,i)=>d.classList.toggle('d',owner[i]>=0||sel.includes(i)));
+ const cur=$('cur');cur.innerHTML=sel.length?sel.map(i=>`<i>${P.letters[i]}</i>`).join(''):'<span>Wörter durch Wischen oder Tippen verbinden</span>';
+ $('slots').innerHTML=P.words.map((w,wi)=>{const c=found[wi]?COL[wi%6]:null;
+  return`<div class="row">${[...w.text].map(ch=>`<b${c?` style="background:${c}"`:''}>${c?ch:''}</b>`).join('')}${found[wi]?'<u>✓</u>':''}</div>`}).join('');
+ $('bUndo').disabled=!sel.length&&!order.length}
+/* ---------- Eingabe ---------- */
+function cellAt(e){const b=grid.getBoundingClientRect(),N=P.N,fx=(e.clientX-b.left)/b.width*N,fy=(e.clientY-b.top)/b.height*N;
+ if(fx<0||fy<0||fx>=N||fy>=N)return -1;const cx=Math.floor(fx),cy=Math.floor(fy);
+ if(Math.abs(fx-cx-.5)>.42||Math.abs(fy-cy-.5)>.42)return -2;return cy*N+cx}
+const usable=i=>i>=0&&P.letters[i]&&owner[i]<0;
+grid.addEventListener('pointerdown',e=>{if(won)return;const i=cellAt(e);if(!usable(i))return;grid.setPointerCapture(e.pointerId);startTimer();
+ const idx=sel.indexOf(i);
+ if(idx>=0){sel.length=idx+1;gNew=false}
+ else if(sel.length&&adj(sel[sel.length-1],i)){sel.push(i);gNew=false}
+ else{sel=[i];gNew=true}
+ drag=true;added=0;draw()});
+grid.addEventListener('pointermove',e=>{if(!drag)return;const i=cellAt(e);if(i<0)return;const last=sel[sel.length-1];if(i===last)return;
+ if(sel.length>1&&sel[sel.length-2]===i){sel.pop();draw();return}
+ if(adj(last,i)&&!sel.includes(i)&&usable(i)){sel.push(i);added++;draw()}});
+const end=()=>{if(!drag)return;drag=false;evaluate()};
+grid.addEventListener('pointerup',end);grid.addEventListener('pointercancel',end);
+function shake(){[...grid.children].forEach((d,i)=>{if(sel.includes(i)){d.classList.remove('sh');void d.offsetWidth;d.classList.add('sh')}})}
+function evaluate(){const s=sel.map(i=>P.letters[i]).join('');let near=false;
+ if(sel.length>=3){for(let wi=0;wi<P.words.length;wi++){if(found[wi]||P.words[wi].text!==s)continue;
+  const a=P.words[wi].cells;if(a.length===sel.length&&a.every((c,k)=>c===sel[k])){lock(wi);return}near=true}}
+ if(gNew&&added>0){if(near)msg('Das Wort stimmt, passt aber an dieser Stelle nicht.');else if(s.length>=3)msg('Kein passendes Wort.');shake();setTimeout(()=>{sel=[];draw()},300);return}
+ draw()}
+function lock(wi){found[wi]=true;P.words[wi].cells.forEach(c=>owner[c]=wi);order.push(wi);sel=[];draw();
+ if(found.every(Boolean))win()}
+$('bUndo').onclick=()=>{if(won)return;if(sel.length){sel=[]}else if(order.length){const wi=order.pop();found[wi]=false;P.words[wi].cells.forEach(c=>owner[c]=-1)}draw()};
+$('bHint').onclick=()=>{if(won)return;startTimer();const open=P.words.map((w,i)=>i).filter(i=>!found[i]);if(!open.length)return;
+ let wi=open.find(i=>hint[i]>0&&hint[i]<P.words[i].text.length-2);if(wi===undefined)wi=open.find(i=>hint[i]===0);if(wi===undefined)wi=open[0];
+ hint[wi]=Math.min(hint[wi]+1,P.words[wi].text.length-2);hints++;msg('Tipp: Das Wort beginnt an den markierten Feldern ('+P.words[wi].text.length+' Buchstaben).');draw()};
+/* ---------- Ende ---------- */
+function win(){won=true;stopTimer();DB.solved++;let extra='';
+ if(mode==='tag'){const o=DB.daily[dayIdx];if(!o||secs<o.sec)DB.daily[dayIdx]={sec:secs,hints};extra='<br>Tagesrätsel erledigt.'}
+ else{const b=DB.best[lv];if(hints===0&&(!b||secs<b)){DB.best[lv]=secs;extra='<br>Neue Bestzeit ('+lv+')!'}}
+ save();$('ovt').innerHTML='Zeit: <b>'+fmt(secs)+'</b> · Tipps: <b>'+hints+'</b>'+extra;setTimeout(()=>$('ov').classList.add('on'),500)}
+$('bClose').onclick=()=>$('ov').classList.remove('on');
+$('bAgain').onclick=()=>{$('ov').classList.remove('on');startGame('frei')};
+$('bNeu').onclick=()=>startGame('frei');$('bTag').onclick=()=>startGame('tag');
+document.querySelectorAll('#lv button').forEach(b=>b.onclick=()=>{lv=b.dataset.l;try{localStorage.setItem('mwend_lv',lv)}catch(e){}startGame('frei')});
+try{lv=localStorage.getItem('mwend_lv')||'mittel'}catch(e){}if(!LEVELS[lv])lv='mittel';
+startGame('frei');
+window.mwendTest={makePuzzle,POOL,LEVELS,state:()=>({P,found,owner}),lock,startGame};
+</script></body></html>
